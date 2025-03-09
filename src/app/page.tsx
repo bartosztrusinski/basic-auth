@@ -1,7 +1,3 @@
 export default function HomePage() {
-  return (
-    <main>
-      <h1>Basic Auth</h1>
-    </main>
-  );
+  return <h1 className='text-center text-2xl font-bold'>Basic Auth</h1>;
 }
