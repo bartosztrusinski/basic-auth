@@ -2,7 +2,7 @@ import { cookies } from 'next/headers';
 import { NextResponse, type NextRequest } from 'next/server';
 import { type ResponseCookie } from 'next/dist/compiled/@edge-runtime/cookies';
 import { jwtVerify, SignJWT, type JWTPayload } from 'jose';
-import { users, type User } from '@/data';
+import { getUserByEmail, type User } from '@/data';
 
 interface Session extends JWTPayload {
   user: Pick<User, 'email' | 'name'>;
@@ -46,10 +46,10 @@ export async function decrypt<T extends JWTPayload>(token: string): Promise<T> {
 }
 
 export async function signIn(formData: FormData) {
-  const email = formData.get('email');
-  const password = formData.get('password');
+  const email = formData.get('email') as string;
+  const password = formData.get('password') as string;
 
-  const user = users.find((user) => user.email === email);
+  const user = getUserByEmail(email);
 
   if (!user || user.password !== password) {
     throw new AuthError('Invalid credentials');

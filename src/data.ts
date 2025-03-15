@@ -4,7 +4,27 @@ export type User = {
   password: string;
 };
 
-export const users: User[] = [
+export function createUser(newUser: User) {
+  const existingUser = getUserByEmail(newUser.email);
+
+  if (existingUser) {
+    throw new Error('Email already in use');
+  }
+
+  users.push(newUser);
+
+  return newUser;
+}
+
+export function getUsers() {
+  return users;
+}
+
+export function getUserByEmail(email: User['email']) {
+  return users.find((user) => user.email === email);
+}
+
+const users: User[] = [
   {
     email: 'basic@auth.com',
     name: 'User123',

@@ -1,9 +1,13 @@
-export default function RegisterPage() {
-  return (
-    <form className='flex flex-col gap-2'>
-      <input type='email' name='email' placeholder='Email' />
-      <input type='password' name='password' placeholder='*****' />
-      <button>Register</button>
-    </form>
-  );
+import { redirect } from 'next/navigation';
+import { getSession } from '@/lib';
+import { RegisterForm } from '@/components/register-form';
+
+export default async function RegisterPage() {
+  const session = await getSession();
+
+  if (session) {
+    redirect('/');
+  }
+
+  return <RegisterForm />;
 }
