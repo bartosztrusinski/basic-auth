@@ -22,6 +22,13 @@ const COOKIE_DEFAULT_FLAGS: Partial<ResponseCookie> = {
 
 const getFreshExpirationTime = () => new Date(Date.now() + EXPIRATION_TIME);
 
+export class AuthError extends Error {
+  constructor(message?: string) {
+    super(message ?? 'Authentication error');
+    this.name = 'AuthError';
+  }
+}
+
 export async function encrypt<T extends JWTPayload>(payload: T): Promise<string> {
   return await new SignJWT(payload)
     .setProtectedHeader({ alg: ALG })
@@ -45,7 +52,7 @@ export async function signIn(formData: FormData) {
   const user = users.find((user) => user.email === email);
 
   if (!user || user.password !== password) {
-    throw new Error('Invalid credentials');
+    throw new AuthError('Invalid credentials');
   }
 
   const expires = getFreshExpirationTime();

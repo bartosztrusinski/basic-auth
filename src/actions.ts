@@ -1,25 +1,37 @@
 'use server';
 
 import { redirect } from 'next/navigation';
-import { signIn, signOut } from '@/lib';
+import { AuthError, signIn, signOut } from '@/lib';
 
-export async function logIn(formData: FormData) {
+type SuccessResponse = {
+  success: string;
+  error?: null;
+};
+
+type ErrorResponse = {
+  success?: null;
+  error: string;
+};
+
+type ActionResponse = Promise<SuccessResponse | ErrorResponse>;
+
+export async function logIn(_: unknown, formData: FormData): ActionResponse {
   try {
     await signIn(formData);
-  } catch {
-    console.error('Failed to log in');
-    return;
+  } catch (error) {
+    return {
+      error: error instanceof AuthError ? error.message : 'Failed to log in. Please try again.',
+    };
   }
 
   redirect('/');
 }
 
-export async function logOut() {
+export async function logOut(): ActionResponse {
   try {
     await signOut();
   } catch {
-    console.error('Failed to log out');
-    return;
+    return { error: 'Failed to log out. Please try again.' };
   }
 
   redirect('/');
