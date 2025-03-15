@@ -1,5 +1,6 @@
 import { cookies } from 'next/headers';
 import { NextResponse, type NextRequest } from 'next/server';
+import { type ResponseCookie } from 'next/dist/compiled/@edge-runtime/cookies';
 import { jwtVerify, SignJWT, type JWTPayload } from 'jose';
 import { users } from '@/data';
 
@@ -8,13 +9,15 @@ const SECRET_KEY = new TextEncoder().encode(process.env.SECRET);
 const SESSION_COOKIE_NAME = process.env.SESSION_COOKIE_NAME ?? 'basic-auth-session';
 const EXPIRATION_TIME =
   (process.env.EXPIRATION_TIME_SECONDS ? parseInt(process.env.EXPIRATION_TIME_SECONDS) : 10) * 1000;
-const COOKIE_DEFAULT_FLAGS = {
+const COOKIE_DEFAULT_FLAGS: Partial<ResponseCookie> = {
   httpOnly: true,
   secure: true,
+  sameSite: 'strict',
 };
 
 const getFreshExpirationTime = () => new Date(Date.now() + EXPIRATION_TIME);
 
+// TODO add correct types
 export async function encrypt(payload: JWTPayload): Promise<string> {
   return await new SignJWT(payload)
     .setProtectedHeader({ alg: ALG })
