@@ -2,7 +2,12 @@ import { cookies } from 'next/headers';
 import { NextResponse, type NextRequest } from 'next/server';
 import { type ResponseCookie } from 'next/dist/compiled/@edge-runtime/cookies';
 import { jwtVerify, SignJWT, type JWTPayload } from 'jose';
-import { users } from '@/data';
+import { users, type User } from '@/data';
+
+interface Session extends JWTPayload {
+  user: Pick<User, 'email' | 'name'>;
+  expires: Date;
+}
 
 const ALG = 'HS256';
 const SECRET_KEY = new TextEncoder().encode(process.env.SECRET);
@@ -17,8 +22,7 @@ const COOKIE_DEFAULT_FLAGS: Partial<ResponseCookie> = {
 
 const getFreshExpirationTime = () => new Date(Date.now() + EXPIRATION_TIME);
 
-// TODO add correct types
-export async function encrypt(payload: JWTPayload): Promise<string> {
+export async function encrypt<T extends JWTPayload>(payload: T): Promise<string> {
   return await new SignJWT(payload)
     .setProtectedHeader({ alg: ALG })
     .setIssuedAt()
@@ -26,8 +30,8 @@ export async function encrypt(payload: JWTPayload): Promise<string> {
     .sign(SECRET_KEY);
 }
 
-export async function decrypt(token: string): Promise<JWTPayload> {
-  const { payload } = await jwtVerify(token, SECRET_KEY, {
+export async function decrypt<T extends JWTPayload>(token: string): Promise<T> {
+  const { payload } = await jwtVerify<T>(token, SECRET_KEY, {
     algorithms: [ALG],
   });
 
@@ -45,7 +49,13 @@ export async function signIn(formData: FormData) {
   }
 
   const expires = getFreshExpirationTime();
-  const session = await encrypt({ user, expires });
+  const session = await encrypt<Session>({
+    user: {
+      email: user.email,
+      name: user.name,
+    },
+    expires,
+  });
   const cookieStore = await cookies();
 
   cookieStore.set(SESSION_COOKIE_NAME, session, {
@@ -71,17 +81,17 @@ export async function getSession() {
     return null;
   }
 
-  return await decrypt(sessionCookie.value);
+  return await decrypt<Session>(sessionCookie.value);
 }
 
 export async function refreshSession(request: NextRequest) {
-  const sessionCookie = request.cookies.get('basic-auth-session');
+  const sessionCookie = request.cookies.get(SESSION_COOKIE_NAME);
 
   if (!sessionCookie) {
     return;
   }
 
-  const session = await decrypt(sessionCookie.value);
+  const session = await decrypt<Session>(sessionCookie.value);
   const refreshedExpires = getFreshExpirationTime();
   const response = NextResponse.next();
 

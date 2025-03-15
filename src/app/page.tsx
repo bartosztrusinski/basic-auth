@@ -3,8 +3,6 @@ import { getSession } from '@/lib';
 export default async function HomePage() {
   const session = await getSession();
 
-  console.log(session);
-
   return (
     <div className='text-center'>
       <h1 className='text-2xl font-bold'>Basic Auth</h1>
