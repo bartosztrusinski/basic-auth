@@ -1,6 +1,7 @@
 import { getSession } from '@/lib';
 import { redirect } from 'next/navigation';
 
+// TODO add edit profile and authorization
 export default async function ProfilePage() {
   const session = await getSession();
 
