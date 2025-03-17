@@ -1,8 +1,9 @@
 'use server';
 
 import { redirect } from 'next/navigation';
-import { AuthError, signIn, signOut } from '@/lib';
-import { createUser } from '@/data';
+import { revalidatePath } from 'next/cache';
+import { AuthError, getSession, signIn, signOut, updateSession } from '@/lib';
+import { createUser, updateUser } from '@/data';
 
 type SuccessResponse = {
   success: string;
@@ -53,4 +54,27 @@ export async function logOut(): ActionResponse {
   }
 
   redirect('/');
+}
+
+export async function editProfile(_: unknown, formData: FormData): ActionResponse {
+  const session = await getSession();
+
+  if (!session) {
+    return { error: 'Unauthorized' };
+  }
+
+  const { user } = session;
+  const name = formData.get('name') as string;
+
+  try {
+    const updatedUser = updateUser(user.email, name);
+    await updateSession(updatedUser);
+  } catch (error) {
+    return {
+      error: error instanceof Error ? error.message : 'Failed to update profile. Please try again.',
+    };
+  }
+
+  revalidatePath('/profile');
+  return { success: 'Profile updated' };
 }

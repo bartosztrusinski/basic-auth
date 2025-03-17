@@ -112,3 +112,26 @@ export async function refreshSession(request: NextRequest) {
 
   return response;
 }
+
+export async function updateSession(user: User) {
+  const cookieStore = await cookies();
+  const sessionCookie = cookieStore.get(SESSION_COOKIE_NAME);
+
+  if (!sessionCookie) {
+    return;
+  }
+
+  const session = await decrypt<Session>(sessionCookie.value);
+
+  session.user = {
+    email: user.email,
+    name: user.name,
+  };
+
+  cookieStore.set(SESSION_COOKIE_NAME, await encrypt(session), {
+    expires: new Date(session.expires),
+    ...COOKIE_DEFAULT_FLAGS,
+  });
+
+  return new Response('Session updated', { status: 200 });
+}

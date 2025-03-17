@@ -16,6 +16,18 @@ export function createUser(newUser: User) {
   return newUser;
 }
 
+export function updateUser(email: User['email'], name: User['name']) {
+  const currentUser = getUserByEmail(email);
+
+  if (!currentUser) {
+    throw new Error('User not found');
+  }
+
+  currentUser.name = name;
+
+  return currentUser;
+}
+
 export function getUsers() {
   return users;
 }

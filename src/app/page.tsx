@@ -6,7 +6,7 @@ export default async function HomePage() {
   return (
     <div className='text-center'>
       <h1 className='text-2xl font-bold'>Basic Auth</h1>
-      <p>{session ? 'You are logged in' : 'You are not logged in'}</p>
+      <p>{session ? `Welcome back ${session.user.name}!` : 'You are not logged in'}</p>
     </div>
   );
 }
