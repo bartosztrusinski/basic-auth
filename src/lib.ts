@@ -1,3 +1,5 @@
+import 'server-only';
+
 import { cookies } from 'next/headers';
 import { NextResponse, type NextRequest } from 'next/server';
 import { type ResponseCookie } from 'next/dist/compiled/@edge-runtime/cookies';
@@ -45,10 +47,7 @@ export async function decrypt<T extends JWTPayload>(token: string): Promise<T> {
   return payload;
 }
 
-export async function signIn(formData: FormData) {
-  const email = formData.get('email') as string;
-  const password = formData.get('password') as string;
-
+export async function signIn(email: User['email'], password: User['password']) {
   const user = getUserByEmail(email);
 
   if (!user || user.password !== password) {
