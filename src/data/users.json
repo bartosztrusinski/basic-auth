@@ -1,0 +1,14 @@
+[
+  {
+    "id": "e7b300bf-494f-459e-a223-bb361279357e",
+    "email": "basic@auth.com",
+    "name": "User123",
+    "password": "password123"
+  },
+  {
+    "id": "8d17627a-a1c9-402e-9d66-dcd603707620",
+    "email": "john@doe.com",
+    "name": "John_Doe",
+    "password": "123"
+  }
+]

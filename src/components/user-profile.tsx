@@ -2,7 +2,7 @@
 
 import { useActionState, useState, useTransition } from 'react';
 import { editProfile } from '@/actions';
-import type { User } from '@/data';
+import type { User } from '@/db';
 
 type Props = {
   user: Pick<User, 'email' | 'name'>;
