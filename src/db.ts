@@ -4,9 +4,9 @@ import { randomUUID, type UUID } from 'node:crypto';
 
 const DATA_PATH = `${process.cwd()}/src/data`;
 
-// USER
+// ======== USER =========
 
-export type User = {
+type User = {
   id: UUID;
   email: string;
   name: string;
@@ -22,7 +22,7 @@ async function writeUsers(users: User[]) {
   await fs.writeFile(`${DATA_PATH}/users.json`, JSON.stringify(users, null, 2));
 }
 
-export async function createUser(newUser: Omit<User, 'id'>) {
+async function createUser(newUser: Omit<User, 'id'>) {
   const existingUser = await getUserByEmail(newUser.email);
 
   if (existingUser) {
@@ -40,7 +40,7 @@ export async function createUser(newUser: Omit<User, 'id'>) {
   return user;
 }
 
-export async function updateUser(email: User['email'], name: User['name']) {
+async function updateUser(email: User['email'], name: User['name']) {
   const currentUser = await getUserByEmail(email);
 
   if (!currentUser) {
@@ -56,7 +56,7 @@ export async function updateUser(email: User['email'], name: User['name']) {
   return currentUser;
 }
 
-export async function getUsers() {
+async function getUsers() {
   try {
     return await readUsers();
   } catch {
@@ -64,20 +64,20 @@ export async function getUsers() {
   }
 }
 
-export async function getUserByEmail(email: User['email']) {
+async function getUserByEmail(email: User['email']) {
   const users = await getUsers();
   return users.find((user) => user.email === email);
 }
 
-export async function getUserById(id: User['id']) {
+async function getUserById(id: User['id']) {
   const users = await getUsers();
   return users.find((user) => user.id === id);
 }
 
-// REFRESH TOKEN
+// ======== REFRESH TOKEN =========
 
-// TODO HASH TOKENS FOR SECURITY
-export type RefreshToken = {
+// TODO HASH TOKENS FOR SECURITY ?
+type RefreshToken = {
   id: UUID;
   userId: User['id'];
   expirationTime: Date;
@@ -90,9 +90,11 @@ async function readRefreshTokens() {
 
 async function writeRefreshTokens(refreshTokens: RefreshToken[]) {
   await fs.writeFile(`${DATA_PATH}/refresh-tokens.json`, JSON.stringify(refreshTokens, null, 2));
+  // TODO remove
+  console.table(await readRefreshTokens());
 }
 
-export async function createRefreshToken(newRefreshToken: Omit<RefreshToken, 'id'>) {
+async function createRefreshToken(newRefreshToken: Omit<RefreshToken, 'id'>) {
   const refreshToken: RefreshToken = {
     ...newRefreshToken,
     id: randomUUID(),
@@ -101,19 +103,32 @@ export async function createRefreshToken(newRefreshToken: Omit<RefreshToken, 'id
   const refreshTokens = await getRefreshTokens();
 
   await writeRefreshTokens([...refreshTokens, refreshToken]);
-  console.table(await readRefreshTokens());
 
   return refreshToken;
 }
 
-export async function deleteRefreshToken(id: RefreshToken['id']) {
+async function deleteRefreshToken(id: RefreshToken['id']) {
   const refreshTokens = await getRefreshTokens();
-
-  const newRefreshTokens = refreshTokens.filter((token) => token.id !== id);
-  await writeRefreshTokens(newRefreshTokens);
+  const updatedRefreshTokens = refreshTokens.filter((token) => token.id !== id);
+  await writeRefreshTokens(updatedRefreshTokens);
 }
 
-export async function getRefreshTokens() {
+async function deleteUserRefreshTokens(userId: User['id']) {
+  const refreshTokens = await getRefreshTokens();
+  const updatedRefreshTokens = refreshTokens.filter((token) => token.userId !== userId);
+  await writeRefreshTokens(updatedRefreshTokens);
+}
+
+async function deleteExpiredUserRefreshTokens(userId: User['id']) {
+  const refreshTokens = await getRefreshTokens();
+  const now = new Date();
+  const updatedRefreshTokens = refreshTokens.filter(
+    (token) => token.userId !== userId || new Date(token.expirationTime) > now,
+  );
+  await writeRefreshTokens(updatedRefreshTokens);
+}
+
+async function getRefreshTokens() {
   try {
     return await readRefreshTokens();
   } catch {
@@ -121,7 +136,23 @@ export async function getRefreshTokens() {
   }
 }
 
-export async function getRefreshTokenById(id: RefreshToken['id']) {
+async function getRefreshTokenById(id: RefreshToken['id']) {
   const refreshTokens = await getRefreshTokens();
   return refreshTokens.find((token) => token.id === id);
 }
+
+export const db = {
+  createUser,
+  updateUser,
+  getUsers,
+  getUserByEmail,
+  getUserById,
+  createRefreshToken,
+  deleteRefreshToken,
+  deleteUserRefreshTokens,
+  deleteExpiredUserRefreshTokens,
+  getRefreshTokens,
+  getRefreshTokenById,
+};
+
+export type { RefreshToken, User };
