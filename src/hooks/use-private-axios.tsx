@@ -2,7 +2,7 @@ import { useEffect } from 'react';
 import { type AxiosError } from 'axios';
 import { privateAxios } from '@/axios';
 import { useAuth } from '@/hooks/use-auth';
-import { useRefreshToken } from '@/hooks/use-refresh-token';
+import { refreshAccessToken } from '@/refresh-access-token';
 
 type CustomConfig = {
   config?: {
@@ -11,7 +11,6 @@ type CustomConfig = {
 };
 
 export function usePrivateAxios() {
-  const refreshToken = useRefreshToken();
   const { accessToken, setAccessToken } = useAuth();
 
   useEffect(() => {
@@ -34,7 +33,8 @@ export function usePrivateAxios() {
         if (error.response?.status === 403 && previousRequest && !previousRequest._retry) {
           previousRequest._retry = true;
           try {
-            const newAccessToken = await refreshToken();
+            const newAccessToken = await refreshAccessToken();
+            setAccessToken(newAccessToken);
             previousRequest.headers.Authorization = `Bearer ${newAccessToken}`;
             return privateAxios(previousRequest);
           } catch {
