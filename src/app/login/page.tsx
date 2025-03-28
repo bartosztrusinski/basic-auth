@@ -1,24 +1,12 @@
-'use client';
-
-import { useEffect } from 'react';
-import { useRouter, useSearchParams } from 'next/navigation';
-import { useAuth } from '@/hooks/use-auth';
+import { auth } from '@/auth';
 import { LoginForm } from '@/components/login-form';
+import { redirect } from 'next/navigation';
 
-export default function LoginPage() {
-  const { accessToken } = useAuth();
-  const router = useRouter();
-  const searchParams = useSearchParams();
-  const redirectTo = searchParams.get('redirect') ?? '/';
+export default async function LoginPage() {
+  const session = await auth();
 
-  useEffect(() => {
-    if (accessToken) {
-      router.replace(redirectTo);
-    }
-  }, [accessToken, redirectTo, router]);
-
-  if (accessToken) {
-    return null;
+  if (session) {
+    redirect('/');
   }
 
   return <LoginForm />;

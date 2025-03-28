@@ -1,11 +1,9 @@
-'use client';
-
 import Link from 'next/link';
+import { auth } from '@/auth';
 import { LogoutButton } from '@/components/logout-button';
-import { useAuth } from '@/hooks/use-auth';
 
-export function Header() {
-  const { accessToken } = useAuth();
+export async function Header() {
+  const session = await auth();
 
   return (
     <header>
@@ -19,7 +17,7 @@ export function Header() {
           </li>
         </ul>
         <ul className='flex gap-8'>
-          {accessToken ? (
+          {session ? (
             <>
               <li>
                 <Link href='/profile'>Profile</Link>

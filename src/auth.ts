@@ -1,5 +1,5 @@
 import 'server-only';
-import { cookies } from 'next/headers';
+import { cookies, headers } from 'next/headers';
 import { type ResponseCookie } from 'next/dist/compiled/@edge-runtime/cookies';
 import { jwtVerify, SignJWT, type JWTPayload } from 'jose';
 import { db, type RefreshToken, type User } from '@/db';
@@ -123,4 +123,20 @@ export async function signOut() {
 
   await db.deleteRefreshToken(refreshTokenId);
   cookieStore.delete(REFRESH_TOKEN_COOKIE_NAME);
+}
+
+export async function auth() {
+  const headersList = await headers();
+  const accessToken = headersList.get('Authorization')?.split('Bearer ')[1];
+
+  if (!accessToken) {
+    return null;
+  }
+
+  try {
+    const { userId } = await verifyAccessToken(accessToken);
+    return { userId };
+  } catch {
+    return null;
+  }
 }

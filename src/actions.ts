@@ -1,6 +1,6 @@
 'use server';
 
-import { AuthError, signIn, signOut } from '@/auth';
+import { AuthError, signIn } from '@/auth';
 import { db } from '@/db';
 
 type SuccessResponse = {
@@ -44,14 +44,5 @@ export async function register(_: unknown, formData: FormData): ActionResponse {
     return {
       error: error instanceof Error ? error.message : 'Failed to register. Please try again.',
     };
-  }
-}
-
-export async function logOut(): ActionResponse {
-  try {
-    await signOut();
-    return { success: 'Logged out successfully' };
-  } catch {
-    return { error: 'Failed to log out. Please try again.' };
   }
 }

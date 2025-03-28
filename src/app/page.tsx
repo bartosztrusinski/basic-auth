@@ -1,15 +1,13 @@
-'use client';
+import { auth } from '@/auth';
 
-import { useAuth } from '@/hooks/use-auth';
-
-export default function HomePage() {
-  const { accessToken } = useAuth();
+export default async function HomePage() {
+  const session = await auth();
 
   return (
     <div className='text-center'>
       <h1 className='text-2xl font-bold'>Basic Auth</h1>
       <p className='break-words'>
-        {accessToken ? `Welcome back ${accessToken}` : 'You are not logged in'}
+        {session ? `Welcome back ${session.userId}` : 'You are not logged in'}
       </p>
     </div>
   );

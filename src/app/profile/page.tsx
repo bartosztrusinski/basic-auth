@@ -1,22 +1,12 @@
-'use client';
-
+import { auth } from '@/auth';
 import { UserProfile } from '@/components/user-profile';
-import { useAuth } from '@/hooks/use-auth';
-import { useRouter } from 'next/navigation';
-import { useEffect } from 'react';
+import { redirect } from 'next/navigation';
 
-export default function ProfilePage() {
-  const { accessToken } = useAuth();
-  const router = useRouter();
+export default async function ProfilePage() {
+  const session = await auth();
 
-  useEffect(() => {
-    if (!accessToken) {
-      router.replace('/');
-    }
-  }, [accessToken, router]);
-
-  if (!accessToken) {
-    return null;
+  if (!session) {
+    redirect('/');
   }
 
   return <UserProfile />;
