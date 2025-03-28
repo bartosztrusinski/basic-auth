@@ -1,15 +1,23 @@
 'use client';
 
-import { useActionState } from 'react';
-import { logOut } from '@/actions';
+import { type FormEvent, useTransition } from 'react';
+import { useAuth } from '@/hooks/use-auth';
+import { publicAxios } from '@/axios';
 
 export function LogoutButton() {
-  const [state, action, isPending] = useActionState(logOut, null);
+  const [isPending, startTransition] = useTransition();
+  const { setAccessToken } = useAuth();
 
-  console.log(state?.error);
+  function handleSubmit(event: FormEvent<HTMLFormElement>) {
+    event.preventDefault();
+    startTransition(async () => {
+      await publicAxios.post('/api/auth/logout');
+      setAccessToken(null);
+    });
+  }
 
   return (
-    <form action={action}>
+    <form onSubmit={handleSubmit}>
       <button disabled={isPending}>{isPending ? 'Logging Out...' : 'Log Out'}</button>
     </form>
   );
