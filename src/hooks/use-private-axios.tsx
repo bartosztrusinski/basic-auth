@@ -30,7 +30,11 @@ export function usePrivateAxios() {
       async (error: AxiosError & CustomConfig) => {
         const previousRequest = error.config;
 
-        if (error.response?.status === 403 && previousRequest && !previousRequest._retry) {
+        if (
+          (error.response?.status === 403 || error.response?.status === 401) &&
+          previousRequest &&
+          !previousRequest._retry
+        ) {
           previousRequest._retry = true;
           try {
             const newAccessToken = await refreshAccessToken();

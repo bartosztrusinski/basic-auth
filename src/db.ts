@@ -40,8 +40,8 @@ async function createUser(newUser: Omit<User, 'id'>) {
   return user;
 }
 
-async function updateUser(email: User['email'], name: User['name']) {
-  const currentUser = await getUserByEmail(email);
+async function updateUser(id: User['id'], name: User['name']) {
+  const currentUser = await getUserById(id);
 
   if (!currentUser) {
     throw new Error('User not found');
@@ -50,7 +50,7 @@ async function updateUser(email: User['email'], name: User['name']) {
   currentUser.name = name;
 
   const users = await readUsers();
-  const updatedUsers = users.map((user) => (user.email === email ? currentUser : user));
+  const updatedUsers = users.map((user) => (user.id === id ? currentUser : user));
   await writeUsers(updatedUsers);
 
   return currentUser;
