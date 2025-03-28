@@ -1,15 +1,20 @@
-import { publicAxios } from '@/axios';
+import { type ExtendedRequestInit } from '@/hooks/use-auth';
 
 export async function refreshAccessToken() {
-  const { data } = await publicAxios.post<{ accessToken: string } | { error: string }>(
-    '/api/auth/refresh',
-    null,
-    { withCredentials: true },
-  );
+  const response = await fetch('/api/auth/refresh', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    credentials: 'include',
+    _shouldRetry: false,
+  } as ExtendedRequestInit);
 
-  if ('error' in data) {
-    throw new Error(data.error);
+  if (!response.ok) {
+    throw new Error('Failed to refresh access token');
   }
+
+  const data = (await response.json()) as { accessToken: string };
 
   return data.accessToken;
 }

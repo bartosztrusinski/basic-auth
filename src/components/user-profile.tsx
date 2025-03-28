@@ -2,16 +2,13 @@
 
 import { useEffect, useState, useTransition } from 'react';
 import { usePathname, useRouter } from 'next/navigation';
-import { usePrivateAxios } from '@/hooks/use-private-axios';
 import type { User } from '@/db';
-import { AxiosError } from 'axios';
 
 export function UserProfile() {
   const [user, setUser] = useState<User>();
   const [isEditing, setIsEditing] = useState(false);
   const [isPending, startTransition] = useTransition();
   const [error, setError] = useState<string | null>(null);
-  const privateAxios = usePrivateAxios();
   const router = useRouter();
   const pathname = usePathname();
 
@@ -24,19 +21,23 @@ export function UserProfile() {
 
     startTransition(async () => {
       try {
-        const response = await privateAxios.patch<User>('/api/users', {
-          name,
+        const response = await fetch('/api/users', {
+          method: 'PATCH',
+          body: JSON.stringify({ name }),
+          headers: {
+            'Content-Type': 'application/json',
+          },
         });
+
+        if (!response.ok) {
+          throw new Error('Failed to update user');
+        }
+
+        const data = (await response.json()) as User;
         setIsEditing(false);
-        setUser(response.data);
+        setUser(data);
       } catch (error) {
-        setError(
-          error instanceof AxiosError
-            ? (error.response?.statusText ?? error.message)
-            : error instanceof Error
-              ? error.message
-              : 'An error occurred. Please try again.',
-        );
+        setError(error instanceof Error ? error.message : 'An error occurred. Please try again.');
       }
     });
   }
@@ -47,12 +48,18 @@ export function UserProfile() {
 
     async function getUser() {
       try {
-        const response = await privateAxios.get<User>('/api/users/me', {
+        const response = await fetch('/api/users/me', {
           signal: controller.signal,
         });
 
+        if (!response.ok) {
+          throw new Error('Failed to fetch user');
+        }
+
+        const data = (await response.json()) as User;
+
         if (isMounted) {
-          setUser(response.data);
+          setUser(data);
         }
       } catch {
         if (isMounted) {
@@ -67,7 +74,7 @@ export function UserProfile() {
       isMounted = false;
       controller.abort();
     };
-  }, [pathname, privateAxios, router]);
+  }, [pathname, router]);
 
   return (
     <>
