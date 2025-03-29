@@ -4,17 +4,11 @@ import { z } from 'zod';
 export const env = createEnv({
   server: {
     NODE_ENV: z.enum(['development', 'test', 'production']),
-    SECRET: z.string(),
-    EXPIRATION_TIME_SECONDS: z.coerce.number(),
-    SESSION_COOKIE_NAME: z.string(),
+    SESSION_EXPIRATION_IN_SECONDS: z.coerce.number(),
   },
-  client: {
-    // NEXT_PUBLIC_CLIENTVAR: z.string(),
-  },
+  client: {},
   runtimeEnv: {
     NODE_ENV: process.env.NODE_ENV,
-    SECRET: process.env.SECRET,
-    EXPIRATION_TIME_SECONDS: process.env.EXPIRATION_TIME_SECONDS,
-    SESSION_COOKIE_NAME: process.env.SESSION_COOKIE_NAME,
+    SESSION_EXPIRATION_IN_SECONDS: process.env.SESSION_EXPIRATION_IN_SECONDS,
   },
 });
