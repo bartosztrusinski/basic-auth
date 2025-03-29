@@ -10,7 +10,9 @@ type User = {
   id: UUID;
   email: string;
   name: string;
+  role: 'user' | 'admin';
   password: string;
+  salt: string;
 };
 
 async function readUsers() {
@@ -22,16 +24,17 @@ async function writeUsers(users: User[]) {
   await fs.writeFile(`${DATA_PATH}/users.json`, JSON.stringify(users, null, 2));
 }
 
-async function createUser(newUser: Omit<User, 'id'>) {
+async function createUser(newUser: Omit<User, 'id' | 'role'>) {
   const existingUser = await getUserByEmail(newUser.email);
 
   if (existingUser) {
     throw new Error('Email already in use');
   }
 
-  const user = {
+  const user: User = {
     ...newUser,
     id: randomUUID(),
+    role: 'user',
   };
 
   const users = await readUsers();
@@ -79,65 +82,64 @@ async function getUserById(id: User['id']) {
 type Session = {
   id: UUID;
   userId: User['id'];
-  expirationTime: Date;
+  userRole: User['role'];
+  expirationTime: number;
 };
 
-async function readSession() {
+async function readSessions() {
   const data = await fs.readFile(`${DATA_PATH}/session.json`, 'utf-8');
   return JSON.parse(data) as Session[];
 }
 
-async function writeSession(refreshTokens: Session[]) {
-  await fs.writeFile(`${DATA_PATH}/session.json`, JSON.stringify(refreshTokens, null, 2));
-  // TODO remove
-  console.table(await readSession());
+async function writeSessions(sessions: Session[]) {
+  await fs.writeFile(`${DATA_PATH}/session.json`, JSON.stringify(sessions, null, 2));
 }
 
-async function createSession(newRefreshToken: Omit<Session, 'id'>) {
-  const refreshToken: Session = {
-    ...newRefreshToken,
+async function createSession(newSession: Omit<Session, 'id'>) {
+  const session: Session = {
+    ...newSession,
     id: randomUUID(),
   };
 
-  const refreshTokens = await getSession();
+  const sessions = await getSessions();
 
-  await writeSession([...refreshTokens, refreshToken]);
+  await writeSessions([...sessions, session]);
 
-  return refreshToken;
+  return session;
 }
 
 async function deleteSession(id: Session['id']) {
-  const refreshTokens = await getSession();
-  const updatedRefreshTokens = refreshTokens.filter((token) => token.id !== id);
-  await writeSession(updatedRefreshTokens);
+  const sessions = await getSessions();
+  const updatedSessions = sessions.filter((session) => session.id !== id);
+  await writeSessions(updatedSessions);
 }
 
 async function deleteUserSession(userId: User['id']) {
-  const refreshTokens = await getSession();
-  const updatedRefreshTokens = refreshTokens.filter((token) => token.userId !== userId);
-  await writeSession(updatedRefreshTokens);
+  const sessions = await getSessions();
+  const updatedSessions = sessions.filter((session) => session.userId !== userId);
+  await writeSessions(updatedSessions);
 }
 
 async function deleteExpiredUserSession(userId: User['id']) {
-  const refreshTokens = await getSession();
+  const sessions = await getSessions();
   const now = new Date();
-  const updatedRefreshTokens = refreshTokens.filter(
-    (token) => token.userId !== userId || new Date(token.expirationTime) > now,
+  const updatedSessions = sessions.filter(
+    (session) => session.userId !== userId || new Date(session.expirationTime) > now,
   );
-  await writeSession(updatedRefreshTokens);
+  await writeSessions(updatedSessions);
 }
 
-async function getSession() {
+async function getSessions() {
   try {
-    return await readSession();
+    return await readSessions();
   } catch {
     return [];
   }
 }
 
 async function getSessionById(id: Session['id']) {
-  const refreshTokens = await getSession();
-  return refreshTokens.find((token) => token.id === id);
+  const sessions = await getSessions();
+  return sessions.find((session) => session.id === id);
 }
 
 export const db = {
@@ -150,7 +152,7 @@ export const db = {
   deleteSession,
   deleteUserSession,
   deleteExpiredUserSession,
-  getSession,
+  getSessions,
   getSessionById,
 };
 
