@@ -9,5 +9,10 @@ export default async function SignupPage() {
     redirect('/');
   }
 
-  return <SignupForm />;
+  return (
+    <>
+      <h1 className='mb-6 text-3xl font-bold'>Sign Up</h1>
+      <SignupForm />
+    </>
+  );
 }

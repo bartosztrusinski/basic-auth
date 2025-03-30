@@ -4,18 +4,22 @@ import { redirect } from 'next/navigation';
 import { generateSalt, hashPassword } from '@/auth/password';
 import { createUserSession } from '@/auth/session';
 import { db } from '@/db';
+import { signupSchema } from '@/schemas';
 
 type ActionState = {
-  error?: string;
-  success?: string;
+  errors?: string[];
 };
 
 export async function signUp(_: ActionState, formData: FormData): Promise<ActionState> {
-  const email = formData.get('email') as string;
-  const name = formData.get('name') as string;
-  const password = formData.get('password') as string;
+  const { data, error } = signupSchema.safeParse(Object.fromEntries(formData.entries()));
 
-  // Validate here
+  if (error) {
+    return {
+      errors: error.errors.map((err) => err.message),
+    };
+  }
+
+  const { email, name, password } = data;
 
   try {
     const salt = generateSalt();
@@ -35,7 +39,7 @@ export async function signUp(_: ActionState, formData: FormData): Promise<Action
     await createUserSession(user);
   } catch (error) {
     return {
-      error: error instanceof Error ? error.message : 'An unknown error occurred',
+      errors: [error instanceof Error ? error.message : 'An unknown error occurred'],
     };
   }
 
