@@ -1,10 +1,10 @@
 'use client';
 
 import { useActionState } from 'react';
-import { register } from '@/actions';
+import { signUp } from '@/actions';
 
-export function RegisterForm() {
-  const [state, action, isPending] = useActionState(register, null);
+export function SignupForm() {
+  const [state, action, isPending] = useActionState(signUp, {});
 
   return (
     <form action={action} className='flex flex-col gap-3'>
