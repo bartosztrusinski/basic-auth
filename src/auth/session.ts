@@ -1,5 +1,6 @@
+import { cache } from 'react';
 import { cookies } from 'next/headers';
-import { randomBytes } from 'crypto';
+import { randomBytes } from 'node:crypto';
 import { env } from '@/env';
 import { db, type User } from '@/db';
 
@@ -31,7 +32,7 @@ export async function setSessionCookie(sessionId: string) {
   });
 }
 
-export async function getUserFromSession(): Promise<UserSession | null> {
+export const getUserFromSession = cache(async (): Promise<UserSession | null> => {
   const cookieStore = await cookies();
   const sessionId = cookieStore.get(SESSION_COOKIE_KEY)?.value;
 
@@ -49,4 +50,4 @@ export async function getUserFromSession(): Promise<UserSession | null> {
     id: session.userId,
     role: session.userRole,
   };
-}
+});
