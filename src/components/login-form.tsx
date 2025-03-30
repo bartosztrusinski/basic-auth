@@ -4,10 +4,10 @@ import { useActionState } from 'react';
 import { logIn } from '@/actions';
 
 export function LoginForm() {
-  const [state, action, isPending] = useActionState(logIn, null);
+  const [state, action, isPending] = useActionState(logIn, {});
 
   return (
-    <form action={action} className='flex flex-col gap-3'>
+    <form action={action} className='flex flex-col gap-5'>
       <input
         type='email'
         name='email'
@@ -22,7 +22,13 @@ export function LoginForm() {
         placeholder='********'
         className='rounded bg-white px-2 py-1 text-base text-black'
       />
-      <p className='min-h-6 text-red-500'> {state?.error && state.error}</p>
+      {state.errors && (
+        <div className='text-sm font-light text-red-500'>
+          {state.errors.map((error, index) => (
+            <p key={index}>{error}</p>
+          ))}
+        </div>
+      )}
       <button disabled={isPending} className='rounded border-2 border-white p-1'>
         {isPending ? 'Submitting...' : 'Log In'}
       </button>
