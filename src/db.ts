@@ -17,7 +17,7 @@ type User = {
 
 async function readUsers() {
   const data = await fs.readFile(`${DATA_PATH}/users.json`, 'utf-8');
-  return JSON.parse(data) as User[];
+  return JSON.parse(data || '[]') as User[];
 }
 
 async function writeUsers(users: User[]) {
@@ -32,9 +32,9 @@ async function createUser(newUser: Omit<User, 'id' | 'role'>) {
   }
 
   const user: User = {
-    ...newUser,
     id: randomUUID(),
     role: 'user',
+    ...newUser,
   };
 
   const users = await readUsers();
@@ -80,7 +80,7 @@ async function getUserById(id: User['id']) {
 // ======== SESSION =========
 
 type Session = {
-  id: UUID;
+  id: string;
   userId: User['id'];
   userRole: User['role'];
   expirationTime: number;
@@ -88,17 +88,16 @@ type Session = {
 
 async function readSessions() {
   const data = await fs.readFile(`${DATA_PATH}/session.json`, 'utf-8');
-  return JSON.parse(data) as Session[];
+  return JSON.parse(data || '[]') as Session[];
 }
 
 async function writeSessions(sessions: Session[]) {
   await fs.writeFile(`${DATA_PATH}/session.json`, JSON.stringify(sessions, null, 2));
 }
 
-async function createSession(newSession: Omit<Session, 'id'>) {
+async function createSession(newSession: Session) {
   const session: Session = {
     ...newSession,
-    id: randomUUID(),
   };
 
   const sessions = await getSessions();
@@ -139,7 +138,18 @@ async function getSessions() {
 
 async function getSessionById(id: Session['id']) {
   const sessions = await getSessions();
-  return sessions.find((session) => session.id === id);
+  const session = sessions.find((session) => session.id === id);
+
+  if (!session) {
+    return null;
+  }
+
+  if (session.expirationTime < Date.now()) {
+    await deleteSession(id);
+    return null;
+  }
+
+  return session;
 }
 
 export const db = {
