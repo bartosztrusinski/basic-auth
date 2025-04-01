@@ -1,12 +1,12 @@
-import { getSession } from '@/lib';
+import { getUserSession } from '@/auth/session';
 
 export default async function HomePage() {
-  const session = await getSession();
+  const user = await getUserSession();
 
   return (
     <div className='text-center'>
       <h1 className='text-2xl font-bold'>Basic Auth</h1>
-      <p>{session ? `Welcome back ${session.user.name}!` : 'You are not logged in'}</p>
+      <p>{user ? `Welcome back ${user.id}!` : 'You are not logged in'}</p>
     </div>
   );
 }

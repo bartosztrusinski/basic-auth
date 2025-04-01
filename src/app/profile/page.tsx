@@ -1,15 +1,13 @@
-import { redirect } from 'next/navigation';
+import { getUserSession } from '@/auth/session';
 import { UserProfile } from '@/components/user-profile';
-import { getSession } from '@/lib';
+import { redirect } from 'next/navigation';
 
 export default async function ProfilePage() {
-  const session = await getSession();
+  const user = await getUserSession();
 
-  if (!session) {
-    redirect('/login');
+  if (!user) {
+    redirect('/log-in');
   }
-
-  const { user } = session;
 
   return <UserProfile user={user} />;
 }
