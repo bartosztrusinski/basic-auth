@@ -2,7 +2,7 @@
 
 import { redirect } from 'next/navigation';
 import { comparePasswords, generateSalt, hashPassword } from '@/auth/password';
-import { createUserSession } from '@/auth/session';
+import { createUserSession, deleteUserSession } from '@/auth/session';
 import { db } from '@/db';
 import { loginSchema, signupSchema } from '@/schemas';
 
@@ -81,5 +81,10 @@ export async function signUp(_: ActionState, formData: FormData): Promise<Action
     };
   }
 
+  redirect('/');
+}
+
+export async function logOut() {
+  await deleteUserSession();
   redirect('/');
 }
