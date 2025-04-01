@@ -1,28 +1,14 @@
 'use client';
 
-import { useActionState, useState, useTransition } from 'react';
-import { editProfile } from '@/actions';
-import type { User } from '@/data';
+import { useState } from 'react';
+import type { FullUser } from '@/auth/session';
 
 type Props = {
-  user: Pick<User, 'email' | 'name'>;
+  user: FullUser;
 };
 
 export function UserProfile({ user }: Props) {
   const [isEditing, setIsEditing] = useState(false);
-  const [state, action] = useActionState(editProfile, null);
-  const [isPending, startTransition] = useTransition();
-
-  function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
-    event.preventDefault();
-
-    const formData = new FormData(event.currentTarget);
-
-    startTransition(() => {
-      action(formData);
-      setIsEditing(false);
-    });
-  }
 
   return (
     <>
@@ -31,7 +17,7 @@ export function UserProfile({ user }: Props) {
         Email: <strong className='text-lg'>{user.email}</strong>
       </p>
       {isEditing ? (
-        <form onSubmit={handleSubmit}>
+        <form>
           Name:{' '}
           <input
             name='name'
@@ -40,10 +26,10 @@ export function UserProfile({ user }: Props) {
             defaultValue={user.name}
             className='rounded bg-white px-2 py-1 text-base text-black'
           />
-          <p className='min-h-6 text-red-500'> {state?.error && state.error}</p>
+          {/* <p className='min-h-6 text-red-500'> {state?.error && state.error}</p>
           <button disabled={isPending} className='rounded border-2 border-white p-1'>
             {isPending ? 'Saving...' : 'Save'}
-          </button>
+          </button> */}
         </form>
       ) : (
         <>

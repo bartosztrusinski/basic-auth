@@ -5,10 +5,32 @@ import { env } from '@/env';
 import { db, type User } from '@/db';
 
 export type UserSession = Pick<User, 'id' | 'role'>;
+export type FullUser = Pick<User, 'id' | 'email' | 'name' | 'role'>;
 
 const SESSION_COOKIE_KEY = 'session-id';
 
-export const getUserSession = cache(async (): Promise<UserSession | null> => {
+export const getCurrentUser = cache<() => Promise<FullUser | null>>(async () => {
+  const userSession = await getUserSession();
+
+  if (!userSession) {
+    return null;
+  }
+
+  const user = await db.getUserById(userSession.id);
+
+  if (!user) {
+    return null;
+  }
+
+  return {
+    id: user.id,
+    email: user.email,
+    name: user.name,
+    role: user.role,
+  };
+});
+
+export const getUserSession = cache<() => Promise<UserSession | null>>(async () => {
   const cookieStore = await cookies();
   const sessionId = cookieStore.get(SESSION_COOKIE_KEY)?.value;
 
