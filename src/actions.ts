@@ -2,11 +2,17 @@
 
 import { redirect } from 'next/navigation';
 import { comparePasswords, generateSalt, hashPassword } from '@/auth/password';
-import { createUserSession, deleteUserSession } from '@/auth/session';
+import {
+  createUserSession,
+  deleteUserSession,
+  getUserSession,
+  updateUserSession,
+} from '@/auth/session';
 import { db } from '@/db';
-import { loginSchema, signupSchema } from '@/schemas';
+import { editProfileSchema, loginSchema, signupSchema } from '@/schemas';
 
 type ActionState = {
+  success?: boolean;
   errors?: string[];
 };
 
@@ -87,4 +93,36 @@ export async function signUp(_: ActionState, formData: FormData): Promise<Action
 export async function logOut() {
   await deleteUserSession();
   redirect('/');
+}
+
+export async function editProfile(_: ActionState, formData: FormData): Promise<ActionState> {
+  const { data, error } = editProfileSchema.safeParse(Object.fromEntries(formData.entries()));
+
+  if (error) {
+    return {
+      errors: error.errors.map((err) => err.message),
+    };
+  }
+
+  const userSession = await getUserSession();
+
+  if (!userSession) {
+    redirect('/log-in');
+  }
+
+  const { id } = userSession;
+  const { name, role } = data;
+
+  try {
+    const updatedUser = await db.updateUser(id, { name, role });
+    await updateUserSession(updatedUser);
+  } catch (error) {
+    return {
+      errors: [error instanceof Error ? error.message : 'An unknown error occurred'],
+    };
+  }
+
+  return {
+    success: true,
+  };
 }
