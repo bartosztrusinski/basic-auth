@@ -58,7 +58,7 @@ export async function createUserSession(user: UserSession) {
     id: sessionId,
     userId: user.id,
     userRole: user.role,
-    expirationTime: Date.now() + env.SESSION_EXPIRATION_IN_SECONDS * 1000,
+    expirationTime: createSessionExpirationTime(),
   });
 
   await setSessionCookie(sessionId);
@@ -76,7 +76,24 @@ export async function deleteUserSession() {
   cookieStore.delete(SESSION_COOKIE_KEY);
 }
 
-export async function setSessionCookie(sessionId: string) {
+export async function updateUserSession(user: UserSession) {
+  const cookieStore = await cookies();
+  const sessionId = cookieStore.get(SESSION_COOKIE_KEY)?.value;
+
+  if (!sessionId) {
+    return;
+  }
+
+  await db.updateSession(sessionId, {
+    userId: user.id,
+    userRole: user.role,
+    expirationTime: createSessionExpirationTime(),
+  });
+
+  await setSessionCookie(sessionId);
+}
+
+async function setSessionCookie(sessionId: string) {
   const cookieStore = await cookies();
   cookieStore.set(SESSION_COOKIE_KEY, sessionId, {
     secure: true,
@@ -85,4 +102,8 @@ export async function setSessionCookie(sessionId: string) {
     maxAge: env.SESSION_EXPIRATION_IN_SECONDS,
     path: '/',
   });
+}
+
+function createSessionExpirationTime() {
+  return Date.now() + env.SESSION_EXPIRATION_IN_SECONDS * 1000;
 }
