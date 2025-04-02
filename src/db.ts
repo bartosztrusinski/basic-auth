@@ -99,15 +99,13 @@ async function writeSessions(sessions: Session[]) {
 }
 
 async function createSession(newSession: Session) {
-  const session: Session = {
-    ...newSession,
-  };
-
   const sessions = await getSessions();
+  const now = Date.now();
+  const nonExpiredSessions = sessions.filter((session) => session.expirationTime > now);
 
-  await writeSessions([...sessions, session]);
+  await writeSessions([...nonExpiredSessions, newSession]);
 
-  return session;
+  return newSession;
 }
 
 async function deleteSession(id: Session['id']) {
