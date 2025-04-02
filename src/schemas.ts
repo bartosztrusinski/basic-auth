@@ -16,4 +16,12 @@ const loginSchema = z.object({
   password: z.string().min(1, 'Password is required'),
 });
 
-export { signupSchema, loginSchema };
+const editProfileSchema = z.object({
+  name: z.string().min(1, 'Name is required'),
+  role: z.enum(['user', 'admin'], {
+    message: 'Role must be either user or admin',
+    required_error: 'Role is required',
+  }),
+});
+
+export { signupSchema, loginSchema, editProfileSchema };
