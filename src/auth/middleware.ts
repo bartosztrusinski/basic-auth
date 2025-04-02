@@ -1,3 +1,4 @@
+import 'server-only';
 import { type NextRequest, NextResponse } from 'next/server';
 
 // TODO create auth config

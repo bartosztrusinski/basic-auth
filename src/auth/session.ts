@@ -1,3 +1,4 @@
+import 'server-only';
 import { cache } from 'react';
 import { cookies } from 'next/headers';
 import { randomBytes } from 'node:crypto';
