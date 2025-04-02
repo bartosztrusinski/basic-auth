@@ -1,12 +1,17 @@
-import { redirect } from 'next/navigation';
+import { redirect, RedirectType } from 'next/navigation';
 import { getUserSession } from '@/auth/session';
 import { LoginForm } from '@/components/login-form';
 
-export default async function LoginPage() {
-  const user = await getUserSession();
+export default async function LoginPage({
+  searchParams,
+}: {
+  searchParams: Promise<Record<string, string | undefined>>;
+}) {
+  const { callbackUrl } = await searchParams;
+  const userSession = await getUserSession();
 
-  if (user) {
-    redirect('/');
+  if (userSession) {
+    redirect(callbackUrl ? decodeURIComponent(callbackUrl) : '/', RedirectType.replace);
   }
 
   return (

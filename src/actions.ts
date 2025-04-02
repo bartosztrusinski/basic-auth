@@ -51,7 +51,7 @@ export async function logIn(_: ActionState, formData: FormData): Promise<ActionS
     };
   }
 
-  redirect('/');
+  return {};
 }
 
 export async function signUp(_: ActionState, formData: FormData): Promise<ActionState> {
@@ -92,7 +92,6 @@ export async function signUp(_: ActionState, formData: FormData): Promise<Action
 
 export async function logOut() {
   await deleteUserSession();
-  redirect('/');
 }
 
 export async function editProfile(_: ActionState, formData: FormData): Promise<ActionState> {
