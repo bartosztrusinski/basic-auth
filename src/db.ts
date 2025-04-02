@@ -43,20 +43,23 @@ async function createUser(newUser: Omit<User, 'id' | 'role'>) {
   return user;
 }
 
-async function updateUser(id: User['id'], name: User['name']) {
+async function updateUser(id: User['id'], updatedUserData: Partial<Omit<User, 'id'>>) {
   const currentUser = await getUserById(id);
 
   if (!currentUser) {
     throw new Error('User not found');
   }
 
-  currentUser.name = name;
+  const updatedUser = {
+    ...currentUser,
+    ...updatedUserData,
+  };
 
   const users = await readUsers();
-  const updatedUsers = users.map((user) => (user.id === id ? currentUser : user));
+  const updatedUsers = users.map((user) => (user.id === id ? updatedUser : user));
   await writeUsers(updatedUsers);
 
-  return currentUser;
+  return updatedUser;
 }
 
 async function getUsers() {
@@ -113,6 +116,30 @@ async function deleteSession(id: Session['id']) {
   await writeSessions(updatedSessions);
 }
 
+async function updateSession(
+  sessionId: Session['id'],
+  updatedSessionData: Partial<Omit<Session, 'id'>>,
+) {
+  const currentSession = await getSessionById(sessionId);
+
+  if (!currentSession) {
+    throw new Error('Session not found');
+  }
+
+  const updatedSession = {
+    ...currentSession,
+    ...updatedSessionData,
+  };
+
+  const sessions = await getSessions();
+  const updatedSessions = sessions.map((session) =>
+    session.id === sessionId ? updatedSession : session,
+  );
+  await writeSessions(updatedSessions);
+
+  return updatedSession;
+}
+
 async function deleteUserSession(userId: User['id']) {
   const sessions = await getSessions();
   const updatedSessions = sessions.filter((session) => session.userId !== userId);
@@ -159,6 +186,7 @@ export const db = {
   getUserByEmail,
   getUserById,
   createSession,
+  updateSession,
   deleteSession,
   deleteUserSession,
   deleteExpiredUserSession,
