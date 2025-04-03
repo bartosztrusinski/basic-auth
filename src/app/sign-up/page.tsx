@@ -1,6 +1,6 @@
 import Link from 'next/link';
 import { LoggedIn } from '@/components/auth/logged-in';
-import { RedirectBack } from '@/components/auth/redirect-back';
+import { ReturnBack } from '@/components/auth/return-back';
 import { SignupForm } from '@/components/signup-form';
 import { Page } from '@/components/page';
 
@@ -14,7 +14,7 @@ export default async function SignupPage({
   return (
     <>
       <LoggedIn>
-        <RedirectBack callbackUrl={callbackUrl} />
+        <ReturnBack searchParams={searchParams} />
       </LoggedIn>
       <Page>
         <Page.Title>Sign Up</Page.Title>

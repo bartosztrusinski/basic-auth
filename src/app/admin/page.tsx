@@ -1,11 +1,11 @@
-import { getUserSession } from '@/auth/session';
+import { auth } from '@/auth/session';
 import { Page } from '@/components/page';
 import { redirect } from 'next/navigation';
 
 export default async function AdminPage() {
-  const user = await getUserSession();
+  const { userRole } = await auth();
 
-  if (user?.role !== 'admin') {
+  if (userRole !== 'admin') {
     redirect('/');
   }
 

@@ -6,7 +6,7 @@ export default async function PrivatePage() {
   return (
     <>
       <LoggedOut>
-        <RedirectToLogin callbackUrl='/private' />
+        <RedirectToLogin returnBackUrl='/private' />
       </LoggedOut>
       <Page>
         <Page.Title>Private</Page.Title>

@@ -1,8 +1,8 @@
 import { type ReactNode } from 'react';
-import { getUserSession } from '@/auth/session';
+import { auth } from '@/auth/session';
 
 export async function LoggedOut({ children }: { children: ReactNode }) {
-  const user = await getUserSession();
+  const { userId } = await auth();
 
-  return user ? null : <>{children}</>;
+  return userId ? null : <>{children}</>;
 }

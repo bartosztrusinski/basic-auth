@@ -2,12 +2,7 @@
 
 import { revalidatePath } from 'next/cache';
 import { comparePasswords, generateSalt, hashPassword } from '@/auth/password';
-import {
-  createUserSession,
-  deleteUserSession,
-  getUserSession,
-  updateUserSession,
-} from '@/auth/session';
+import { createUserSession, deleteUserSession, auth, updateUserSession } from '@/auth/session';
 import { db } from '@/db';
 import { editProfileSchema, loginSchema, signupSchema } from '@/schemas';
 
@@ -44,7 +39,7 @@ export async function logIn(_: ActionState, formData: FormData): Promise<ActionS
       };
     }
 
-    await createUserSession(user);
+    await createUserSession({ userId: user.id, userRole: user.role });
   } catch (error) {
     return {
       errors: [error instanceof Error ? error.message : 'An unknown error occurred'],
@@ -80,7 +75,7 @@ export async function signUp(_: ActionState, formData: FormData): Promise<Action
       throw new Error('User creation failed');
     }
 
-    await createUserSession(user);
+    await createUserSession({ userId: user.id, userRole: user.role });
   } catch (error) {
     return {
       errors: [error instanceof Error ? error.message : 'An unknown error occurred'],
@@ -103,21 +98,20 @@ export async function editProfile(_: ActionState, formData: FormData): Promise<A
     };
   }
 
-  const userSession = await getUserSession();
+  const { userId } = await auth();
 
-  if (!userSession) {
+  if (!userId) {
     revalidatePath('/profile');
     return {
       errors: ['User not authenticated'],
     };
   }
 
-  const { id } = userSession;
   const { name, role } = data;
 
   try {
-    const updatedUser = await db.updateUser(id, { name, role });
-    await updateUserSession(updatedUser);
+    const { role: newRole } = await db.updateUser(userId, { name, role });
+    await updateUserSession({ userId, userRole: newRole });
   } catch (error) {
     return {
       errors: [error instanceof Error ? error.message : 'An unknown error occurred'],

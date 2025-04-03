@@ -1,11 +1,11 @@
 'use client';
 
 import { useActionState, useEffect, useState } from 'react';
-import type { FullUser } from '@/auth/session';
+import { type User } from '@/db';
 import { editProfile } from '@/actions';
 
 type Props = {
-  user: FullUser;
+  user: Pick<User, 'email' | 'name' | 'role'>;
 };
 
 export function UserProfile({ user }: Props) {

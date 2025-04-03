@@ -4,20 +4,29 @@ import { cookies } from 'next/headers';
 import { randomBytes } from 'node:crypto';
 import { env } from '@/env';
 import { db, type User } from '@/db';
+import { redirect, RedirectType } from 'next/navigation';
 
-export type UserSession = Pick<User, 'id' | 'role'>;
-export type FullUser = Pick<User, 'id' | 'email' | 'name' | 'role'>;
+type SessionUser = {
+  userId: User['id'];
+  userRole: User['role'];
+};
+
+export type Auth = Partial<SessionUser> & {
+  redirectToLogin: typeof redirectToLogin;
+};
+
+export type BackendUser = Pick<User, 'id' | 'email' | 'name' | 'role'>;
 
 const SESSION_COOKIE_KEY = 'session-id';
 
-export const getCurrentUser = cache<() => Promise<FullUser | null>>(async () => {
-  const userSession = await getUserSession();
+export const currentUser = cache<() => Promise<BackendUser | null>>(async () => {
+  const { userId } = await auth();
 
-  if (!userSession) {
+  if (!userId) {
     return null;
   }
 
-  const user = await db.getUserById(userSession.id);
+  const user = await db.getUserById(userId);
 
   if (!user) {
     return null;
@@ -28,36 +37,49 @@ export const getCurrentUser = cache<() => Promise<FullUser | null>>(async () => 
     email: user.email,
     name: user.name,
     role: user.role,
-  };
+  } satisfies BackendUser;
 });
 
-export const getUserSession = cache<() => Promise<UserSession | null>>(async () => {
+export const auth = cache<() => Promise<Auth>>(async () => {
   const cookieStore = await cookies();
   const sessionId = cookieStore.get(SESSION_COOKIE_KEY)?.value;
+  const auth: Auth = {
+    redirectToLogin,
+  };
 
   if (!sessionId) {
-    return null;
+    return auth;
   }
 
   const session = await db.getSessionById(sessionId);
 
   if (!session) {
-    return null;
+    return auth;
   }
 
+  const { userId, userRole } = session;
+
   return {
-    id: session.userId,
-    role: session.userRole,
-  };
+    ...auth,
+    userId,
+    userRole,
+  } satisfies Auth;
 });
 
-export async function createUserSession(user: UserSession) {
+export function redirectToLogin(returnBackUrl?: string | URL) {
+  redirect(
+    `/log-in${returnBackUrl ? `?callbackUrl=${encodeURIComponent(returnBackUrl.toString())}` : ''}`,
+    RedirectType.replace,
+  );
+}
+
+export async function createUserSession({ userId, userRole }: SessionUser) {
   const sessionId = randomBytes(512).toString('hex');
 
   await db.createSession({
     id: sessionId,
-    userId: user.id,
-    userRole: user.role,
+    userId,
+    userRole,
     expirationTime: createSessionExpirationTime(),
   });
 
@@ -76,7 +98,7 @@ export async function deleteUserSession() {
   cookieStore.delete(SESSION_COOKIE_KEY);
 }
 
-export async function updateUserSession(user: UserSession) {
+export async function updateUserSession({ userId, userRole }: SessionUser) {
   const cookieStore = await cookies();
   const sessionId = cookieStore.get(SESSION_COOKIE_KEY)?.value;
 
@@ -85,8 +107,8 @@ export async function updateUserSession(user: UserSession) {
   }
 
   await db.updateSession(sessionId, {
-    userId: user.id,
-    userRole: user.role,
+    userId,
+    userRole,
     expirationTime: createSessionExpirationTime(),
   });
 

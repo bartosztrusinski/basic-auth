@@ -1,8 +1,8 @@
-import { getCurrentUser } from '@/auth/session';
+import { currentUser } from '@/auth/session';
 import { Page } from '@/components/page';
 
 export default async function HomePage() {
-  const user = await getCurrentUser();
+  const user = await currentUser();
 
   return (
     <Page>

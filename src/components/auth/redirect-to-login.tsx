@@ -1,14 +1,14 @@
-import { redirect, RedirectType } from 'next/navigation';
+import { redirectToLogin } from '@/auth/session';
 
 type Props = {
-  callbackUrl?: string;
+  returnBackUrl?: string | URL;
   searchParams?: Promise<Record<string, string | undefined>>;
 };
 
-export async function RedirectToLogin({ callbackUrl, searchParams }: Props) {
-  const url = callbackUrl ?? (await searchParams)?.callbackUrl;
+export async function RedirectToLogin({ returnBackUrl, searchParams }: Props) {
+  const url = returnBackUrl ?? (await searchParams)?.callbackUrl;
 
-  redirect(`/log-in${url ? `?callbackUrl=${encodeURIComponent(url)}` : ''}`, RedirectType.replace);
+  redirectToLogin(url);
 
   return null;
 }
