@@ -1,12 +1,15 @@
 import { getUserSession } from '@/auth/session';
+import { Page } from '@/components/page';
 
 export default async function HomePage() {
   const user = await getUserSession();
 
   return (
-    <div className='text-center'>
-      <h1 className='text-2xl font-bold'>Basic Auth</h1>
-      <p>{user ? `Welcome back ${user.id}!` : 'You are not logged in'}</p>
-    </div>
+    <Page>
+      <Page.Title>Basic Auth</Page.Title>
+      <Page.Description>
+        {user ? `Welcome back ${user.id}!` : 'You are not logged in'}
+      </Page.Description>
+    </Page>
   );
 }

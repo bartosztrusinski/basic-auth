@@ -1,4 +1,5 @@
 import { getUserSession } from '@/auth/session';
+import { Page } from '@/components/page';
 import { redirect } from 'next/navigation';
 
 export default async function PrivatePage() {
@@ -9,9 +10,9 @@ export default async function PrivatePage() {
   }
 
   return (
-    <div className='text-center'>
-      <h1 className='text-2xl font-bold'>Private</h1>
-      <p>This page is only accessible to authenticated users.</p>
-    </div>
+    <Page>
+      <Page.Title>Private</Page.Title>
+      <Page.Description>This page is only accessible to authenticated users.</Page.Description>
+    </Page>
   );
 }

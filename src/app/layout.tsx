@@ -15,7 +15,7 @@ export default async function RootLayout({ children }: Readonly<{ children: Reac
     <html lang='en' className={`${GeistSans.variable}`}>
       <body className='bg-zinc-900 text-zinc-50'>
         <Header />
-        <main className='mx-auto mt-4 w-full max-w-80 p-4'>{children}</main>
+        <main className='mx-auto mt-4 w-full max-w-sm p-4'>{children}</main>
       </body>
     </html>
   );
