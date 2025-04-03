@@ -67,10 +67,11 @@ export const auth = cache<() => Promise<Auth>>(async () => {
 });
 
 export function redirectToLogin(returnBackUrl?: string | URL) {
-  redirect(
-    `/log-in${returnBackUrl ? `?callbackUrl=${encodeURIComponent(returnBackUrl.toString())}` : ''}`,
-    RedirectType.replace,
-  );
+  redirect(`/log-in${createReturnBackSearchParam(returnBackUrl)}`, RedirectType.replace);
+}
+
+export function createReturnBackSearchParam(returnBackUrl?: string | URL) {
+  return returnBackUrl ? `?callbackUrl=${encodeURIComponent(returnBackUrl.toString())}` : '';
 }
 
 export async function createUserSession({ userId, userRole }: SessionUser) {
