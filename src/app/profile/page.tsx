@@ -7,7 +7,7 @@ export default async function ProfilePage() {
   const user = await getCurrentUser();
 
   if (!user) {
-    redirect('/log-in?callbackUrl=/profile');
+    redirect(`/log-in?callbackUrl=${encodeURIComponent('/profile')}`);
   }
 
   return (

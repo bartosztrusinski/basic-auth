@@ -1,6 +1,6 @@
 'use server';
 
-import { redirect } from 'next/navigation';
+import { revalidatePath } from 'next/cache';
 import { comparePasswords, generateSalt, hashPassword } from '@/auth/password';
 import {
   createUserSession,
@@ -87,7 +87,7 @@ export async function signUp(_: ActionState, formData: FormData): Promise<Action
     };
   }
 
-  redirect('/');
+  return {};
 }
 
 export async function logOut() {
@@ -106,7 +106,10 @@ export async function editProfile(_: ActionState, formData: FormData): Promise<A
   const userSession = await getUserSession();
 
   if (!userSession) {
-    redirect('/log-in');
+    revalidatePath('/profile');
+    return {
+      errors: ['User not authenticated'],
+    };
   }
 
   const { id } = userSession;

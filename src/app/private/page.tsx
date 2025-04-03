@@ -6,7 +6,7 @@ export default async function PrivatePage() {
   const user = await getUserSession();
 
   if (!user) {
-    redirect('/log-in?callbackUrl=/private');
+    redirect(`/log-in?callbackUrl=${encodeURIComponent('/private')}`);
   }
 
   return (

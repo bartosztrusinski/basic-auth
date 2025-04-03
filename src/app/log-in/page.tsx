@@ -21,7 +21,10 @@ export default async function LoginPage({
       <Page.Title>Log In</Page.Title>
       <Page.Description>
         Don&apos;t have an account?{' '}
-        <Link href='/sign-up' className='text-teal-500 hover:underline'>
+        <Link
+          href={`/sign-up${callbackUrl ? `?callbackUrl=${encodeURIComponent(callbackUrl)}` : ''}`}
+          className='text-teal-500 hover:underline'
+        >
           Sign up
         </Link>
       </Page.Description>
