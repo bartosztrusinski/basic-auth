@@ -35,6 +35,7 @@ export function UserProfile({ user }: Props) {
               required
               placeholder='Name'
               defaultValue={user.name}
+              autoComplete='name'
               className='h-6 grow rounded bg-white px-1 text-base text-black'
             />
           </div>

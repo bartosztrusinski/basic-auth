@@ -13,6 +13,7 @@ export function LoginForm() {
         name='email'
         required
         placeholder='Email'
+        autoComplete='email'
         className='rounded bg-white px-2 py-1 text-base text-black'
       />
       <input
@@ -20,6 +21,7 @@ export function LoginForm() {
         name='password'
         required
         placeholder='********'
+        autoComplete='current-password'
         className='rounded bg-white px-2 py-1 text-base text-black'
       />
       {state.errors && (
