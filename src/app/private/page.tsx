@@ -1,18 +1,17 @@
-import { getUserSession } from '@/auth/session';
+import { LoggedOut } from '@/components/auth/logged-out';
+import { RedirectToLogin } from '@/components/auth/redirect-to-login';
 import { Page } from '@/components/page';
-import { redirect } from 'next/navigation';
 
 export default async function PrivatePage() {
-  const user = await getUserSession();
-
-  if (!user) {
-    redirect(`/log-in?callbackUrl=${encodeURIComponent('/private')}`);
-  }
-
   return (
-    <Page>
-      <Page.Title>Private</Page.Title>
-      <Page.Description>This page is only accessible to authenticated users.</Page.Description>
-    </Page>
+    <>
+      <LoggedOut>
+        <RedirectToLogin callbackUrl='/private' />
+      </LoggedOut>
+      <Page>
+        <Page.Title>Private</Page.Title>
+        <Page.Description>This page is only accessible to authenticated users.</Page.Description>
+      </Page>
+    </>
   );
 }
