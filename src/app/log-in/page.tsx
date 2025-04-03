@@ -1,6 +1,6 @@
-import { LoggedIn } from '@/components/auth/logged-in';
-import { ReturnBack } from '@/components/auth/return-back';
-import { SignupLink } from '@/components/auth/auth-link';
+import { LoggedIn } from '@/auth/components/logged-in';
+import { ReturnBack } from '@/auth/components/return-back';
+import { SignupLink } from '@/auth/components/auth-link';
 import { Page } from '@/components/page';
 import { LoginForm } from '@/components/login-form';
 

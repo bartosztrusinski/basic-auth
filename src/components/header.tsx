@@ -1,6 +1,6 @@
 import Link from 'next/link';
 import { auth } from '@/auth/session';
-import { LoginLink, SignupLink } from '@/components/auth/auth-link';
+import { LoginLink, SignupLink } from '@/auth/components/auth-link';
 import { LogoutButton } from '@/components/logout-button';
 
 // TODO fix stale ui after session expiry

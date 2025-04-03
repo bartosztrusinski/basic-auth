@@ -1,5 +1,5 @@
-import { LoggedOut } from '@/components/auth/logged-out';
-import { RedirectToLogin } from '@/components/auth/redirect-to-login';
+import { LoggedOut } from '@/auth/components/logged-out';
+import { RedirectToLogin } from '@/auth/components/redirect-to-login';
 import { Page } from '@/components/page';
 
 export default async function PrivatePage() {
