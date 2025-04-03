@@ -1,5 +1,6 @@
 import Link from 'next/link';
 import { auth } from '@/auth/session';
+import { LoginLink, SignupLink } from '@/components/auth/auth-link';
 import { LogoutButton } from '@/components/logout-button';
 
 // TODO fix stale ui after session expiry
@@ -35,10 +36,10 @@ export async function Header() {
         ) : (
           <>
             <li>
-              <Link href='/log-in'>Log In</Link>
+              <LoginLink>Log In</LoginLink>
             </li>
             <li>
-              <Link href='/sign-up'>Sign Up</Link>
+              <SignupLink>Sign Up</SignupLink>
             </li>
           </>
         )}
