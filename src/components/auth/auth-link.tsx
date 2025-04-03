@@ -1,6 +1,6 @@
 import { type HTMLProps } from 'react';
 import Link, { type LinkProps } from 'next/link';
-import { createReturnBackSearchParam } from '@/auth/session';
+import { createReturnBackSearchParam, getReturnBackUrlFromSearchParams } from '@/auth/util';
 
 type AuthProps = {
   returnBackUrl?: string | URL;
@@ -10,7 +10,8 @@ type AuthProps = {
 type Props = Omit<LinkProps & HTMLProps<HTMLAnchorElement>, 'href'> & AuthProps;
 
 async function AuthLink({ returnBackUrl, searchParams, href, ...props }: Props & { href: string }) {
-  const url = returnBackUrl ?? (await searchParams)?.callbackUrl;
+  const url =
+    returnBackUrl ?? (searchParams && (await getReturnBackUrlFromSearchParams(searchParams)));
 
   return <Link {...props} href={href + createReturnBackSearchParam(url)} />;
 }

@@ -1,10 +1,16 @@
 import 'server-only';
-import { cache } from 'react';
-import { cookies } from 'next/headers';
 import { randomBytes } from 'node:crypto';
-import { env } from '@/env';
+import { cache } from 'react';
 import { db, type User } from '@/db';
-import { redirect, RedirectType } from 'next/navigation';
+import {
+  createSessionExpirationTime,
+  deleteSessionCookie,
+  getSessionCookie,
+  redirectToLogin,
+  setSessionCookie,
+} from './util';
+
+export type BackendUser = Pick<User, 'id' | 'email' | 'name' | 'role'>;
 
 type SessionUser = {
   userId: User['id'];
@@ -14,10 +20,6 @@ type SessionUser = {
 export type Auth = Partial<SessionUser> & {
   redirectToLogin: typeof redirectToLogin;
 };
-
-export type BackendUser = Pick<User, 'id' | 'email' | 'name' | 'role'>;
-
-const SESSION_COOKIE_KEY = 'session-id';
 
 export const currentUser = cache<() => Promise<BackendUser | null>>(async () => {
   const { userId } = await auth();
@@ -41,8 +43,7 @@ export const currentUser = cache<() => Promise<BackendUser | null>>(async () => 
 });
 
 export const auth = cache<() => Promise<Auth>>(async () => {
-  const cookieStore = await cookies();
-  const sessionId = cookieStore.get(SESSION_COOKIE_KEY)?.value;
+  const sessionId = await getSessionCookie();
   const auth: Auth = {
     redirectToLogin,
   };
@@ -66,14 +67,6 @@ export const auth = cache<() => Promise<Auth>>(async () => {
   } satisfies Auth;
 });
 
-export function redirectToLogin(returnBackUrl?: string | URL) {
-  redirect(`/log-in${createReturnBackSearchParam(returnBackUrl)}`, RedirectType.replace);
-}
-
-export function createReturnBackSearchParam(returnBackUrl?: string | URL) {
-  return returnBackUrl ? `?callbackUrl=${encodeURIComponent(returnBackUrl.toString())}` : '';
-}
-
 export async function createUserSession({ userId, userRole }: SessionUser) {
   const sessionId = randomBytes(512).toString('hex');
 
@@ -88,20 +81,18 @@ export async function createUserSession({ userId, userRole }: SessionUser) {
 }
 
 export async function deleteUserSession() {
-  const cookieStore = await cookies();
-  const sessionId = cookieStore.get(SESSION_COOKIE_KEY)?.value;
+  const sessionId = await getSessionCookie();
 
   if (!sessionId) {
     return;
   }
 
   await db.deleteSession(sessionId);
-  cookieStore.delete(SESSION_COOKIE_KEY);
+  await deleteSessionCookie();
 }
 
 export async function updateUserSession({ userId, userRole }: SessionUser) {
-  const cookieStore = await cookies();
-  const sessionId = cookieStore.get(SESSION_COOKIE_KEY)?.value;
+  const sessionId = await getSessionCookie();
 
   if (!sessionId) {
     return;
@@ -114,19 +105,4 @@ export async function updateUserSession({ userId, userRole }: SessionUser) {
   });
 
   await setSessionCookie(sessionId);
-}
-
-async function setSessionCookie(sessionId: string) {
-  const cookieStore = await cookies();
-  cookieStore.set(SESSION_COOKIE_KEY, sessionId, {
-    secure: true,
-    httpOnly: true,
-    sameSite: 'lax',
-    maxAge: env.SESSION_EXPIRATION_IN_SECONDS,
-    path: '/',
-  });
-}
-
-function createSessionExpirationTime() {
-  return Date.now() + env.SESSION_EXPIRATION_IN_SECONDS * 1000;
 }
