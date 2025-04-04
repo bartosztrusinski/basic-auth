@@ -1,14 +1,9 @@
-import { redirect } from 'next/navigation';
 import { auth } from '@/auth/session';
 import { Page } from '@/components/page';
 import { UsersList } from '@/components/users-list';
 
 export default async function AdminPage() {
-  const { userRole } = await auth();
-
-  if (userRole !== 'admin') {
-    redirect('/');
-  }
+  await auth.protect({ role: 'admin', unauthorizedUrl: '/profile' });
 
   return (
     <Page>

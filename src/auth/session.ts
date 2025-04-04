@@ -1,14 +1,12 @@
 import 'server-only';
 import { randomBytes } from 'node:crypto';
 import { cache } from 'react';
+import { redirect } from 'next/navigation';
 import { db, type User } from '@/db';
 import { createSessionExpirationTime, redirectToLogin } from './util';
 import { getSessionCookie, setSessionCookie, deleteSessionCookie } from './cookie';
 
-// TODO create protect api
 // TODO update session expiration time in middleware
-
-export type BackendUser = Pick<User, 'id' | 'email' | 'name' | 'role'>;
 
 type SessionUser = {
   userId: User['id'];
@@ -19,28 +17,22 @@ export type Auth = Partial<SessionUser> & {
   redirectToLogin: typeof redirectToLogin;
 };
 
-export const currentUser = cache<() => Promise<BackendUser | null>>(async () => {
-  const { userId } = await auth();
+interface AuthFunction {
+  (): ReturnType<typeof authFn>;
+  protect: typeof protect;
+}
 
-  if (!userId) {
-    return null;
-  }
+type ProtectOptions = {
+  role?: User['role'];
+  unauthorizedUrl?: string;
+  unauthenticatedUrl?: string;
+};
 
-  const user = await db.getUserById(userId);
+type BackendUser = Pick<User, 'id' | 'email' | 'name' | 'role'>;
 
-  if (!user) {
-    return null;
-  }
+export const auth: AuthFunction = Object.assign(cache(authFn), { protect });
 
-  return {
-    id: user.id,
-    email: user.email,
-    name: user.name,
-    role: user.role,
-  } satisfies BackendUser;
-});
-
-export const auth = cache<() => Promise<Auth>>(async () => {
+async function authFn(): Promise<Auth> {
   const sessionId = await getSessionCookie();
   const auth: Auth = {
     redirectToLogin,
@@ -63,6 +55,41 @@ export const auth = cache<() => Promise<Auth>>(async () => {
     userId,
     userRole,
   } satisfies Auth;
+}
+
+async function protect({ role, unauthorizedUrl, unauthenticatedUrl }: ProtectOptions = {}) {
+  const { userId, userRole } = await auth();
+
+  if (!userId) {
+    return unauthenticatedUrl ? redirect(unauthenticatedUrl) : redirectToLogin();
+  }
+
+  if (userRole !== role) {
+    return redirect(unauthorizedUrl ?? '/');
+  }
+
+  return { userId };
+}
+
+export const currentUser = cache<() => Promise<BackendUser | null>>(async () => {
+  const { userId } = await auth();
+
+  if (!userId) {
+    return null;
+  }
+
+  const user = await db.getUserById(userId);
+
+  if (!user) {
+    return null;
+  }
+
+  return {
+    id: user.id,
+    email: user.email,
+    name: user.name,
+    role: user.role,
+  } satisfies BackendUser;
 });
 
 export async function createUserSession({ userId, userRole }: SessionUser) {

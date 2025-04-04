@@ -9,7 +9,7 @@ export async function getReturnBackUrlFromSearchParams(
   return (await searchParams)[RETURN_BACK_URL_KEY];
 }
 
-export function redirectToLogin(returnBackUrl?: string) {
+export function redirectToLogin(returnBackUrl?: string): never {
   redirect('/log-in' + createReturnBackSearchParam(returnBackUrl), RedirectType.replace);
 }
 
