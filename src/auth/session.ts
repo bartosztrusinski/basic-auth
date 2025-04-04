@@ -2,13 +2,11 @@ import 'server-only';
 import { randomBytes } from 'node:crypto';
 import { cache } from 'react';
 import { db, type User } from '@/db';
-import {
-  createSessionExpirationTime,
-  deleteSessionCookie,
-  getSessionCookie,
-  redirectToLogin,
-  setSessionCookie,
-} from './util';
+import { createSessionExpirationTime, redirectToLogin } from './util';
+import { getSessionCookie, setSessionCookie, deleteSessionCookie } from './cookie';
+
+// TODO create protect api
+// TODO update session expiration time in middleware
 
 export type BackendUser = Pick<User, 'id' | 'email' | 'name' | 'role'>;
 
