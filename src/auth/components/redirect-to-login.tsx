@@ -1,7 +1,7 @@
 import { getReturnBackUrlFromSearchParams, redirectToLogin } from '@/auth/util';
 
 type Props = {
-  returnBackUrl?: string | URL;
+  returnBackUrl?: string;
   searchParams?: Promise<Record<string, string | undefined>>;
 };
 

@@ -3,7 +3,7 @@ import Link, { type LinkProps } from 'next/link';
 import { createReturnBackSearchParam, getReturnBackUrlFromSearchParams } from '@/auth/util';
 
 type AuthProps = {
-  returnBackUrl?: string | URL;
+  returnBackUrl?: string;
   searchParams?: Promise<Record<string, string | undefined>>;
 };
 

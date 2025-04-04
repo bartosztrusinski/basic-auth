@@ -9,14 +9,12 @@ export async function getReturnBackUrlFromSearchParams(
   return (await searchParams)[RETURN_BACK_URL_KEY];
 }
 
-export function redirectToLogin(returnBackUrl?: string | URL) {
-  redirect(`/log-in${createReturnBackSearchParam(returnBackUrl)}`, RedirectType.replace);
+export function redirectToLogin(returnBackUrl?: string) {
+  redirect('/log-in' + createReturnBackSearchParam(returnBackUrl), RedirectType.replace);
 }
 
-export function createReturnBackSearchParam(returnBackUrl?: string | URL) {
-  return returnBackUrl
-    ? `?${RETURN_BACK_URL_KEY}=${encodeURIComponent(returnBackUrl.toString())}`
-    : '';
+export function createReturnBackSearchParam(returnBackUrl?: string) {
+  return returnBackUrl ? `?${RETURN_BACK_URL_KEY}=${encodeURIComponent(returnBackUrl)}` : '';
 }
 
 export function createSessionExpirationTime() {
