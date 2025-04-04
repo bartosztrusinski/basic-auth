@@ -8,7 +8,7 @@ const privateRoutes = ['/private', '/profile'];
 const adminRoutes = ['/admin'];
 const authRoutes = ['/log-in', '/sign-up'];
 
-export function authMiddleware(request: NextRequest): NextResponse {
+export async function authMiddleware(request: NextRequest): Promise<NextResponse> {
   const { pathname } = request.nextUrl;
   const isAuthenticated = request.cookies.has(SESSION_COOKIE_KEY);
   const isAuthRoute = authRoutes.some((route) => pathname.startsWith(route));
@@ -25,6 +25,9 @@ export function authMiddleware(request: NextRequest): NextResponse {
       new URL('/log-in' + createReturnBackSearchParam(pathname), request.url),
     );
   }
+
+  // Refresh user session if compatible with edge
+  // await refreshUserSession(request);
 
   return NextResponse.next();
 }

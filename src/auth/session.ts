@@ -2,11 +2,10 @@ import 'server-only';
 import { randomBytes } from 'node:crypto';
 import { cache } from 'react';
 import { redirect } from 'next/navigation';
+import { type NextRequest } from 'next/server';
 import { db, type User } from '@/db';
 import { createSessionExpirationTime, redirectToLogin } from './util';
 import { getSessionCookie, setSessionCookie, deleteSessionCookie } from './cookie';
-
-// TODO update session expiration time in middleware
 
 type SessionUser = {
   userId: User['id'];
@@ -130,4 +129,22 @@ export async function updateUserSession({ userId, userRole }: SessionUser) {
   });
 
   await setSessionCookie(sessionId);
+}
+
+export async function refreshUserSession(request?: NextRequest) {
+  const sessionId = await getSessionCookie(request);
+
+  if (!sessionId) {
+    return;
+  }
+
+  try {
+    await db.updateSession(sessionId, {
+      expirationTime: createSessionExpirationTime(),
+    });
+
+    await setSessionCookie(sessionId, request);
+  } catch (error) {
+    console.error('Error refreshing user session:', error);
+  }
 }
