@@ -1,9 +1,20 @@
-import { type NextRequest } from 'next/server';
 import { authMiddleware } from '@/auth/middleware';
+import { isAuthRoute, isProtectedRoute } from '@/auth/util';
 
-export function middleware(request: NextRequest) {
-  return authMiddleware(request);
-}
+export default authMiddleware(async (auth, request) => {
+  const { isAuthenticated, redirectToLogin, redirectToDefault } = await auth();
+
+  if (isAuthRoute(request) && isAuthenticated) {
+    return redirectToDefault();
+  }
+
+  if (isProtectedRoute(request) && !isAuthenticated) {
+    return redirectToLogin();
+  }
+
+  // Refresh user session if compatible with edge
+  // await refreshUserSession(request);
+});
 
 export const config = {
   matcher: [
