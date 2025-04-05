@@ -1,22 +1,20 @@
 import { redirect, RedirectType } from 'next/navigation';
-import { env } from '@/env';
-
-const RETURN_BACK_URL_KEY = 'callback_url';
+import config from './config';
 
 export async function getReturnBackUrlFromSearchParams(
   searchParams: Promise<Record<string, string | undefined>>,
 ) {
-  return (await searchParams)[RETURN_BACK_URL_KEY];
+  return (await searchParams)[config.returnBackUrlKey];
 }
 
 export function redirectToLogin(returnBackUrl?: string): never {
-  redirect('/log-in' + createReturnBackSearchParam(returnBackUrl), RedirectType.replace);
+  redirect(config.loginRoute + createReturnBackSearchParam(returnBackUrl), RedirectType.replace);
 }
 
 export function createReturnBackSearchParam(returnBackUrl?: string) {
-  return returnBackUrl ? `?${RETURN_BACK_URL_KEY}=${encodeURIComponent(returnBackUrl)}` : '';
+  return returnBackUrl ? `?${config.returnBackUrlKey}=${encodeURIComponent(returnBackUrl)}` : '';
 }
 
 export function createSessionExpirationTime() {
-  return Date.now() + env.SESSION_EXPIRATION_IN_SECONDS * 1000;
+  return Date.now() + config.sessionExpirationInSeconds * 1000;
 }

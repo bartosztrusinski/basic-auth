@@ -6,6 +6,7 @@ import { type NextRequest } from 'next/server';
 import { db, type User } from '@/db';
 import { createSessionExpirationTime, redirectToLogin } from './util';
 import { getSessionCookie, setSessionCookie, deleteSessionCookie } from './cookie';
+import config from './config';
 
 type SessionUser = {
   userId: User['id'];
@@ -13,12 +14,12 @@ type SessionUser = {
 };
 
 export type Auth = Partial<SessionUser> & {
-  redirectToLogin: typeof redirectToLogin;
+  redirectToLogin: (returnBackUrl?: string) => never;
 };
 
 interface AuthFunction {
-  (): ReturnType<typeof authFn>;
-  protect: typeof protect;
+  (): ReturnType<() => Promise<Auth>>;
+  protect: (options?: ProtectOptions) => Promise<{ userId: User['id'] }>;
 }
 
 type ProtectOptions = {
@@ -64,7 +65,7 @@ async function protect({ role, unauthorizedUrl, unauthenticatedUrl }: ProtectOpt
   }
 
   if (userRole !== role) {
-    return redirect(unauthorizedUrl ?? '/');
+    return redirect(unauthorizedUrl ?? config.defaultRedirectRoute);
   }
 
   return { userId };

@@ -1,5 +1,6 @@
 import { type HTMLProps } from 'react';
 import Link, { type LinkProps } from 'next/link';
+import config from '@/auth/config';
 import { createReturnBackSearchParam, getReturnBackUrlFromSearchParams } from '@/auth/util';
 
 type AuthProps = {
@@ -17,9 +18,9 @@ async function AuthLink({ returnBackUrl, searchParams, href, ...props }: Props &
 }
 
 export async function LoginLink(props: Props) {
-  return <AuthLink {...props} href='/log-in' />;
+  return <AuthLink {...props} href={config.loginRoute} />;
 }
 
 export async function SignupLink(props: Props) {
-  return <AuthLink {...props} href='/sign-up' />;
+  return <AuthLink {...props} href={config.signupRoute} />;
 }
