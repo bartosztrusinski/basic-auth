@@ -1,11 +1,12 @@
-import Link from 'next/link';
-import { auth } from '@/auth/session';
-import { LoginLink, SignupLink } from '@/auth/components/auth-link';
-import { LogoutButton } from '@/components/logout-button';
+'use client';
 
-// TODO fix stale ui after session expiry
-export async function Header() {
-  const { userId } = await auth();
+import Link from 'next/link';
+// import { LoginLink, SignupLink } from '@/auth/components/auth-link';
+import { LogoutButton } from '@/components/logout-button';
+import { useAuth } from '@/auth/hooks/use-auth';
+
+export function Header() {
+  const { isLoggedIn } = useAuth();
 
   return (
     <nav className='flex flex-wrap justify-between gap-x-8 gap-y-4 bg-zinc-800 p-4 text-zinc-50'>
@@ -24,7 +25,7 @@ export async function Header() {
         </li>
       </ul>
       <ul className='flex gap-8'>
-        {userId ? (
+        {isLoggedIn ? (
           <>
             <li>
               <Link href='/profile'>Profile</Link>
@@ -36,10 +37,12 @@ export async function Header() {
         ) : (
           <>
             <li>
-              <LoginLink>Log In</LoginLink>
+              {/* <LoginLink>Log In</LoginLink> */}
+              <Link href='/log-in'>Log In</Link>
             </li>
             <li>
-              <SignupLink>Sign Up</SignupLink>
+              {/* <SignupLink>Sign Up</SignupLink> */}
+              <Link href='/sign-up'>Sign Up</Link>
             </li>
           </>
         )}

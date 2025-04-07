@@ -1,13 +1,32 @@
 'use client';
 
-import { useActionState } from 'react';
+import { type FormEvent, useActionState, useTransition } from 'react';
 import { logIn } from '@/actions';
+import { useAuth } from '@/auth/hooks/use-auth';
 
 export function LoginForm() {
-  const [state, action, isPending] = useActionState(logIn, {});
+  const [state] = useActionState(logIn, {});
+  const [isPending, startTransition] = useTransition();
+  const { setAuth } = useAuth();
+
+  function handleSubmit(event: FormEvent<HTMLFormElement>) {
+    event.preventDefault();
+    const formData = new FormData(event.currentTarget);
+
+    startTransition(async () => {
+      const state = await logIn({}, formData);
+
+      if (state.success) {
+        setAuth({
+          ...state.session,
+          isLoggedIn: true,
+        });
+      }
+    });
+  }
 
   return (
-    <form action={action} className='flex flex-col gap-5'>
+    <form onSubmit={handleSubmit} className='flex flex-col gap-5'>
       <input
         type='email'
         name='email'
