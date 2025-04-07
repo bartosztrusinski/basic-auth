@@ -11,6 +11,7 @@ import config from './config';
 type SessionUser = {
   userId: User['id'];
   userRole: User['role'];
+  expirationTime?: number;
 };
 
 export type Auth = Partial<SessionUser> & {
@@ -48,12 +49,13 @@ async function authFn(): Promise<Auth> {
     return auth;
   }
 
-  const { userId, userRole } = session;
+  const { userId, userRole, expirationTime } = session;
 
   return {
     ...auth,
     userId,
     userRole,
+    expirationTime,
   } satisfies Auth;
 }
 
@@ -95,7 +97,7 @@ export const currentUser = cache<() => Promise<BackendUser | null>>(async () => 
 export async function createUserSession({ userId, userRole }: SessionUser) {
   const sessionId = randomBytes(512).toString('hex');
 
-  await db.createSession({
+  const session = await db.createSession({
     id: sessionId,
     userId,
     userRole,
@@ -103,6 +105,8 @@ export async function createUserSession({ userId, userRole }: SessionUser) {
   });
 
   await setSessionCookie(sessionId);
+
+  return session;
 }
 
 export async function deleteUserSession() {

@@ -3,7 +3,7 @@
 import { revalidatePath } from 'next/cache';
 import { comparePasswords, generateSalt, hashPassword } from '@/auth/password';
 import { createUserSession, deleteUserSession, auth, updateUserSession } from '@/auth/session';
-import { db } from '@/db';
+import { db, type Session } from '@/db';
 import { editProfileSchema, loginSchema, signupSchema } from '@/schemas';
 
 type ActionState = {
@@ -11,7 +11,10 @@ type ActionState = {
   errors?: string[];
 };
 
-export async function logIn(_: ActionState, formData: FormData): Promise<ActionState> {
+export async function logIn(
+  _: ActionState & { session?: Session },
+  formData: FormData,
+): Promise<ActionState & { session?: Session }> {
   const { data, error } = loginSchema.safeParse(Object.fromEntries(formData.entries()));
 
   if (error) {
@@ -39,14 +42,17 @@ export async function logIn(_: ActionState, formData: FormData): Promise<ActionS
       };
     }
 
-    await createUserSession({ userId: user.id, userRole: user.role });
+    const session = await createUserSession({ userId: user.id, userRole: user.role });
+
+    return {
+      success: true,
+      session,
+    };
   } catch (error) {
     return {
       errors: [error instanceof Error ? error.message : 'An unknown error occurred'],
     };
   }
-
-  return {};
 }
 
 export async function signUp(_: ActionState, formData: FormData): Promise<ActionState> {
@@ -120,5 +126,17 @@ export async function editProfile(_: ActionState, formData: FormData): Promise<A
 
   return {
     success: true,
+  };
+}
+
+export async function getAuth() {
+  const { userId, userRole, expirationTime } = await auth();
+  const isLoggedIn = Boolean(userId);
+
+  return {
+    isLoggedIn,
+    userId,
+    userRole,
+    expirationTime,
   };
 }
