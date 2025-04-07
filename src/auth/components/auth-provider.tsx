@@ -54,6 +54,24 @@ export function AuthProvider({ children, initialAuth = {} }: Props) {
     }
   }, [auth.expirationTime, checkAuth, pathname]);
 
+  useEffect(() => {
+    const controller = new AbortController();
+
+    document.addEventListener(
+      'visibilitychange',
+      () => {
+        if (!document.hidden && auth.isLoggedIn) {
+          void checkAuth();
+        }
+      },
+      { signal: controller.signal },
+    );
+
+    return () => {
+      controller.abort();
+    };
+  }, [auth.isLoggedIn, checkAuth]);
+
   return (
     <AuthContext.Provider value={{ ...auth, isLoading, setAuth }}>{children}</AuthContext.Provider>
   );
