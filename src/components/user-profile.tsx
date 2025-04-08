@@ -1,8 +1,9 @@
 'use client';
 
-import { useActionState, useEffect, useState } from 'react';
+import { useState, useTransition } from 'react';
 import { type User } from '@/db';
 import { editProfile } from '@/actions';
+import { useAuth } from '@/auth/hooks/use-auth';
 
 type Props = {
   user: Pick<User, 'email' | 'name' | 'role'>;
@@ -10,13 +11,34 @@ type Props = {
 
 export function UserProfile({ user }: Props) {
   const [isEditing, setIsEditing] = useState(false);
-  const [state, action, isPending] = useActionState(editProfile, {});
+  const [isSuccess, setIsSuccess] = useState(false);
+  const [errors, setErrors] = useState<string[]>([]);
+  const [isPending, startTransition] = useTransition();
+  const { syncAuth } = useAuth();
 
-  useEffect(() => {
-    if (state.success) {
-      setIsEditing(false);
-    }
-  }, [state]);
+  function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
+    const formData = new FormData(event.currentTarget);
+
+    setIsSuccess(false);
+    event.preventDefault();
+
+    startTransition(async () => {
+      const { success, errors, isUnauthenticated } = await editProfile(formData);
+
+      if (isUnauthenticated) {
+        await syncAuth();
+      }
+
+      if (success) {
+        setIsEditing(false);
+        setIsSuccess(true);
+      }
+
+      if (errors) {
+        setErrors(errors);
+      }
+    });
+  }
 
   return (
     <div className='space-y-4 rounded-lg border border-zinc-600 p-6'>
@@ -24,7 +46,7 @@ export function UserProfile({ user }: Props) {
         <strong>Email:</strong> {user.email}
       </p>
       {isEditing ? (
-        <form action={action} className='space-y-4'>
+        <form onSubmit={handleSubmit} className='space-y-4'>
           <div className='flex items-center gap-2'>
             <label htmlFor='name'>
               <strong>Name:</strong>
@@ -54,9 +76,9 @@ export function UserProfile({ user }: Props) {
             </select>
           </div>
 
-          {state.errors && (
+          {errors && (
             <div className='text-sm font-light text-red-500'>
-              {state.errors.map((error, index) => (
+              {errors.map((error, index) => (
                 <p key={index}>{error}</p>
               ))}
             </div>
@@ -88,7 +110,7 @@ export function UserProfile({ user }: Props) {
             <strong>Role:</strong> {user.role}
           </p>
 
-          {state.success && (
+          {isSuccess && (
             <p className='text-sm font-light text-green-500'>Profile updated successfully!</p>
           )}
 
