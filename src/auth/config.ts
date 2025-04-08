@@ -1,6 +1,5 @@
-import 'server-only';
-
-const sessionExpirationInSeconds = 60;
+// TODO use env variables
+const sessionExpirationInSeconds = 15;
 const sessionCookieKey = 'session-id';
 const sessionCookieAttributes = {
   secure: true,
@@ -18,7 +17,7 @@ const signupRoute = '/sign-up';
 const protectedRoutes = ['/private', '/profile', '/admin'];
 const authRoutes = [loginRoute, signupRoute];
 
-const authConfig = Object.freeze({
+export default Object.freeze({
   sessionExpirationInSeconds,
   sessionCookieKey,
   sessionCookieAttributes,
@@ -29,5 +28,3 @@ const authConfig = Object.freeze({
   protectedRoutes,
   authRoutes,
 });
-
-export default authConfig;

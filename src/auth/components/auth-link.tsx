@@ -1,26 +1,34 @@
-import { type HTMLProps } from 'react';
+import { type AnchorHTMLAttributes } from 'react';
 import Link, { type LinkProps } from 'next/link';
-import config from '@/auth/config';
-import { createReturnBackSearchParam, getReturnBackUrlFromSearchParams } from '@/auth/util';
+import { createReturnBackSearchParam, getReturnBackSearchParam } from '../util';
+import config from '../config';
 
-type AuthProps = {
-  returnBackUrl?: string;
-  searchParams?: Promise<Record<string, string | undefined>>;
-};
+type AuthProps = LinkProps &
+  AnchorHTMLAttributes<HTMLAnchorElement> & {
+    returnBackUrl?: string;
+    searchParams?: Promise<Record<string, string | undefined>>;
+  };
 
-type Props = Omit<LinkProps & HTMLProps<HTMLAnchorElement>, 'href'> & AuthProps;
+type Props = Omit<AuthProps, 'href'>;
 
-async function AuthLink({ returnBackUrl, searchParams, href, ...props }: Props & { href: string }) {
-  const url =
-    returnBackUrl ?? (searchParams && (await getReturnBackUrlFromSearchParams(searchParams)));
+function AuthLink({ returnBackUrl, searchParams, href, ...props }: AuthProps) {
+  if (!searchParams) {
+    return <Link {...props} href={href + createReturnBackSearchParam(returnBackUrl)} />;
+  }
 
-  return <Link {...props} href={href + createReturnBackSearchParam(url)} />;
+  return <AuthLinkAsync {...props} href={href} searchParams={searchParams} />;
 }
 
-export async function LoginLink(props: Props) {
+async function AuthLinkAsync({ searchParams, href, ...props }: AuthProps) {
+  const returnBackUrl = await getReturnBackSearchParam(searchParams);
+
+  return <Link {...props} href={href + createReturnBackSearchParam(returnBackUrl)} />;
+}
+
+export function LoginLink(props: Props) {
   return <AuthLink {...props} href={config.loginRoute} />;
 }
 
-export async function SignupLink(props: Props) {
+export function SignupLink(props: Props) {
   return <AuthLink {...props} href={config.signupRoute} />;
 }

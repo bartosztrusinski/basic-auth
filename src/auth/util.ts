@@ -1,15 +1,30 @@
-import 'server-only';
 import { redirect, RedirectType } from 'next/navigation';
 import { type NextRequest, NextResponse } from 'next/server';
 import config from './config';
 
-export async function getReturnBackUrlFromSearchParams(
-  searchParams: Promise<Record<string, string | undefined>>,
+export async function getReturnBackSearchParam(
+  searchParams: Promise<Record<string, string | undefined>> | undefined,
 ) {
-  return (await searchParams)[config.returnBackUrlKey];
+  if (!searchParams) {
+    return null;
+  }
+
+  const params = await searchParams;
+
+  if (!params) {
+    return null;
+  }
+
+  const returnBackUrl = params[config.returnBackUrlKey];
+
+  if (!returnBackUrl) {
+    return null;
+  }
+
+  return decodeURIComponent(returnBackUrl);
 }
 
-export function redirectToLogin(returnBackUrl?: string): never {
+export function redirectToLogin(returnBackUrl?: string | null): never {
   redirect(config.loginRoute + createReturnBackSearchParam(returnBackUrl), RedirectType.replace);
 }
 
@@ -24,7 +39,7 @@ export function redirectToDefaultMiddleware(request: NextRequest) {
   return NextResponse.redirect(new URL(config.defaultRedirectRoute, request.url));
 }
 
-export function createReturnBackSearchParam(returnBackUrl?: string) {
+export function createReturnBackSearchParam(returnBackUrl?: string | null) {
   return returnBackUrl ? `?${config.returnBackUrlKey}=${encodeURIComponent(returnBackUrl)}` : '';
 }
 

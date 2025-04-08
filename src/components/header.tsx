@@ -1,9 +1,9 @@
 'use client';
 
 import Link from 'next/link';
-// import { LoginLink, SignupLink } from '@/auth/components/auth-link';
-import { LogoutButton } from '@/components/logout-button';
+import { LoginLink, SignupLink } from '@/auth/components/auth-link';
 import { useAuth } from '@/auth/hooks/use-auth';
+import { LogoutButton } from '@/components/logout-button';
 
 export function Header() {
   const { isLoggedIn } = useAuth();
@@ -37,12 +37,10 @@ export function Header() {
         ) : (
           <>
             <li>
-              {/* <LoginLink>Log In</LoginLink> */}
-              <Link href='/log-in'>Log In</Link>
+              <LoginLink>Log In</LoginLink>
             </li>
             <li>
-              {/* <SignupLink>Sign Up</SignupLink> */}
-              <Link href='/sign-up'>Sign Up</Link>
+              <SignupLink>Sign Up</SignupLink>
             </li>
           </>
         )}

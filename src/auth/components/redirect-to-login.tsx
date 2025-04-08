@@ -1,4 +1,4 @@
-import { getReturnBackUrlFromSearchParams, redirectToLogin } from '@/auth/util';
+import { getReturnBackSearchParam, redirectToLogin } from '@/auth/util';
 
 type Props = {
   returnBackUrl?: string;
@@ -6,8 +6,7 @@ type Props = {
 };
 
 export async function RedirectToLogin({ returnBackUrl, searchParams }: Props) {
-  const url =
-    returnBackUrl ?? (searchParams && (await getReturnBackUrlFromSearchParams(searchParams)));
+  const url = returnBackUrl ?? (searchParams && (await getReturnBackSearchParam(searchParams)));
 
   redirectToLogin(url);
 

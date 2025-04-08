@@ -1,6 +1,6 @@
 import { redirect, RedirectType } from 'next/navigation';
 import config from '@/auth/config';
-import { getReturnBackUrlFromSearchParams } from '@/auth/util';
+import { getReturnBackSearchParam } from '@/auth/util';
 
 type Props = {
   returnUrl?: string;
@@ -8,7 +8,7 @@ type Props = {
 };
 
 export async function ReturnBack({ returnUrl, searchParams }: Props) {
-  const url = returnUrl ?? (searchParams && (await getReturnBackUrlFromSearchParams(searchParams)));
+  const url = returnUrl ?? (searchParams && (await getReturnBackSearchParam(searchParams)));
 
   redirect(url ? decodeURIComponent(url) : config.defaultRedirectRoute, RedirectType.replace);
 
