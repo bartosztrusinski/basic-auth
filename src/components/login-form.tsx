@@ -1,26 +1,28 @@
 'use client';
 
-import { type FormEvent, useActionState, useTransition } from 'react';
+import { type FormEvent, useState, useTransition } from 'react';
 import { logIn } from '@/actions';
 import { useAuth } from '@/auth/hooks/use-auth';
 
 export function LoginForm() {
-  const [state] = useActionState(logIn, {});
   const [isPending, startTransition] = useTransition();
+  const [errors, setErrors] = useState<string[]>([]);
   const { setAuth } = useAuth();
 
   function handleSubmit(event: FormEvent<HTMLFormElement>) {
-    event.preventDefault();
     const formData = new FormData(event.currentTarget);
 
-    startTransition(async () => {
-      const state = await logIn({}, formData);
+    event.preventDefault();
 
-      if (state.success) {
-        setAuth({
-          ...state.session,
-          isLoggedIn: true,
-        });
+    startTransition(async () => {
+      const { errors, session, success } = await logIn(formData);
+
+      if (success) {
+        setAuth({ ...session, isLoggedIn: true });
+      }
+
+      if (errors) {
+        setErrors(errors);
       }
     });
   }
@@ -43,9 +45,9 @@ export function LoginForm() {
         autoComplete='current-password'
         className='rounded bg-white px-2 py-1 text-base text-black'
       />
-      {state.errors && (
+      {errors && (
         <div className='text-sm font-light text-red-500'>
-          {state.errors.map((error, index) => (
+          {errors.map((error, index) => (
             <p key={index}>{error}</p>
           ))}
         </div>

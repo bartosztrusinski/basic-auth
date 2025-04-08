@@ -11,10 +11,7 @@ type ActionState = {
   errors?: string[];
 };
 
-export async function logIn(
-  _: ActionState & { session?: Session },
-  formData: FormData,
-): Promise<ActionState & { session?: Session }> {
+export async function logIn(formData: FormData): Promise<ActionState & { session?: Session }> {
   const { data, error } = loginSchema.safeParse(Object.fromEntries(formData.entries()));
 
   if (error) {
@@ -91,11 +88,17 @@ export async function signUp(_: ActionState, formData: FormData): Promise<Action
   return {};
 }
 
-export async function logOut() {
+export async function logOut(_: ActionState): Promise<ActionState> {
   await deleteUserSession();
+
+  return {
+    success: true,
+  };
 }
 
-export async function editProfile(_: ActionState, formData: FormData): Promise<ActionState> {
+export async function editProfile(
+  formData: FormData,
+): Promise<ActionState & { isUnauthenticated?: boolean }> {
   const { data, error } = editProfileSchema.safeParse(Object.fromEntries(formData.entries()));
 
   if (error) {
@@ -107,9 +110,10 @@ export async function editProfile(_: ActionState, formData: FormData): Promise<A
   const { userId } = await auth();
 
   if (!userId) {
-    revalidatePath('/profile');
+    revalidatePath('/');
     return {
       errors: ['User not authenticated'],
+      isUnauthenticated: true,
     };
   }
 
