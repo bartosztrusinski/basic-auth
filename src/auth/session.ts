@@ -63,11 +63,15 @@ async function protect({ role, unauthorizedUrl, unauthenticatedUrl }: ProtectOpt
   const { userId, userRole } = await auth();
 
   if (!userId) {
-    return unauthenticatedUrl ? redirect(unauthenticatedUrl) : redirectToLogin();
+    if (unauthenticatedUrl) {
+      redirect(unauthenticatedUrl);
+    }
+
+    redirectToLogin();
   }
 
   if (userRole !== role) {
-    return redirect(unauthorizedUrl ?? config.defaultRedirectRoute);
+    redirect(unauthorizedUrl ?? config.defaultRedirectRoute);
   }
 
   return { userId };
