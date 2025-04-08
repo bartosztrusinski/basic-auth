@@ -8,9 +8,9 @@ import {
   type ReactNode,
   type Dispatch,
 } from 'react';
-import { type User } from '@/db';
-import { getAuth } from '@/actions';
 import { useRouter } from 'next/navigation';
+import { type User } from '@/db';
+import config from '../config';
 
 type Auth = {
   isLoggedIn?: boolean;
@@ -39,7 +39,11 @@ export function AuthProvider({ children, initialAuth = {} }: Props) {
   const router = useRouter();
 
   const syncAuth = useCallback(async () => {
-    const auth = await getAuth();
+    const response = await fetch(config.apiRoute, {
+      cache: 'no-store',
+    });
+
+    const auth = (await response.json()) as Auth;
 
     setAuth(auth);
   }, []);

@@ -132,15 +132,3 @@ export async function editProfile(
     success: true,
   };
 }
-
-export async function getAuth() {
-  const { userId, userRole, expirationTime } = await auth();
-  const isLoggedIn = Boolean(userId);
-
-  return {
-    isLoggedIn,
-    userId,
-    userRole,
-    expirationTime,
-  };
-}
