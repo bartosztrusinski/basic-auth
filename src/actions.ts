@@ -11,7 +11,10 @@ type ActionState = {
   errors?: string[];
 };
 
-export async function logIn(formData: FormData): Promise<ActionState & { session?: Session }> {
+export async function logIn(
+  _: ActionState,
+  formData: FormData,
+): Promise<ActionState & { session?: Session }> {
   const { data, error } = loginSchema.safeParse(Object.fromEntries(formData.entries()));
 
   if (error) {

@@ -1,15 +1,9 @@
 'use client';
 
-import {
-  createContext,
-  useEffect,
-  useState,
-  useCallback,
-  type ReactNode,
-  type Dispatch,
-} from 'react';
+import { createContext, useEffect, useState, useCallback, type ReactNode } from 'react';
 import { useRouter } from 'next/navigation';
 import { type User } from '@/db';
+import { logOut as logOutAction, logIn as logInAction } from '@/actions';
 import config from '../config';
 
 type Auth = {
@@ -20,8 +14,9 @@ type Auth = {
 };
 
 type AuthContext = Auth & {
-  setAuth: Dispatch<React.SetStateAction<Auth>>;
   syncAuth: () => Promise<void>;
+  logIn: typeof logInAction;
+  logOut: typeof logOutAction;
 };
 
 type Props = {
@@ -30,8 +25,9 @@ type Props = {
 };
 
 export const AuthContext = createContext<AuthContext>({
-  setAuth: () => null,
   syncAuth: async () => undefined,
+  logIn: logInAction,
+  logOut: logOutAction,
 });
 
 export function ClientAuthProvider({ children, initialAuth = {} }: Props) {
@@ -82,7 +78,28 @@ export function ClientAuthProvider({ children, initialAuth = {} }: Props) {
     };
   }, [auth.isLoggedIn, syncAuth, router]);
 
+  async function logOut() {
+    const state = await logOutAction({});
+    setAuth({ isLoggedIn: false });
+
+    return state;
+  }
+
+  async function logIn(_: unknown, formData: FormData) {
+    const { errors, session, success } = await logInAction({}, formData);
+
+    if (success) {
+      setAuth({ ...session, isLoggedIn: true });
+    }
+
+    return {
+      errors,
+      success,
+    };
+  }
   return (
-    <AuthContext.Provider value={{ ...auth, setAuth, syncAuth }}>{children}</AuthContext.Provider>
+    <AuthContext.Provider value={{ ...auth, syncAuth, logIn, logOut }}>
+      {children}
+    </AuthContext.Provider>
   );
 }

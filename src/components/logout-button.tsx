@@ -1,18 +1,11 @@
 'use client';
 
-import { logOut } from '@/actions';
+import { useActionState } from 'react';
 import { useAuth } from '@/auth/hooks/use-auth';
-import { useActionState, useEffect } from 'react';
 
 export function LogoutButton() {
-  const [state, action, isPending] = useActionState(logOut, {});
-  const { setAuth } = useAuth();
-
-  useEffect(() => {
-    if (state.success) {
-      setAuth({ isLoggedIn: false });
-    }
-  }, [setAuth, state]);
+  const { logOut } = useAuth();
+  const [, action, isPending] = useActionState(logOut, {});
 
   return (
     <form action={action}>
