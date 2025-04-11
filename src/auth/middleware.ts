@@ -12,7 +12,7 @@ type MiddlewareAuth = {
 type MiddlewareHandler = (
   auth: () => Promise<MiddlewareAuth>,
   request: NextRequest,
-) => Promise<NextResponse | undefined>;
+) => Promise<NextResponse | void>;
 
 const authClosure = (request: NextRequest) => async () =>
   ({
@@ -23,6 +23,13 @@ const authClosure = (request: NextRequest) => async () =>
 
 export function authMiddleware(middlewareHandler: MiddlewareHandler) {
   return async function middleware(request: NextRequest): Promise<NextResponse> {
+    const isServerAction = request.headers.get('next-action');
+
+    // Skip initial authentication for server actions as redirects are not supported
+    if (isServerAction) {
+      return NextResponse.next();
+    }
+
     const response = await middlewareHandler(authClosure(request), request);
     return response ?? NextResponse.next();
   };
