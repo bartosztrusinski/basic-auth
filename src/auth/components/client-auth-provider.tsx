@@ -3,7 +3,7 @@
 import { createContext, useEffect, useState, useCallback, type ReactNode } from 'react';
 import { useRouter } from 'next/navigation';
 import { type User } from '@/db';
-import { logOut as logOutAction, logIn as logInAction } from '@/actions';
+import { logOut as logOutAction, logIn as logInAction } from '../actions';
 import config from '../config';
 
 type Auth = {
@@ -14,7 +14,7 @@ type Auth = {
 };
 
 type AuthContext = Auth & {
-  syncAuth: () => Promise<void>;
+  syncAuth: (signal?: AbortSignal) => Promise<void>;
   logIn: typeof logInAction;
   logOut: typeof logOutAction;
 };
@@ -34,14 +34,23 @@ export function ClientAuthProvider({ children, initialAuth = {} }: Props) {
   const [auth, setAuth] = useState(initialAuth);
   const router = useRouter();
 
-  const syncAuth = useCallback(async () => {
-    const response = await fetch(config.apiRoute, {
-      cache: 'no-store',
-    });
+  const syncAuth = useCallback(async (signal?: AbortSignal) => {
+    try {
+      const response = await fetch(config.apiRoute, {
+        cache: 'no-store',
+        signal,
+      });
 
-    const auth = (await response.json()) as Auth;
+      const auth = (await response.json()) as Auth;
 
-    setAuth(auth);
+      setAuth(auth);
+    } catch (error) {
+      if (signal?.aborted) {
+        console.info('Auth sync aborted');
+      } else {
+        console.error('Auth sync failed:', error);
+      }
+    }
   }, []);
 
   useEffect(() => {
@@ -66,7 +75,7 @@ export function ClientAuthProvider({ children, initialAuth = {} }: Props) {
       'visibilitychange',
       () => {
         if (!document.hidden && auth.isLoggedIn) {
-          void syncAuth();
+          void syncAuth(controller.signal);
           router.refresh();
         }
       },
@@ -78,25 +87,32 @@ export function ClientAuthProvider({ children, initialAuth = {} }: Props) {
     };
   }, [auth.isLoggedIn, syncAuth, router]);
 
+  async function logIn(_: unknown, formData: FormData) {
+    const { errors, session, isSuccess } = await logInAction({ isSuccess: false }, formData);
+
+    if (isSuccess) {
+      setAuth({
+        isLoggedIn: true,
+        userId: session?.userId,
+        userRole: session?.userRole,
+        expirationTime: session?.expirationTime,
+      });
+    }
+
+    return {
+      isSuccess,
+      errors,
+    };
+  }
+
   async function logOut() {
-    const state = await logOutAction({});
+    const state = await logOutAction();
+
     setAuth({ isLoggedIn: false });
 
     return state;
   }
 
-  async function logIn(_: unknown, formData: FormData) {
-    const { errors, session, success } = await logInAction({}, formData);
-
-    if (success) {
-      setAuth({ ...session, isLoggedIn: true });
-    }
-
-    return {
-      errors,
-      success,
-    };
-  }
   return (
     <AuthContext.Provider value={{ ...auth, syncAuth, logIn, logOut }}>
       {children}
