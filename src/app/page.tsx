@@ -1,5 +1,6 @@
 import { currentUser } from '@/auth/session';
 import { Page } from '@/components/page';
+import { ClientComponent } from '@/components/client-component';
 
 export default async function HomePage() {
   const user = await currentUser();
@@ -8,7 +9,8 @@ export default async function HomePage() {
     <Page>
       <Page.Title>🔐 Basic Auth</Page.Title>
       <Page.Description>
-        {user ? `Welcome back ${user.name}` : 'You are not logged in'}
+        Server-side: {user ? `Welcome back ${user.name}` : 'You are not logged in'}
+        <ClientComponent />
       </Page.Description>
     </Page>
   );
