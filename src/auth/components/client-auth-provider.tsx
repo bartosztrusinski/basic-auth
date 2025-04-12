@@ -3,7 +3,6 @@
 import { createContext, useEffect, useState, useCallback, type ReactNode } from 'react';
 import { useRouter } from 'next/navigation';
 import { type User } from '@/db';
-import { logOut as logOutAction, logIn as logInAction } from '../actions';
 import config from '../config';
 
 type Auth = {
@@ -15,8 +14,6 @@ type Auth = {
 
 type AuthContext = Auth & {
   syncAuth: (signal?: AbortSignal) => Promise<void>;
-  logIn: typeof logInAction;
-  logOut: typeof logOutAction;
 };
 
 type Props = {
@@ -26,8 +23,6 @@ type Props = {
 
 export const AuthContext = createContext<AuthContext>({
   syncAuth: async () => undefined,
-  logIn: logInAction,
-  logOut: logOutAction,
 });
 
 export function ClientAuthProvider({ children, initialAuth = {} }: Props) {
@@ -53,6 +48,7 @@ export function ClientAuthProvider({ children, initialAuth = {} }: Props) {
     }
   }, []);
 
+  // This effect is for syncing auth when it expires
   useEffect(() => {
     if (!auth.expirationTime || !auth.isLoggedIn) {
       return;
@@ -68,6 +64,7 @@ export function ClientAuthProvider({ children, initialAuth = {} }: Props) {
     };
   }, [auth.expirationTime, auth.isLoggedIn, syncAuth, router]);
 
+  // This effect is for syncing auth when the page becomes visible again
   useEffect(() => {
     const controller = new AbortController();
 
@@ -87,35 +84,29 @@ export function ClientAuthProvider({ children, initialAuth = {} }: Props) {
     };
   }, [auth.isLoggedIn, syncAuth, router]);
 
-  async function logIn(_: unknown, formData: FormData) {
-    const { errors, session, isSuccess } = await logInAction({ isSuccess: false }, formData);
+  // This effect is for syncing auth when it is requested by the server
+  useEffect(() => {
+    const originalFetch = window.fetch;
+    const controller = new AbortController();
 
-    if (isSuccess) {
-      setAuth({
-        isLoggedIn: true,
-        userId: session?.userId,
-        userRole: session?.userRole,
-        expirationTime: session?.expirationTime,
-      });
-    }
+    window.fetch = async (...args) => {
+      const [resource, requestConfig] = args;
 
-    return {
-      isSuccess,
-      errors,
+      const response = await originalFetch(resource, requestConfig);
+
+      if (document.cookie.includes(`${config.syncAuthCookieKey}=true`)) {
+        document.cookie = `${config.syncAuthCookieKey}=false; max-age=0; path=/`;
+        await syncAuth(controller.signal);
+      }
+
+      return response;
     };
-  }
 
-  async function logOut() {
-    const state = await logOutAction();
+    return () => {
+      window.fetch = originalFetch;
+      controller.abort();
+    };
+  }, [syncAuth]);
 
-    setAuth({ isLoggedIn: false });
-
-    return state;
-  }
-
-  return (
-    <AuthContext.Provider value={{ ...auth, syncAuth, logIn, logOut }}>
-      {children}
-    </AuthContext.Provider>
-  );
+  return <AuthContext.Provider value={{ ...auth, syncAuth }}>{children}</AuthContext.Provider>;
 }
