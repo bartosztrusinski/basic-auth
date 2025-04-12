@@ -5,12 +5,19 @@ export default authMiddleware(async (auth, request) => {
   const { isAuthenticated, redirectToLogin, redirectToDefault } = await auth();
 
   if (isAuthRoute(request) && isAuthenticated) {
-    return redirectToDefault();
+    return redirectToDefault({ requestAuthSync: true });
   }
 
   if (isProtectedRoute(request) && !isAuthenticated) {
-    return redirectToLogin();
+    return redirectToLogin({ requestAuthSync: true });
   }
+
+  // Request auth sync on all public routes
+  // if (!isApiAuthRoute(request)) {
+  //   const response = NextResponse.next();
+  //   await setAuthSyncCookie(response);
+  //   return response;
+  // }
 
   // Refresh user session if compatible with edge
   // await refreshUserSession(request);

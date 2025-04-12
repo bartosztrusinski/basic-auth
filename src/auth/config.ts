@@ -1,6 +1,7 @@
 // TODO use env variables
 const sessionExpirationInSeconds = 15;
 const sessionCookieKey = 'session-id';
+const syncAuthCookieKey = 'sync-auth';
 const sessionCookieAttributes = {
   secure: true,
   httpOnly: true,
@@ -21,6 +22,7 @@ const authRoutes = [loginRoute, signupRoute];
 export default Object.freeze({
   sessionExpirationInSeconds,
   sessionCookieKey,
+  syncAuthCookieKey,
   sessionCookieAttributes,
   returnBackUrlKey,
   defaultRedirectRoute,

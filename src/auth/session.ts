@@ -5,7 +5,12 @@ import { redirect } from 'next/navigation';
 import { type NextRequest } from 'next/server';
 import { db, type User } from '@/db';
 import { createSessionExpirationTime, redirectToLogin } from './util';
-import { getSessionCookie, setSessionCookie, deleteSessionCookie } from './cookie';
+import {
+  getSessionCookie,
+  setSessionCookie,
+  deleteSessionCookie,
+  setAuthSyncCookie,
+} from './cookie';
 import config from './config';
 
 type SessionUser = {
@@ -62,6 +67,12 @@ async function authFn(): Promise<Auth> {
 async function protect({ role, unauthorizedUrl, unauthenticatedUrl }: ProtectOptions = {}) {
   const { userId, userRole } = await auth();
 
+  try {
+    await setAuthSyncCookie();
+  } catch {
+    console.info('Protect called from server component, sync auth cookie not set');
+  }
+
   if (!userId) {
     if (unauthenticatedUrl) {
       redirect(unauthenticatedUrl);
@@ -70,7 +81,7 @@ async function protect({ role, unauthorizedUrl, unauthenticatedUrl }: ProtectOpt
     redirectToLogin();
   }
 
-  if (userRole !== role) {
+  if (role && userRole !== role) {
     redirect(unauthorizedUrl ?? config.defaultRedirectRoute);
   }
 
