@@ -1,11 +1,10 @@
 'use client';
 
 import { useActionState } from 'react';
-import { useAuth } from '@/auth/hooks/use-auth';
+import { logOut } from '@/auth/actions';
 
 export function LogoutButton() {
-  const { logOut } = useAuth();
-  const [, action, isPending] = useActionState(logOut, {});
+  const [, action, isPending] = useActionState(logOut, null);
 
   return (
     <form action={action}>

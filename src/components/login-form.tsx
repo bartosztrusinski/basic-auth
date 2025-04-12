@@ -1,14 +1,10 @@
 'use client';
 
 import { useActionState } from 'react';
-import { useAuth } from '@/auth/hooks/use-auth';
-import { useSyncAuth } from '@/auth/hooks/use-sync-auth';
+import { logIn } from '@/auth/actions';
 
 export function LoginForm() {
-  const { logIn } = useAuth();
   const [state, action, isPending] = useActionState(logIn, { isSuccess: false });
-
-  useSyncAuth();
 
   return (
     <form action={action} className='flex flex-col gap-5'>

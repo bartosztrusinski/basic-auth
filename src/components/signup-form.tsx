@@ -4,7 +4,7 @@ import { useActionState } from 'react';
 import { signUp } from '@/actions';
 
 export function SignupForm() {
-  const [state, action, isPending] = useActionState(signUp, {});
+  const [state, action, isPending] = useActionState(signUp, { isSuccess: false });
 
   return (
     <form action={action} className='flex flex-col gap-5'>
@@ -31,6 +31,7 @@ export function SignupForm() {
         autoComplete='new-password'
         className='rounded bg-white px-2 py-1 text-base text-black'
       />
+
       {state.errors && (
         <div className='text-sm font-light text-red-500'>
           {state.errors.map((error, index) => (
@@ -38,6 +39,7 @@ export function SignupForm() {
           ))}
         </div>
       )}
+
       <button disabled={isPending} className='rounded border-2 border-white p-1'>
         {isPending ? 'Submitting...' : 'Sign Up'}
       </button>
