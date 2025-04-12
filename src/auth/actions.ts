@@ -5,7 +5,8 @@ import { loginSchema } from '@/schemas';
 import { createUserSession, deleteUserSession } from './session';
 import { comparePasswords } from './password';
 
-export type ActionState<T extends Record<string, unknown> = Record<string, unknown>> = {
+// eslint-disable-next-line @typescript-eslint/no-empty-object-type
+export type ActionState<T extends Record<string, unknown> = {}> = {
   isSuccess: boolean;
   errors?: string[];
 } & T;

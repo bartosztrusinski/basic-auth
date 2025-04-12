@@ -47,11 +47,7 @@ export async function editProfile(_: ActionState, formData: FormData): Promise<A
     };
   }
 
-  const { userId, redirectToLogin } = await auth();
-
-  if (!userId) {
-    return redirectToLogin('/profile');
-  }
+  const { userId } = await auth.protect();
 
   try {
     const { role } = await db.updateUser(userId, userData);

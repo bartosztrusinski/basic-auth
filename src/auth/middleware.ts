@@ -23,7 +23,7 @@ const authClosure = (request: NextRequest) => async () =>
 
 export function authMiddleware(middlewareHandler: MiddlewareHandler) {
   return async function middleware(request: NextRequest): Promise<NextResponse> {
-    const isServerAction = request.headers.get('next-action');
+    const isServerAction = Boolean(request.headers.get('next-action'));
 
     // Skip initial authentication for server actions as redirects are not supported
     if (isServerAction) {
