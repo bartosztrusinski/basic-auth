@@ -48,5 +48,8 @@ export function isProtectedRoute(request: NextRequest) {
 
 export function isApiAuthRoute(request: NextRequest) {
   const { pathname } = request.nextUrl;
-  return pathname.startsWith(config.apiRoute);
+  return pathname.startsWith(config.apiBaseRoute);
 }
+
+export const fetcher = <T>(...args: Parameters<typeof fetch>) =>
+  fetch(...args).then((res) => res.json() as T);
