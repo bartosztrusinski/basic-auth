@@ -1,16 +1,20 @@
 'use client';
 
-import { useAuth } from '@/auth/hooks/use-auth';
+import { useCurrentUser } from '@/auth/hooks/use-current-user';
 import { useSyncAuth } from '@/auth/hooks/use-sync-auth';
 
 export function ClientComponent() {
-  const { isLoggedIn } = useAuth();
+  const { isLoading, isLoggedIn, user } = useCurrentUser();
 
   useSyncAuth();
 
+  if (isLoading) {
+    return null;
+  }
+
   return (
     <span className='mt-1 block'>
-      Client-side: {isLoggedIn ? 'You are logged in' : 'You are not logged in'}
+      Client-side: {isLoggedIn ? `Welcome back ${user.name}` : 'You are not logged in'}
     </span>
   );
 }

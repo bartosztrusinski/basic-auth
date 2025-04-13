@@ -14,7 +14,10 @@ const returnBackUrlKey = 'return_back_url';
 const defaultRedirectRoute = '/';
 const loginRoute = '/log-in';
 const signupRoute = '/sign-up';
-const apiRoute = '/api/auth';
+const apiBaseRoute = '/api/auth';
+
+const apiSessionEndpoint = 'session';
+const apiUserEndpoint = 'user';
 
 const protectedRoutes = ['/private', '/profile', '/admin'];
 const authRoutes = [loginRoute, signupRoute];
@@ -28,7 +31,9 @@ export default Object.freeze({
   defaultRedirectRoute,
   loginRoute,
   signupRoute,
-  apiRoute,
+  apiBaseRoute,
+  apiSessionEndpoint,
+  apiUserEndpoint,
   protectedRoutes,
   authRoutes,
 });

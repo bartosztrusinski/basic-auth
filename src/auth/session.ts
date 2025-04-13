@@ -34,7 +34,7 @@ type ProtectOptions = {
   unauthenticatedUrl?: string;
 };
 
-type BackendUser = Pick<User, 'id' | 'email' | 'name' | 'role'>;
+export type BackendUser = Pick<User, 'id' | 'email' | 'name' | 'role'>;
 
 export const auth: AuthFunction = Object.assign(cache(authFn), { protect });
 

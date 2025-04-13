@@ -33,9 +33,12 @@ export function useCurrentUser(): UseCurrentUser {
 
       async function fetchUser() {
         try {
-          const user = await fetcher<CurrentUser>(config.apiUserEndpoint, {
-            signal: controller.signal,
-          });
+          const user = await fetcher<CurrentUser>(
+            `${config.apiBaseRoute}/${config.apiUserEndpoint}`,
+            {
+              signal: controller.signal,
+            },
+          );
 
           setUser(user);
         } catch (error) {

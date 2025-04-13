@@ -4,9 +4,10 @@ import { createContext, useEffect, useState, useCallback, type ReactNode } from 
 import { useRouter } from 'next/navigation';
 import { type User } from '@/db';
 import config from '../config';
+import { fetcher } from '@/auth/util';
 
 type Auth = {
-  isLoggedIn?: boolean;
+  isLoggedIn: boolean;
   userId?: User['id'];
   userRole?: User['role'];
   expirationTime?: number;
@@ -22,21 +23,20 @@ type Props = {
 };
 
 export const AuthContext = createContext<AuthContext>({
+  isLoggedIn: false,
   syncAuth: async () => undefined,
 });
 
-export function ClientAuthProvider({ children, initialAuth = {} }: Props) {
-  const [auth, setAuth] = useState(initialAuth);
+export function ClientAuthProvider({ children, initialAuth = { isLoggedIn: false } }: Props) {
+  const [auth, setAuth] = useState<Auth>(initialAuth);
   const router = useRouter();
 
   const syncAuth = useCallback(async (signal?: AbortSignal) => {
     try {
-      const response = await fetch(config.apiRoute, {
+      const auth = await fetcher<Auth>(`${config.apiBaseRoute}/${config.apiSessionEndpoint}`, {
         cache: 'no-store',
         signal,
       });
-
-      const auth = (await response.json()) as Auth;
 
       setAuth(auth);
     } catch (error) {
