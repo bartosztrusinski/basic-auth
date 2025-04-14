@@ -5,6 +5,9 @@ export const env = createEnv({
   server: {
     NODE_ENV: z.enum(['development', 'test', 'production']),
     SESSION_EXPIRATION_IN_SECONDS: z.coerce.number(),
+    BASE_URL: z.string().url(),
+    DISCORD_CLIENT_ID: z.string(),
+    DISCORD_CLIENT_SECRET: z.string(),
   },
   client: {
     NEXT_PUBLIC_DEFAULT_REDIRECT_ROUTE: z.string().optional(),
@@ -15,6 +18,9 @@ export const env = createEnv({
   runtimeEnv: {
     NODE_ENV: process.env.NODE_ENV,
     SESSION_EXPIRATION_IN_SECONDS: process.env.SESSION_EXPIRATION_IN_SECONDS,
+    BASE_URL: process.env.BASE_URL,
+    DISCORD_CLIENT_ID: process.env.DISCORD_CLIENT_ID,
+    DISCORD_CLIENT_SECRET: process.env.DISCORD_CLIENT_SECRET,
     NEXT_PUBLIC_DEFAULT_REDIRECT_ROUTE: process.env.NEXT_PUBLIC_DEFAULT_REDIRECT_ROUTE,
     NEXT_PUBLIC_LOGIN_ROUTE: process.env.NEXT_PUBLIC_LOGIN_ROUTE,
     NEXT_PUBLIC_SIGNUP_ROUTE: process.env.NEXT_PUBLIC_SIGNUP_ROUTE,
