@@ -3,6 +3,7 @@
 import { useActionState, useEffect, useState } from 'react';
 import { type User } from '@/db';
 import { editProfile } from '@/actions';
+import { useCurrentUser } from '@/auth/hooks/use-current-user';
 
 type Props = {
   user: Pick<User, 'email' | 'name' | 'role'>;
@@ -11,12 +12,14 @@ type Props = {
 export function UserProfile({ user }: Props) {
   const [isEditing, setIsEditing] = useState(false);
   const [state, action, isPending] = useActionState(editProfile, { isSuccess: false });
+  const { currentUser } = useCurrentUser();
 
   useEffect(() => {
     if (state.isSuccess) {
       setIsEditing(false);
+      void currentUser?.reload();
     }
-  }, [state]);
+  }, [currentUser, state]);
 
   return (
     <div className='space-y-4 rounded-lg border border-zinc-600 p-6'>

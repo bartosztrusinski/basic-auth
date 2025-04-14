@@ -1,79 +1,12 @@
-import { useEffect, useState } from 'react';
-import { useAuth } from '../hooks/use-auth';
-import { fetcher } from '../util';
-import { type BackendUser } from '../session';
-import config from '../config';
+import { useContext } from 'react';
+import { CurrentUserContext } from '../components/current-user-provider';
 
-type CurrentUser = Omit<BackendUser, 'role'>;
+export function useCurrentUser() {
+  const context = useContext(CurrentUserContext);
 
-type UserData =
-  | {
-      isLoggedIn: true;
-      user: CurrentUser;
-    }
-  | {
-      isLoggedIn: false;
-      user: null;
-    };
-
-type UseCurrentUser = UserData & {
-  isLoading: boolean;
-};
-
-export function useCurrentUser(): UseCurrentUser {
-  const { isLoggedIn } = useAuth();
-  const [isLoading, setIsLoading] = useState(isLoggedIn);
-  const [user, setUser] = useState<CurrentUser | null>(null);
-
-  useEffect(() => {
-    if (isLoggedIn) {
-      setIsLoading(true);
-
-      const controller = new AbortController();
-
-      async function fetchUser() {
-        try {
-          const user = await fetcher<CurrentUser>(
-            `${config.apiBaseRoute}/${config.apiUserEndpoint}`,
-            {
-              signal: controller.signal,
-            },
-          );
-
-          setUser(user);
-        } catch (error) {
-          if (controller.signal?.aborted) {
-            console.info('User fetch aborted');
-          } else {
-            console.error('User fetch failed:', error);
-          }
-        } finally {
-          setIsLoading(false);
-        }
-      }
-
-      void fetchUser();
-
-      return () => {
-        controller.abort();
-      };
-    } else {
-      setUser(null);
-      setIsLoading(false);
-    }
-  }, [isLoggedIn]);
-
-  if (isLoggedIn && user) {
-    return {
-      isLoggedIn: true,
-      isLoading,
-      user,
-    };
+  if (!context) {
+    throw new Error('useCurrentUser must be used within AuthProvider');
   }
 
-  return {
-    isLoggedIn: false,
-    isLoading,
-    user: null,
-  };
+  return context;
 }
