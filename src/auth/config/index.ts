@@ -7,6 +7,7 @@ const apiBaseRoute = env.NEXT_PUBLIC_API_BASE_ROUTE ?? '/api/auth';
 
 const apiSessionEndpoint = 'session';
 const apiUserEndpoint = 'user';
+const apiOAuthEndpoint = 'oauth';
 
 const protectedRoutes = ['/private', '/profile', '/admin'];
 const authRoutes = [loginRoute, signupRoute];
@@ -21,6 +22,7 @@ export default Object.freeze({
   apiBaseRoute,
   apiSessionEndpoint,
   apiUserEndpoint,
+  apiOAuthEndpoint,
   protectedRoutes,
   authRoutes,
   returnBackUrlKey,

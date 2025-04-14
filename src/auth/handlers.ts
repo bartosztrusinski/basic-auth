@@ -1,18 +1,25 @@
 import 'server-only';
-import { NextResponse } from 'next/server';
+import { type NextRequest, NextResponse } from 'next/server';
 import { auth, currentUser } from './session';
 import config from './config';
 import serverConfig from './config/server';
+import { type OAuthProvider } from '@/db';
 
-async function GET(_: Request, { params }: { params: Promise<{ endpoint: string }> }) {
+async function GET(request: NextRequest, { params }: { params: Promise<{ endpoint: string[] }> }) {
   const { endpoint } = await params;
+  const [first, second] = endpoint;
 
-  if (endpoint === config.apiSessionEndpoint) {
+  if (first === config.apiSessionEndpoint) {
     return getSession();
   }
 
-  if (endpoint === config.apiUserEndpoint) {
+  if (first === config.apiUserEndpoint) {
     return getCurrentUser();
+  }
+
+  if (first === config.apiOAuthEndpoint) {
+    const provider = second as OAuthProvider;
+    return getOAuthUser(provider, request);
   }
 }
 
@@ -50,6 +57,16 @@ async function getCurrentUser() {
         }
       : null,
   );
+}
+
+async function getOAuthUser(provider: OAuthProvider, request: NextRequest) {
+  const code = request.nextUrl.searchParams.get('code');
+  console.log('getOAuthUser', provider, code);
+
+  return NextResponse.json({
+    provider,
+    code,
+  });
 }
 
 export const handlers = {
