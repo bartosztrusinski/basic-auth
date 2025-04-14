@@ -53,3 +53,14 @@ export function isApiAuthRoute(request: NextRequest) {
 
 export const fetcher = <T>(...args: Parameters<typeof fetch>) =>
   fetch(...args).then((res) => res.json() as T);
+
+/** Shallow object comparison */
+export function isSameObject<T extends Record<string, unknown>>(objA: T, objB: T) {
+  for (const key in objA) {
+    if (objA[key as keyof T] !== objB[key as keyof T]) {
+      return false;
+    }
+  }
+
+  return true;
+}
