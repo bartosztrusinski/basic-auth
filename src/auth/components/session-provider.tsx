@@ -3,8 +3,8 @@
 import { createContext, useEffect, useState, useCallback, type ReactNode } from 'react';
 import { useRouter } from 'next/navigation';
 import { type User } from '@/db';
+import { fetcher } from '../util';
 import config from '../config';
-import { fetcher } from '@/auth/util';
 
 type Auth = {
   isLoggedIn: boolean;
@@ -27,7 +27,7 @@ export const AuthContext = createContext<AuthContext>({
   syncAuth: async () => undefined,
 });
 
-export function ClientAuthProvider({ children, initialAuth = { isLoggedIn: false } }: Props) {
+export function SessionProvider({ children, initialAuth = { isLoggedIn: false } }: Props) {
   const [auth, setAuth] = useState<Auth>(initialAuth);
   const router = useRouter();
 
