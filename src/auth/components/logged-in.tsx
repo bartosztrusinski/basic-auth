@@ -1,5 +1,5 @@
 import { type ReactNode } from 'react';
-import { auth } from '@/auth/session';
+import { auth } from '../session';
 
 export async function LoggedIn({ children }: { children: ReactNode }) {
   const { userId } = await auth();

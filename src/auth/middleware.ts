@@ -36,11 +36,11 @@ export function authMiddleware(middlewareHandler: MiddlewareHandler) {
 const authClosure = (request: NextRequest) => async () =>
   ({
     isAuthenticated: Boolean(await getSessionCookie(request)),
-    redirectToLogin: (options) => redirectToLoginMiddleware(request, options),
-    redirectToDefault: (options) => redirectToDefaultMiddleware(request, options),
+    redirectToLogin: (options) => redirectToLogin(request, options),
+    redirectToDefault: (options) => redirectToDefault(request, options),
   }) satisfies MiddlewareAuth;
 
-export function redirectToLoginMiddleware(request: NextRequest, options: RedirectOptions = {}) {
+function redirectToLogin(request: NextRequest, options: RedirectOptions = {}) {
   const { pathname } = request.nextUrl;
   const { requestAuthSync } = options;
 
@@ -55,7 +55,7 @@ export function redirectToLoginMiddleware(request: NextRequest, options: Redirec
   return response;
 }
 
-export function redirectToDefaultMiddleware(request: NextRequest, options: RedirectOptions = {}) {
+function redirectToDefault(request: NextRequest, options: RedirectOptions = {}) {
   const { requestAuthSync } = options;
 
   const response = NextResponse.redirect(new URL(config.defaultRedirectRoute, request.url));

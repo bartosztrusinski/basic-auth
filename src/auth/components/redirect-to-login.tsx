@@ -1,4 +1,4 @@
-import { getReturnBackSearchParam, redirectToLogin } from '@/auth/util';
+import { getReturnBackSearchParam, redirectToLogin } from '../util';
 
 type Props = {
   returnBackUrl?: string;
