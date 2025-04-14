@@ -1,13 +1,16 @@
 'use client';
 
 import { useActionState } from 'react';
-import { logIn } from '@/auth/actions';
+import { logIn, oAuthLogIn } from '@/auth/actions';
 
 export function LoginForm() {
   const [state, action, isPending] = useActionState(logIn, { isSuccess: false });
 
   return (
     <form action={action} className='flex flex-col gap-5'>
+      <button className='rounded border-2 border-white p-1' onClick={() => oAuthLogIn('discord')}>
+        Discord
+      </button>
       <input
         type='email'
         name='email'

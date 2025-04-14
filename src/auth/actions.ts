@@ -1,9 +1,12 @@
 'use server';
 
-import { db, type Session } from '@/db';
+import { redirect } from 'next/navigation';
+import { env } from '@/env';
+import { db, type OAuthProvider, type Session } from '@/db';
 import { loginSchema } from '@/schemas';
 import { createUserSession, deleteUserSession } from './session';
 import { comparePasswords } from './password';
+import config from './config';
 
 // eslint-disable-next-line @typescript-eslint/no-empty-object-type
 export type ActionState<T extends Record<string, unknown> = {}> = {
@@ -28,7 +31,7 @@ export async function logIn(_: LoginActionState, formData: FormData): Promise<Lo
   try {
     const user = await db.getUserByEmail(email);
 
-    if (!user) {
+    if (!user?.password || !user?.salt) {
       return {
         isSuccess: false,
         errors: ['Invalid email or password'],
@@ -56,6 +59,21 @@ export async function logIn(_: LoginActionState, formData: FormData): Promise<Lo
       errors: [error instanceof Error ? error.message : 'An unknown error occurred'],
     };
   }
+}
+
+export async function oAuthLogIn(provider: OAuthProvider) {
+  const url = new URL('https://discord.com/oauth2/authorize');
+  const responseType = 'code';
+  const clientId = env.DISCORD_CLIENT_ID;
+  const scope = 'identify email';
+  const redirectUri = `${env.BASE_URL}${config.apiBaseRoute}/${config.apiOAuthEndpoint}/${provider}`;
+
+  url.searchParams.set('response_type', responseType);
+  url.searchParams.set('client_id', clientId);
+  url.searchParams.set('scope', scope);
+  url.searchParams.set('redirect_uri', redirectUri);
+
+  redirect(url.toString());
 }
 
 export async function logOut() {
