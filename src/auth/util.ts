@@ -32,10 +32,6 @@ export function createReturnBackSearchParam(returnBackUrl?: string | null) {
   return returnBackUrl ? `?${config.returnBackUrlKey}=${encodeURIComponent(returnBackUrl)}` : '';
 }
 
-export function createSessionExpirationTime() {
-  return Date.now() + config.sessionExpirationInSeconds * 1000;
-}
-
 export function isAuthRoute(request: NextRequest) {
   const { pathname } = request.nextUrl;
   return config.authRoutes.some((route) => pathname.startsWith(route));

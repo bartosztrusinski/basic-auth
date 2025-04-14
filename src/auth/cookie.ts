@@ -1,19 +1,21 @@
+import 'server-only';
 import { cookies } from 'next/headers';
 import { type NextResponse, type NextRequest } from 'next/server';
 import config from './config';
+import serverConfig from './config/server';
 
 export async function getSessionCookie(request?: NextRequest) {
   if (request) {
-    return request.cookies.get(config.sessionCookieKey)?.value;
+    return request.cookies.get(serverConfig.sessionCookieKey)?.value;
   }
 
   const cookieStore = await cookies();
-  return cookieStore.get(config.sessionCookieKey)?.value;
+  return cookieStore.get(serverConfig.sessionCookieKey)?.value;
 }
 
 export async function deleteSessionCookie() {
   const cookieStore = await cookies();
-  cookieStore.delete(config.sessionCookieKey);
+  cookieStore.delete(serverConfig.sessionCookieKey);
   await setAuthSyncCookie();
 }
 
@@ -24,9 +26,9 @@ export async function setSessionCookie(
 ) {
   if (request) {
     request.cookies.set({
-      name: config.sessionCookieKey,
+      name: serverConfig.sessionCookieKey,
       value: sessionId,
-      ...config.sessionCookieAttributes,
+      ...serverConfig.sessionCookieAttributes,
     });
     return;
   }
@@ -34,7 +36,7 @@ export async function setSessionCookie(
   await setAuthSyncCookie(response);
 
   const cookieStore = await cookies();
-  cookieStore.set(config.sessionCookieKey, sessionId, config.sessionCookieAttributes);
+  cookieStore.set(serverConfig.sessionCookieKey, sessionId, serverConfig.sessionCookieAttributes);
 }
 
 export async function setAuthSyncCookie(response?: NextResponse) {

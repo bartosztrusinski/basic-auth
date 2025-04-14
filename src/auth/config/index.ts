@@ -1,0 +1,28 @@
+import { env } from '@/env';
+
+const defaultRedirectRoute = env.NEXT_PUBLIC_DEFAULT_REDIRECT_ROUTE ?? '/';
+const loginRoute = env.NEXT_PUBLIC_LOGIN_ROUTE ?? '/log-in';
+const signupRoute = env.NEXT_PUBLIC_SIGNUP_ROUTE ?? '/sign-up';
+const apiBaseRoute = env.NEXT_PUBLIC_API_BASE_ROUTE ?? '/api/auth';
+
+const apiSessionEndpoint = 'session';
+const apiUserEndpoint = 'user';
+
+const protectedRoutes = ['/private', '/profile', '/admin'];
+const authRoutes = [loginRoute, signupRoute];
+
+const returnBackUrlKey = 'return_back_url';
+const syncAuthCookieKey = 'sync-auth';
+
+export default Object.freeze({
+  defaultRedirectRoute,
+  loginRoute,
+  signupRoute,
+  apiBaseRoute,
+  apiSessionEndpoint,
+  apiUserEndpoint,
+  protectedRoutes,
+  authRoutes,
+  returnBackUrlKey,
+  syncAuthCookieKey,
+});

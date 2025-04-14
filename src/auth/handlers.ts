@@ -1,6 +1,8 @@
+import 'server-only';
 import { NextResponse } from 'next/server';
 import { auth, currentUser } from './session';
 import config from './config';
+import serverConfig from './config/server';
 
 async function GET(_: Request, { params }: { params: Promise<{ endpoint: string }> }) {
   const { endpoint } = await params;
@@ -23,7 +25,7 @@ async function getSession() {
       isLoggedIn: false,
     });
 
-    response.cookies.delete(config.sessionCookieKey);
+    response.cookies.delete(serverConfig.sessionCookieKey);
 
     return response;
   }

@@ -4,7 +4,7 @@ import { cache } from 'react';
 import { redirect } from 'next/navigation';
 import { type NextRequest } from 'next/server';
 import { db, type User } from '@/db';
-import { createSessionExpirationTime, redirectToLogin } from './util';
+import { redirectToLogin } from './util';
 import {
   getSessionCookie,
   setSessionCookie,
@@ -12,6 +12,7 @@ import {
   setAuthSyncCookie,
 } from './cookie';
 import config from './config';
+import serverConfig from './config/server';
 
 type SessionUser = {
   userId: User['id'];
@@ -173,4 +174,8 @@ export async function refreshUserSession(request?: NextRequest) {
   } catch (error) {
     console.error('Error refreshing user session:', error);
   }
+}
+
+function createSessionExpirationTime() {
+  return Date.now() + serverConfig.sessionExpirationInSeconds * 1000;
 }
