@@ -3,7 +3,7 @@ import { type Metadata } from 'next';
 import { GeistSans } from 'geist/font/sans';
 import '@/globals.css';
 import { Header } from '@/components/header';
-import { AuthProvider } from '@/auth/components/auth-provider';
+import { AuthProvider } from '@/auth/providers/auth-provider';
 
 export const metadata: Metadata = {
   title: 'Basic Auth',
