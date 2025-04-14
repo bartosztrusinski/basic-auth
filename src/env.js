@@ -6,9 +6,18 @@ export const env = createEnv({
     NODE_ENV: z.enum(['development', 'test', 'production']),
     SESSION_EXPIRATION_IN_SECONDS: z.coerce.number(),
   },
-  client: {},
+  client: {
+    NEXT_PUBLIC_DEFAULT_REDIRECT_ROUTE: z.string().optional(),
+    NEXT_PUBLIC_LOGIN_ROUTE: z.string().optional(),
+    NEXT_PUBLIC_SIGNUP_ROUTE: z.string().optional(),
+    NEXT_PUBLIC_API_BASE_ROUTE: z.string().optional(),
+  },
   runtimeEnv: {
     NODE_ENV: process.env.NODE_ENV,
     SESSION_EXPIRATION_IN_SECONDS: process.env.SESSION_EXPIRATION_IN_SECONDS,
+    NEXT_PUBLIC_DEFAULT_REDIRECT_ROUTE: process.env.NEXT_PUBLIC_DEFAULT_REDIRECT_ROUTE,
+    NEXT_PUBLIC_LOGIN_ROUTE: process.env.NEXT_PUBLIC_LOGIN_ROUTE,
+    NEXT_PUBLIC_SIGNUP_ROUTE: process.env.NEXT_PUBLIC_SIGNUP_ROUTE,
+    NEXT_PUBLIC_API_BASE_ROUTE: process.env.NEXT_PUBLIC_API_BASE_ROUTE,
   },
 });
