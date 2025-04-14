@@ -13,7 +13,7 @@ type Auth = {
   expirationTime?: number;
 };
 
-type AuthContext = Auth & {
+type SessionContext = Auth & {
   syncAuth: (signal?: AbortSignal) => Promise<void>;
 };
 
@@ -22,7 +22,7 @@ type Props = {
   initialAuth?: Auth;
 };
 
-export const AuthContext = createContext<AuthContext>({
+export const SessionContext = createContext<SessionContext>({
   isLoggedIn: false,
   syncAuth: async () => undefined,
 });
@@ -108,5 +108,7 @@ export function SessionProvider({ children, initialAuth = { isLoggedIn: false } 
     };
   }, [syncAuth]);
 
-  return <AuthContext.Provider value={{ ...auth, syncAuth }}>{children}</AuthContext.Provider>;
+  return (
+    <SessionContext.Provider value={{ ...auth, syncAuth }}>{children}</SessionContext.Provider>
+  );
 }
