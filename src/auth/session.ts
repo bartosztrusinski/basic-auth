@@ -32,6 +32,7 @@ type ProtectOptions = {
   role?: User['role'];
   unauthorizedUrl?: string;
   unauthenticatedUrl?: string;
+  returnBackUrl?: string;
 };
 
 export type BackendUser = Pick<User, 'id' | 'email' | 'name' | 'role'>;
@@ -64,7 +65,12 @@ async function authFn(): Promise<Auth> {
   } satisfies Auth;
 }
 
-async function protect({ role, unauthorizedUrl, unauthenticatedUrl }: ProtectOptions = {}) {
+async function protect({
+  role,
+  unauthorizedUrl,
+  unauthenticatedUrl,
+  returnBackUrl,
+}: ProtectOptions = {}) {
   const { userId, userRole } = await auth();
 
   try {
@@ -78,7 +84,7 @@ async function protect({ role, unauthorizedUrl, unauthenticatedUrl }: ProtectOpt
       redirect(unauthenticatedUrl);
     }
 
-    redirectToLogin();
+    redirectToLogin(returnBackUrl);
   }
 
   if (role && userRole !== role) {

@@ -47,7 +47,7 @@ export async function editProfile(_: ActionState, formData: FormData): Promise<A
     };
   }
 
-  const { userId } = await auth.protect();
+  const { userId } = await auth.protect({ returnBackUrl: '/profile' });
 
   try {
     const { role } = await db.updateUser(userId, userData);
