@@ -11,8 +11,17 @@ type User = {
   email: string;
   name: string;
   role: 'user' | 'admin';
-  password: string;
-  salt: string;
+  password?: string;
+  salt?: string;
+  accounts: Account[];
+};
+
+export type OAuthProvider = 'discord' | 'github' | 'google';
+
+type Account = {
+  userId: User['id'];
+  provider: OAuthProvider;
+  providerAccountId: string;
 };
 
 async function readUsers() {
