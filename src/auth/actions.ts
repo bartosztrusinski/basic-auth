@@ -66,12 +66,12 @@ export async function oAuthLogIn(provider: OAuthProvider) {
   const responseType = 'code';
   const clientId = env.DISCORD_CLIENT_ID;
   const scope = 'identify email';
-  const redirectUri = `${env.BASE_URL}${config.apiBaseRoute}/${config.apiOAuthEndpoint}/${provider}`;
+  const redirectUrl = `${env.BASE_URL}${config.apiBaseRoute}/${config.apiOAuthEndpoint}/${provider}`;
 
   url.searchParams.set('response_type', responseType);
   url.searchParams.set('client_id', clientId);
   url.searchParams.set('scope', scope);
-  url.searchParams.set('redirect_uri', redirectUri);
+  url.searchParams.set('redirect_uri', redirectUrl);
 
   redirect(url.toString());
 }
