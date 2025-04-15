@@ -53,3 +53,18 @@ export async function setAuthSyncCookie(response?: NextResponse) {
   const cookieStore = await cookies();
   cookieStore.set(config.syncAuthCookieKey, value, attributes);
 }
+
+export async function getStateCookie() {
+  const cookieStore = await cookies();
+  return cookieStore.get(serverConfig.stateCookieKey)?.value;
+}
+
+export async function setStateCookie(state: string) {
+  const cookieStore = await cookies();
+  cookieStore.set(serverConfig.stateCookieKey, state, serverConfig.stateCookieAttributes);
+}
+
+export async function deleteStateCookie() {
+  const cookieStore = await cookies();
+  cookieStore.delete(serverConfig.stateCookieKey);
+}
