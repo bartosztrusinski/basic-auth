@@ -7,7 +7,9 @@ const apiBaseRoute = env.NEXT_PUBLIC_API_BASE_ROUTE ?? '/api/auth';
 
 const apiSessionEndpoint = 'session';
 const apiUserEndpoint = 'user';
-const apiOAuthEndpoint = 'oauth';
+const apiOAuthEndpoint = 'callback';
+
+const oAuthProviders = ['discord', 'github', 'google'] as const;
 
 const protectedRoutes = ['/private', '/profile', '/admin'];
 const authRoutes = [loginRoute, signupRoute];
@@ -23,6 +25,7 @@ export default Object.freeze({
   apiSessionEndpoint,
   apiUserEndpoint,
   apiOAuthEndpoint,
+  oAuthProviders,
   protectedRoutes,
   authRoutes,
   returnBackUrlKey,

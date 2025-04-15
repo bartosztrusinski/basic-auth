@@ -127,6 +127,7 @@ export async function createUserSession({ userId, userRole }: SessionUser) {
   });
 
   await setSessionCookie(sessionId);
+  await setAuthSyncCookie();
 
   return session;
 }
@@ -140,6 +141,7 @@ export async function deleteUserSession() {
 
   await db.deleteSession(sessionId);
   await deleteSessionCookie();
+  await setAuthSyncCookie();
 }
 
 export async function updateUserSession({ userId, userRole }: SessionUser) {
@@ -156,6 +158,7 @@ export async function updateUserSession({ userId, userRole }: SessionUser) {
   });
 
   await setSessionCookie(sessionId);
+  await setAuthSyncCookie();
 }
 
 export async function refreshUserSession(request?: NextRequest) {

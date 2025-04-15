@@ -1,6 +1,7 @@
 import 'server-only';
 import fs from 'node:fs/promises';
 import { randomUUID, type UUID } from 'node:crypto';
+import { type OAuthProvider } from '@/auth/oauth';
 
 const DATA_PATH = `${process.cwd()}/src/data`;
 
@@ -81,8 +82,6 @@ async function getUserById(id: User['id']) {
 }
 
 // ======= ACCOUNT =========
-
-export type OAuthProvider = 'discord' | 'github' | 'google';
 
 type Account = {
   userId: User['id'];

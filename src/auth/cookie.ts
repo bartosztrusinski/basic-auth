@@ -16,14 +16,9 @@ export async function getSessionCookie(request?: NextRequest) {
 export async function deleteSessionCookie() {
   const cookieStore = await cookies();
   cookieStore.delete(serverConfig.sessionCookieKey);
-  await setAuthSyncCookie();
 }
 
-export async function setSessionCookie(
-  sessionId: string,
-  request?: NextRequest,
-  response?: NextResponse,
-) {
+export async function setSessionCookie(sessionId: string, request?: NextRequest) {
   if (request) {
     request.cookies.set({
       name: serverConfig.sessionCookieKey,
@@ -32,8 +27,6 @@ export async function setSessionCookie(
     });
     return;
   }
-
-  await setAuthSyncCookie(response);
 
   const cookieStore = await cookies();
   cookieStore.set(serverConfig.sessionCookieKey, sessionId, serverConfig.sessionCookieAttributes);
