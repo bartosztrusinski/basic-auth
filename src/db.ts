@@ -13,15 +13,6 @@ type User = {
   role: 'user' | 'admin';
   password?: string;
   salt?: string;
-  accounts: Account[];
-};
-
-export type OAuthProvider = 'discord' | 'github' | 'google';
-
-type Account = {
-  userId: User['id'];
-  provider: OAuthProvider;
-  providerAccountId: string;
 };
 
 async function readUsers() {
@@ -87,6 +78,41 @@ async function getUserByEmail(email: User['email']) {
 async function getUserById(id: User['id']) {
   const users = await getUsers();
   return users.find((user) => user.id === id);
+}
+
+// ======= ACCOUNT =========
+
+export type OAuthProvider = 'discord' | 'github' | 'google';
+
+type Account = {
+  userId: User['id'];
+  provider: OAuthProvider;
+  providerAccountId: string;
+};
+
+async function readAccounts() {
+  const data = await fs.readFile(`${DATA_PATH}/accounts.json`, 'utf-8');
+  return JSON.parse(data || '[]') as Account[];
+}
+
+async function writeAccounts(accounts: Account[]) {
+  await fs.writeFile(`${DATA_PATH}/accounts.json`, JSON.stringify(accounts, null, 2));
+}
+
+async function createAccount(newAccount: Account) {
+  const accounts = await readAccounts();
+  const isExistingAccount = accounts.some(
+    ({ provider, providerAccountId }) =>
+      provider === newAccount.provider && providerAccountId === newAccount.providerAccountId,
+  );
+
+  if (isExistingAccount) {
+    return newAccount;
+  }
+
+  await writeAccounts([...accounts, newAccount]);
+
+  return newAccount;
 }
 
 // ======== SESSION =========
@@ -199,6 +225,7 @@ export const db = {
   deleteExpiredUserSession,
   getSessions,
   getSessionById,
+  createAccount,
 };
 
 export type { Session, User };
