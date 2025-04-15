@@ -6,6 +6,7 @@ import { db, type OAuthProvider } from '@/db';
 import { discordUserSchema, tokenSchema } from '@/schemas';
 import { auth, createUserSession, currentUser } from './session';
 import { fetcher, redirectToLogin } from './util';
+import { validateState } from './oauth';
 import config from './config';
 import serverConfig from './config/server';
 
@@ -65,10 +66,21 @@ async function getCurrentUser() {
 
 async function getOAuthUser(provider: OAuthProvider, request: NextRequest) {
   const code = request.nextUrl.searchParams.get('code');
+  const state = request.nextUrl.searchParams.get('state');
 
   try {
     if (!code) {
       throw new Error('Missing code');
+    }
+
+    if (!state) {
+      throw new Error('Missing state');
+    }
+
+    const isValidState = await validateState(state);
+
+    if (!isValidState) {
+      throw new Error('Invalid state');
     }
 
     const { tokenType, accessToken } = await fetchOAuthToken(code, provider);

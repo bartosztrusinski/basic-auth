@@ -6,6 +6,7 @@ import { db, type OAuthProvider, type Session } from '@/db';
 import { loginSchema } from '@/schemas';
 import { createUserSession, deleteUserSession } from './session';
 import { comparePasswords } from './password';
+import { generateState } from './oauth';
 import config from './config';
 
 // eslint-disable-next-line @typescript-eslint/no-empty-object-type
@@ -67,11 +68,13 @@ export async function oAuthLogIn(provider: OAuthProvider) {
   const clientId = env.DISCORD_CLIENT_ID;
   const scope = 'identify email';
   const redirectUrl = `${env.BASE_URL}${config.apiBaseRoute}/${config.apiOAuthEndpoint}/${provider}`;
+  const state = await generateState();
 
   url.searchParams.set('response_type', responseType);
   url.searchParams.set('client_id', clientId);
   url.searchParams.set('scope', scope);
   url.searchParams.set('redirect_uri', redirectUrl);
+  url.searchParams.set('state', state);
 
   redirect(url.toString());
 }
