@@ -1,13 +1,11 @@
 'use server';
 
 import { redirect } from 'next/navigation';
-import { env } from '@/env';
-import { db, type OAuthProvider, type Session } from '@/db';
+import { db, type Session } from '@/db';
 import { loginSchema } from '@/schemas';
 import { createUserSession, deleteUserSession } from './session';
 import { comparePasswords } from './password';
-import { generateState } from './oauth';
-import config from './config';
+import { generateAuthorizationUrl, type OAuthProvider } from './oauth';
 
 // eslint-disable-next-line @typescript-eslint/no-empty-object-type
 export type ActionState<T extends Record<string, unknown> = {}> = {
@@ -63,20 +61,8 @@ export async function logIn(_: LoginActionState, formData: FormData): Promise<Lo
 }
 
 export async function oAuthLogIn(provider: OAuthProvider) {
-  const url = new URL('https://discord.com/oauth2/authorize');
-  const responseType = 'code';
-  const clientId = env.DISCORD_CLIENT_ID;
-  const scope = 'identify email';
-  const redirectUrl = `${env.BASE_URL}${config.apiBaseRoute}/${config.apiOAuthEndpoint}/${provider}`;
-  const state = await generateState();
-
-  url.searchParams.set('response_type', responseType);
-  url.searchParams.set('client_id', clientId);
-  url.searchParams.set('scope', scope);
-  url.searchParams.set('redirect_uri', redirectUrl);
-  url.searchParams.set('state', state);
-
-  redirect(url.toString());
+  const authorizationUrl = await generateAuthorizationUrl(provider);
+  redirect(authorizationUrl.toString());
 }
 
 export async function logOut() {

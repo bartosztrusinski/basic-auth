@@ -7,6 +7,7 @@ import { oAuthTokenSchema, discordUserSchema, type OAuthProviderEnum } from './s
 import { getStateCookie, setStateCookie, deleteStateCookie } from './cookie';
 import { fetcher } from './util';
 import config from './config';
+import oAuthConfig from './config/oauth';
 
 export type OAuthProvider = z.infer<typeof OAuthProviderEnum>;
 export type OAuthUser = {
@@ -14,6 +15,25 @@ export type OAuthUser = {
   email: User['email'];
   name: User['name'];
 };
+
+export async function generateAuthorizationUrl(provider: OAuthProvider) {
+  const { authorizationUrl, clientId, scope } = oAuthConfig[provider];
+  const responseType = 'code';
+  const redirectUrl = getRedirectUrl(provider);
+  const state = await generateState();
+
+  authorizationUrl.searchParams.set('response_type', responseType);
+  authorizationUrl.searchParams.set('client_id', clientId);
+  authorizationUrl.searchParams.set('scope', scope.join(' '));
+  authorizationUrl.searchParams.set('redirect_uri', redirectUrl);
+  authorizationUrl.searchParams.set('state', state);
+
+  return authorizationUrl;
+}
+
+export function getRedirectUrl(provider: OAuthProvider) {
+  return `${env.BASE_URL}${config.apiBaseRoute}/${config.apiOAuthEndpoint}/${provider}`;
+}
 
 export async function generateState() {
   const state = randomBytes(64).toString('hex');
@@ -36,12 +56,11 @@ export async function validateState(state: string) {
 }
 
 export async function fetchOAuthToken(code: string, provider: OAuthProvider) {
+  const { tokenUrl, clientId, clientSecret } = oAuthConfig[provider];
   const grantType = 'authorization_code';
-  const redirectUrl = `${env.BASE_URL}${config.apiBaseRoute}/${config.apiOAuthEndpoint}/${provider}`;
-  const clientId = env.DISCORD_CLIENT_ID;
-  const clientSecret = env.DISCORD_CLIENT_SECRET;
+  const redirectUrl = getRedirectUrl(provider);
 
-  const rawData = await fetcher('https://discord.com/api/oauth2/token', {
+  const rawData = await fetcher(tokenUrl, {
     method: 'POST',
     headers: {
       'Content-Type': 'application/x-www-form-urlencoded',
@@ -95,7 +114,7 @@ export async function fetchOAuthUser(accessToken: string, tokenType: string): Pr
 export async function connectUserToAccount(
   { id, email, name }: OAuthUser,
   provider: OAuthProvider,
-) {
+): Promise<Pick<User, 'id' | 'role'>> {
   // Start transaction to ensure atomicity when using db
   const existingUser = await db.getUserByEmail(email);
   const user = existingUser ?? (await db.createUser({ email, name }));
@@ -107,5 +126,8 @@ export async function connectUserToAccount(
     providerAccountId: id,
   });
 
-  return user;
+  return {
+    id: user.id,
+    role: user.role,
+  };
 }
