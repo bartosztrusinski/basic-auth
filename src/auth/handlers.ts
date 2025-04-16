@@ -86,9 +86,9 @@ async function handleOAuthCallback(
       throw new Error('Invalid state');
     }
 
-    const { tokenType, accessToken } = await fetchOAuthToken(code, provider);
-    const oAuthUser = await fetchOAuthUser(accessToken, tokenType);
-    const user = await connectUserToAccount(oAuthUser, provider);
+    const { tokenType, accessToken } = await fetchOAuthToken(provider, code);
+    const oAuthUser = await fetchOAuthUser(provider, accessToken, tokenType);
+    const user = await connectUserToAccount(provider, oAuthUser);
     await createUserSession({
       userId: user.id,
       userRole: user.role,

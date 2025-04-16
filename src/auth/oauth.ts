@@ -3,7 +3,7 @@ import { randomBytes } from 'node:crypto';
 import { type z } from 'zod';
 import { env } from '@/env';
 import { db, type User } from '@/db';
-import { oAuthTokenSchema, discordUserSchema, type OAuthProviderEnum } from './schemas';
+import { oAuthTokenSchema, type OAuthProviderEnum } from './schemas';
 import { getStateCookie, setStateCookie, deleteStateCookie } from './cookie';
 import { fetcher } from './util';
 import config from './config';
@@ -12,9 +12,7 @@ import oAuthConfig from './config/oauth';
 export type OAuthProvider = z.infer<typeof OAuthProviderEnum>;
 export type OAuthUser = {
   id: string;
-  email: User['email'];
-  name: User['name'];
-};
+} & Pick<User, 'email' | 'name'>;
 
 export async function generateAuthorizationUrl(provider: OAuthProvider) {
   const { authorizationUrl, clientId, scope } = oAuthConfig[provider];
@@ -31,18 +29,6 @@ export async function generateAuthorizationUrl(provider: OAuthProvider) {
   return authorizationUrl;
 }
 
-export function getRedirectUrl(provider: OAuthProvider) {
-  return `${env.BASE_URL}${config.apiBaseRoute}/${config.apiOAuthEndpoint}/${provider}`;
-}
-
-export async function generateState() {
-  const state = randomBytes(64).toString('hex');
-
-  await setStateCookie(state);
-
-  return state;
-}
-
 export async function validateState(state: string) {
   const storedState = await getStateCookie();
 
@@ -55,7 +41,7 @@ export async function validateState(state: string) {
   return state === storedState;
 }
 
-export async function fetchOAuthToken(code: string, provider: OAuthProvider) {
+export async function fetchOAuthToken(provider: OAuthProvider, code: string) {
   const { tokenUrl, clientId, clientSecret } = oAuthConfig[provider];
   const grantType = 'authorization_code';
   const redirectUrl = getRedirectUrl(provider);
@@ -89,35 +75,35 @@ export async function fetchOAuthToken(code: string, provider: OAuthProvider) {
   };
 }
 
-export async function fetchOAuthUser(accessToken: string, tokenType: string): Promise<OAuthUser> {
-  const rawData = await fetcher('https://discord.com/api/users/@me', {
+export async function fetchOAuthUser(
+  provider: OAuthProvider,
+  accessToken: string,
+  tokenType: string,
+): Promise<OAuthUser> {
+  const { userUrl, userSchema, userMapper } = oAuthConfig[provider];
+
+  const data = await fetcher(userUrl, {
     headers: {
       Authorization: `${tokenType} ${accessToken}`,
     },
   });
 
-  const { success, data } = discordUserSchema.safeParse(rawData);
+  const { success, data: providerUser } = userSchema.safeParse(data);
 
   if (!success) {
     throw new Error('Invalid user response');
   }
 
-  const { id, email, global_name, username } = data;
-
-  return {
-    id,
-    email,
-    name: global_name ?? username,
-  };
+  return userMapper(providerUser);
 }
 
 export async function connectUserToAccount(
-  { id, email, name }: OAuthUser,
   provider: OAuthProvider,
+  { id, email, ...oAuthData }: OAuthUser,
 ): Promise<Pick<User, 'id' | 'role'>> {
   // Start transaction to ensure atomicity when using db
   const existingUser = await db.getUserByEmail(email);
-  const user = existingUser ?? (await db.createUser({ email, name }));
+  const user = existingUser ?? (await db.createUser({ ...oAuthData, email }));
 
   // Do nothing on conflict
   await db.createAccount({
@@ -130,4 +116,16 @@ export async function connectUserToAccount(
     id: user.id,
     role: user.role,
   };
+}
+
+export function getRedirectUrl(provider: OAuthProvider) {
+  return `${env.BASE_URL}${config.apiBaseRoute}/${config.apiOAuthEndpoint}/${provider}`;
+}
+
+async function generateState() {
+  const state = randomBytes(64).toString('hex');
+
+  await setStateCookie(state);
+
+  return state;
 }
