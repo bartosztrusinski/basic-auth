@@ -1,10 +1,16 @@
 import 'server-only';
-import { randomBytes } from 'node:crypto';
+import { randomBytes, hash } from 'node:crypto';
 import { type z } from 'zod';
 import { env } from '@/env';
 import { db, type User } from '@/db';
 import { oAuthTokenSchema, type OAuthProviderEnum } from './schemas';
-import { getStateCookie, setStateCookie, deleteStateCookie } from './cookie';
+import {
+  getStateCookie,
+  setStateCookie,
+  deleteStateCookie,
+  setCodeVerifierCookie,
+  getCodeVerifierCookie,
+} from './cookie';
 import { fetcher } from './util';
 import config from './config';
 import oAuthConfig from './config/oauth';
@@ -19,34 +25,32 @@ export async function generateAuthorizationUrl(provider: OAuthProvider) {
   const responseType = 'code';
   const redirectUrl = getRedirectUrl(provider);
   const state = await generateState();
+  const codeVerifier = await generateCodeVerifier();
+  const codeChallenge = await generateCodeChallenge(codeVerifier);
+  const codeChallengeMethod = 'S256';
 
   authorizationUrl.searchParams.set('response_type', responseType);
   authorizationUrl.searchParams.set('client_id', clientId);
   authorizationUrl.searchParams.set('scope', scope.join(' '));
   authorizationUrl.searchParams.set('redirect_uri', redirectUrl);
   authorizationUrl.searchParams.set('state', state);
+  authorizationUrl.searchParams.set('code_challenge', codeChallenge);
+  authorizationUrl.searchParams.set('code_challenge_method', codeChallengeMethod);
 
   return authorizationUrl;
-}
-
-export async function validateState(state: string) {
-  const storedState = await getStateCookie();
-
-  if (!storedState) {
-    return false;
-  }
-
-  await deleteStateCookie();
-
-  return state === storedState;
 }
 
 export async function fetchOAuthToken(provider: OAuthProvider, code: string) {
   const { tokenUrl, clientId, clientSecret } = oAuthConfig[provider];
   const grantType = 'authorization_code';
   const redirectUrl = getRedirectUrl(provider);
+  const codeVerifier = await getCodeVerifierCookie();
 
-  const rawData = await fetcher(tokenUrl, {
+  if (!codeVerifier) {
+    throw new Error('Code verifier not found');
+  }
+
+  const data = await fetcher(tokenUrl, {
     method: 'POST',
     headers: {
       'Content-Type': 'application/x-www-form-urlencoded',
@@ -58,16 +62,17 @@ export async function fetchOAuthToken(provider: OAuthProvider, code: string) {
       redirect_uri: redirectUrl,
       client_id: clientId,
       client_secret: clientSecret,
+      code_verifier: codeVerifier,
     }),
   });
 
-  const { success, data } = oAuthTokenSchema.safeParse(rawData);
+  const { success, data: tokenData } = oAuthTokenSchema.safeParse(data);
 
   if (!success) {
     throw new Error('Invalid token response');
   }
 
-  const { token_type, access_token } = data;
+  const { token_type, access_token } = tokenData;
 
   return {
     tokenType: token_type,
@@ -122,10 +127,34 @@ export function getRedirectUrl(provider: OAuthProvider) {
   return `${env.BASE_URL}${config.apiBaseRoute}/${config.apiOAuthEndpoint}/${provider}`;
 }
 
+export async function validateState(state: string) {
+  const storedState = await getStateCookie();
+
+  if (!storedState) {
+    return false;
+  }
+
+  await deleteStateCookie();
+
+  return state === storedState;
+}
+
 async function generateState() {
   const state = randomBytes(64).toString('hex');
 
   await setStateCookie(state);
 
   return state;
+}
+
+async function generateCodeVerifier() {
+  const codeVerifier = randomBytes(64).toString('hex');
+
+  await setCodeVerifierCookie(codeVerifier);
+
+  return codeVerifier;
+}
+
+async function generateCodeChallenge(codeVerifier: string) {
+  return hash('sha256', codeVerifier, 'base64url');
 }

@@ -61,3 +61,22 @@ export async function deleteStateCookie() {
   const cookieStore = await cookies();
   cookieStore.delete(serverConfig.stateCookieKey);
 }
+
+export async function getCodeVerifierCookie() {
+  const cookieStore = await cookies();
+  return cookieStore.get(serverConfig.codeVerifierCookieKey)?.value;
+}
+
+export async function setCodeVerifierCookie(codeVerifier: string) {
+  const cookieStore = await cookies();
+  cookieStore.set(
+    serverConfig.codeVerifierCookieKey,
+    codeVerifier,
+    serverConfig.codeVerifierCookieAttributes,
+  );
+}
+
+export async function deleteCodeVerifierCookie() {
+  const cookieStore = await cookies();
+  cookieStore.delete(serverConfig.codeVerifierCookieKey);
+}

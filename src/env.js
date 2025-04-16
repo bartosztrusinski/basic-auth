@@ -6,6 +6,7 @@ export const env = createEnv({
     NODE_ENV: z.enum(['development', 'test', 'production']),
     SESSION_EXPIRATION_IN_SECONDS: z.coerce.number(),
     OAUTH_STATE_EXPIRATION_IN_SECONDS: z.coerce.number().optional(),
+    OAUTH_CODE_VERIFIER_EXPIRATION_IN_SECONDS: z.coerce.number().optional(),
     BASE_URL: z.string().url(),
     DISCORD_CLIENT_ID: z.string(),
     DISCORD_CLIENT_SECRET: z.string(),
@@ -20,6 +21,8 @@ export const env = createEnv({
     NODE_ENV: process.env.NODE_ENV,
     SESSION_EXPIRATION_IN_SECONDS: process.env.SESSION_EXPIRATION_IN_SECONDS,
     OAUTH_STATE_EXPIRATION_IN_SECONDS: process.env.OAUTH_STATE_EXPIRATION_IN_SECONDS,
+    OAUTH_CODE_VERIFIER_EXPIRATION_IN_SECONDS:
+      process.env.OAUTH_CODE_VERIFIER_EXPIRATION_IN_SECONDS,
     BASE_URL: process.env.BASE_URL,
     DISCORD_CLIENT_ID: process.env.DISCORD_CLIENT_ID,
     DISCORD_CLIENT_SECRET: process.env.DISCORD_CLIENT_SECRET,
