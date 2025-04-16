@@ -1,7 +1,7 @@
 import 'server-only';
 import { type NextRequest, NextResponse } from 'next/server';
 import { getSessionCookie, setAuthSyncCookie } from './cookie';
-import { createReturnBackSearchParam } from './util';
+import { setRedirectReasonParam, setReturnBackParam } from './util';
 import config from './config';
 
 type MiddlewareAuth = {
@@ -17,6 +17,7 @@ type MiddlewareHandler = (
 
 type RedirectOptions = {
   requestAuthSync?: boolean;
+  redirectReason?: string;
 };
 
 export function authMiddleware(middlewareHandler: MiddlewareHandler) {
@@ -43,10 +44,12 @@ const authClosure = (request: NextRequest) => async () =>
 function redirectToLogin(request: NextRequest, options: RedirectOptions = {}) {
   const { pathname } = request.nextUrl;
   const { requestAuthSync } = options;
+  const redirectUrl = new URL(config.loginRoute, request.url);
 
-  const response = NextResponse.redirect(
-    new URL(config.loginRoute + createReturnBackSearchParam(pathname), request.url),
-  );
+  setReturnBackParam(redirectUrl, pathname);
+  setRedirectReasonParam(redirectUrl, options.redirectReason);
+
+  const response = NextResponse.redirect(redirectUrl);
 
   if (requestAuthSync) {
     void setAuthSyncCookie(response);

@@ -1,6 +1,7 @@
 import { LoggedIn } from '@/auth/components/logged-in';
 import { ReturnBack } from '@/auth/components/return-back';
 import { SignupLink } from '@/auth/components/auth-link';
+import { RedirectReason } from '@/auth/components/redirect-reason';
 import { Page } from '@/components/page';
 import { LoginForm } from '@/components/login-form';
 
@@ -22,6 +23,7 @@ export default async function LoginPage({
             Sign up
           </SignupLink>
         </Page.Description>
+        <RedirectReason searchParams={searchParams} />
         <LoginForm />
       </Page>
     </>

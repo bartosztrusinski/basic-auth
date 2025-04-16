@@ -1,9 +1,11 @@
 import { redirect, RedirectType } from 'next/navigation';
 import { type NextRequest } from 'next/server';
+import { env } from '@/env';
 import config from './config';
 
-export async function getReturnBackSearchParam(
+async function getSearchParam(
   searchParams: Promise<Record<string, string | undefined>> | undefined,
+  key: string,
 ) {
   if (!searchParams) {
     return null;
@@ -15,21 +17,47 @@ export async function getReturnBackSearchParam(
     return null;
   }
 
-  const returnBackUrl = params[config.returnBackUrlKey];
+  const value = params[key];
 
-  if (!returnBackUrl) {
+  if (!value) {
     return null;
   }
 
-  return decodeURIComponent(returnBackUrl);
+  return decodeURIComponent(value);
 }
 
-export function redirectToLogin(returnBackUrl?: string | null): never {
-  redirect(config.loginRoute + createReturnBackSearchParam(returnBackUrl), RedirectType.replace);
+export async function getReturnBackSearchParam(
+  searchParams: Promise<Record<string, string | undefined>> | undefined,
+) {
+  return getSearchParam(searchParams, config.returnBackUrlKey);
 }
 
-export function createReturnBackSearchParam(returnBackUrl?: string | null) {
-  return returnBackUrl ? `?${config.returnBackUrlKey}=${encodeURIComponent(returnBackUrl)}` : '';
+export async function getRedirectReasonSearchParam(
+  searchParams: Promise<Record<string, string | undefined>> | undefined,
+) {
+  return getSearchParam(searchParams, config.redirectReasonKey);
+}
+
+export function redirectToLogin(returnBackUrl?: string | null, redirectReason?: string): never {
+  const redirectUrl = new URL(config.loginRoute, env.BASE_URL);
+  setRedirectReasonParam(redirectUrl, redirectReason);
+
+  if (returnBackUrl) {
+    setReturnBackParam(redirectUrl, returnBackUrl);
+  }
+
+  redirect(redirectUrl.toString(), RedirectType.replace);
+}
+
+export function setReturnBackParam(url: URL, returnBackUrl: string) {
+  url.searchParams.set(config.returnBackUrlKey, returnBackUrl);
+}
+
+export function setRedirectReasonParam(
+  url: URL,
+  redirectReason: string = config.defaultRedirectReason,
+) {
+  url.searchParams.set(config.redirectReasonKey, encodeURIComponent(redirectReason));
 }
 
 export function isAuthRoute(request: NextRequest) {

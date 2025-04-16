@@ -95,8 +95,7 @@ async function handleOAuthCallback(
     });
   } catch (error) {
     console.error(error);
-    // TODO error in search params
-    redirectToLogin();
+    redirectToLogin(null, 'Could not log in with your provider. Please try again.');
   }
 
   redirect(config.defaultRedirectRoute);

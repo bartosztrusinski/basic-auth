@@ -13,6 +13,8 @@ const protectedRoutes = ['/private', '/profile', '/admin'];
 const authRoutes = [loginRoute, signupRoute];
 
 const returnBackUrlKey = 'return_back_url';
+const redirectReasonKey = 'redirect_reason';
+const defaultRedirectReason = 'Please log in to continue';
 const syncAuthCookieKey = 'sync-auth';
 
 export default Object.freeze({
@@ -26,5 +28,7 @@ export default Object.freeze({
   protectedRoutes,
   authRoutes,
   returnBackUrlKey,
+  redirectReasonKey,
+  defaultRedirectReason,
   syncAuthCookieKey,
 });
