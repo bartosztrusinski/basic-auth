@@ -12,7 +12,7 @@ export const handlers = { GET };
 
 async function GET(request: NextRequest, { params }: { params: Promise<{ endpoint: string[] }> }) {
   const { endpoint } = await params;
-  const [resource, providerParam] = endpoint;
+  const [resource, provider] = endpoint;
 
   if (resource === config.apiSessionEndpoint) {
     return await getSession();
@@ -23,7 +23,7 @@ async function GET(request: NextRequest, { params }: { params: Promise<{ endpoin
   }
 
   if (resource === config.apiOAuthEndpoint) {
-    await handleOAuthCallback(providerParam, request);
+    await handleOAuthCallback(provider, request);
   }
 
   return NextResponse.json({ error: 'Invalid endpoint' }, { status: 404 });
@@ -65,10 +65,10 @@ async function handleOAuthCallback(
 ): Promise<void> {
   const code = request.nextUrl.searchParams.get('code');
   const state = request.nextUrl.searchParams.get('state');
-  const { success, data: provider } = OAuthProviderEnum.safeParse(providerParam);
+  const { success: isValidProvider, data: provider } = OAuthProviderEnum.safeParse(providerParam);
 
   try {
-    if (!success) {
+    if (!isValidProvider) {
       throw new Error('Invalid provider');
     }
 

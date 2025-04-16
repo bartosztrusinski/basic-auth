@@ -9,8 +9,6 @@ const apiSessionEndpoint = 'session';
 const apiUserEndpoint = 'user';
 const apiOAuthEndpoint = 'callback';
 
-const oAuthProviders = ['discord', 'github', 'google'] as const;
-
 const protectedRoutes = ['/private', '/profile', '/admin'];
 const authRoutes = [loginRoute, signupRoute];
 
@@ -25,7 +23,6 @@ export default Object.freeze({
   apiSessionEndpoint,
   apiUserEndpoint,
   apiOAuthEndpoint,
-  oAuthProviders,
   protectedRoutes,
   authRoutes,
   returnBackUrlKey,

@@ -1,7 +1,7 @@
 import { z } from 'zod';
-import config from '@/auth/config';
+import serverConfig from './config/server';
 
-const OAuthProviderEnum = z.enum(config.oAuthProviders);
+const OAuthProviderEnum = z.enum(serverConfig.oAuthProviders);
 
 const oAuthTokenSchema = z.object({
   token_type: z.string(),

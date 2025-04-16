@@ -24,6 +24,9 @@ const stateCookieAttributes = {
   path: `${config.apiBaseRoute}/${config.apiOAuthEndpoint}`,
 };
 
+// TODO move?
+const oAuthProviders = ['discord'] as const;
+
 export default Object.freeze({
   sessionExpirationInSeconds,
   sessionCookieKey,
@@ -31,4 +34,5 @@ export default Object.freeze({
   stateExpirationInSeconds,
   stateCookieKey,
   stateCookieAttributes,
+  oAuthProviders,
 });
