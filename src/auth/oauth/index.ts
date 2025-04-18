@@ -61,10 +61,11 @@ async function fetchOAuthToken(provider: OAuthProvider, code: string) {
     }),
   });
 
-  const { success, data: tokenData } = oAuthTokenSchema.safeParse(data);
+  const { success: isTokenValid, data: tokenData, error } = oAuthTokenSchema.safeParse(data);
 
-  if (!success) {
-    throw new Error('Invalid token response');
+  if (!isTokenValid) {
+    console.error(error);
+    throw new Error('Invalid token response from provider');
   }
 
   const { token_type, access_token } = tokenData;
@@ -88,10 +89,11 @@ async function fetchOAuthUser(
     },
   });
 
-  const { success, data: providerUser } = userSchema.safeParse(data);
+  const { success: isValidUser, data: providerUser, error } = userSchema.safeParse(data);
 
-  if (!success) {
-    throw new Error('Invalid user response');
+  if (!isValidUser) {
+    console.error(error);
+    throw new Error('Invalid user response from provider');
   }
 
   return userMapper(providerUser);
