@@ -13,6 +13,9 @@ const discordUserSchema = z.object({
   email: z.string().email(),
   username: z.string(),
   discriminator: z.string(),
+  verified: z.boolean().refine((val) => val, {
+    message: 'Verify your email with Discord first',
+  }),
   global_name: z.string().nullable(),
   avatar: z.string().nullable(),
   bot: z.boolean().optional(),
@@ -21,7 +24,6 @@ const discordUserSchema = z.object({
   banner: z.string().nullish(),
   accent_color: z.number().int().nullish(),
   locale: z.string().optional(),
-  verified: z.boolean().optional(),
   flags: z.number().int().optional(),
   premium_type: z.number().int().optional(),
   public_flags: z.number().int().optional(),
