@@ -1,27 +1,22 @@
 import 'server-only';
 import { randomBytes, hash } from 'node:crypto';
-import { type z } from 'zod';
-import { env } from '@/env';
 import { db, type User } from '@/db';
-import { oAuthTokenSchema, type OAuthProviderEnum } from './schemas';
+import { env } from '@/env';
 import {
   getStateCookie,
   setStateCookie,
   deleteStateCookie,
   setCodeVerifierCookie,
   getCodeVerifierCookie,
-} from './cookie';
-import { fetcher } from './util';
-import config from './config';
-import oAuthConfig from './config/oauth';
+} from '../cookie';
+import { fetcher } from '../util';
+import { oAuthTokenSchema } from './schemas';
+import { type OAuthUser, type OAuthProvider } from './types';
+import config from '../config';
+import providerConfig from './providers';
 
-export type OAuthProvider = z.infer<typeof OAuthProviderEnum>;
-export type OAuthUser = {
-  id: string;
-} & Pick<User, 'email' | 'name'>;
-
-export async function generateAuthorizationUrl(provider: OAuthProvider) {
-  const { authorizationUrl, clientId, scope } = oAuthConfig[provider];
+async function generateAuthorizationUrl(provider: OAuthProvider) {
+  const { authorizationUrl, clientId, scope } = providerConfig[provider];
   const responseType = 'code';
   const redirectUrl = getRedirectUrl(provider);
   const state = await generateState();
@@ -40,8 +35,8 @@ export async function generateAuthorizationUrl(provider: OAuthProvider) {
   return authorizationUrl;
 }
 
-export async function fetchOAuthToken(provider: OAuthProvider, code: string) {
-  const { tokenUrl, clientId, clientSecret } = oAuthConfig[provider];
+async function fetchOAuthToken(provider: OAuthProvider, code: string) {
+  const { tokenUrl, clientId, clientSecret } = providerConfig[provider];
   const grantType = 'authorization_code';
   const redirectUrl = getRedirectUrl(provider);
   const codeVerifier = await getCodeVerifierCookie();
@@ -80,12 +75,12 @@ export async function fetchOAuthToken(provider: OAuthProvider, code: string) {
   };
 }
 
-export async function fetchOAuthUser(
+async function fetchOAuthUser(
   provider: OAuthProvider,
   accessToken: string,
   tokenType: string,
 ): Promise<OAuthUser> {
-  const { userUrl, userSchema, userMapper } = oAuthConfig[provider];
+  const { userUrl, userSchema, userMapper } = providerConfig[provider];
 
   const data = await fetcher(userUrl, {
     headers: {
@@ -102,7 +97,7 @@ export async function fetchOAuthUser(
   return userMapper(providerUser);
 }
 
-export async function connectUserToAccount(
+async function connectUserToAccount(
   provider: OAuthProvider,
   { id, email, ...oAuthData }: OAuthUser,
 ): Promise<Pick<User, 'id' | 'role'>> {
@@ -123,11 +118,11 @@ export async function connectUserToAccount(
   };
 }
 
-export function getRedirectUrl(provider: OAuthProvider) {
+function getRedirectUrl(provider: OAuthProvider) {
   return `${env.BASE_URL}${config.apiBaseRoute}/${config.apiOAuthEndpoint}/${provider}`;
 }
 
-export async function validateState(state: string) {
+async function validateState(state: string) {
   const storedState = await getStateCookie();
 
   if (!storedState) {
@@ -158,3 +153,12 @@ async function generateCodeVerifier() {
 async function generateCodeChallenge(codeVerifier: string) {
   return hash('sha256', codeVerifier, 'base64url');
 }
+
+export {
+  generateAuthorizationUrl,
+  fetchOAuthToken,
+  fetchOAuthUser,
+  connectUserToAccount,
+  getRedirectUrl,
+  validateState,
+};

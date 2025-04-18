@@ -1,7 +1,7 @@
 import 'server-only';
 import fs from 'node:fs/promises';
 import { randomUUID, type UUID } from 'node:crypto';
-import { type OAuthProvider } from '@/auth/oauth';
+import { type OAuthProvider } from '@/auth/oauth/types';
 
 const DATA_PATH = `${process.cwd()}/src/data`;
 

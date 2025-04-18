@@ -4,9 +4,9 @@ import { redirect } from 'next/navigation';
 import { auth, createUserSession, currentUser } from './session';
 import { redirectToLogin } from './util';
 import { deleteSessionCookie } from './cookie';
-import { connectUserToAccount, fetchOAuthToken, fetchOAuthUser, validateState } from './oauth';
-import { OAuthProviderEnum } from './schemas';
 import config from './config';
+import { connectUserToAccount, fetchOAuthToken, fetchOAuthUser, validateState } from './oauth';
+import { OAuthProviderEnum } from './oauth/providers';
 
 export const handlers = { GET };
 

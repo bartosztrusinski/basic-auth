@@ -1,7 +1,4 @@
 import { z } from 'zod';
-import serverConfig from './config/server';
-
-const OAuthProviderEnum = z.enum(serverConfig.oAuthProviders);
 
 const oAuthTokenSchema = z.object({
   token_type: z.string(),
@@ -11,6 +8,7 @@ const oAuthTokenSchema = z.object({
   scope: z.string(),
 });
 
+// TODO add more fields to the user schema
 const discordUserSchema = z.object({
   id: z.string(),
   username: z.string(),
@@ -18,4 +16,4 @@ const discordUserSchema = z.object({
   email: z.string().email(),
 });
 
-export { OAuthProviderEnum, oAuthTokenSchema, discordUserSchema };
+export { oAuthTokenSchema, discordUserSchema };

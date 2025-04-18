@@ -5,7 +5,8 @@ import { db, type Session } from '@/db';
 import { loginSchema } from '@/schemas';
 import { createUserSession, deleteUserSession } from './session';
 import { comparePasswords } from './password';
-import { generateAuthorizationUrl, type OAuthProvider } from './oauth';
+import { generateAuthorizationUrl } from './oauth';
+import { type OAuthProvider } from './oauth/types';
 
 // eslint-disable-next-line @typescript-eslint/no-empty-object-type
 export type ActionState<T extends Record<string, unknown> = {}> = {
@@ -60,11 +61,11 @@ export async function logIn(_: LoginActionState, formData: FormData): Promise<Lo
   }
 }
 
+export async function logOut() {
+  await deleteUserSession();
+}
+
 export async function oAuthLogIn(provider: OAuthProvider) {
   const authorizationUrl = await generateAuthorizationUrl(provider);
   redirect(authorizationUrl.toString());
-}
-
-export async function logOut() {
-  await deleteUserSession();
 }
