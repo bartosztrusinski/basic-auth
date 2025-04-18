@@ -41,14 +41,12 @@ export function CurrentUserProvider({ children, initialUser = null }: Props) {
   const fetchUser = useCallback(
     async (signal?: AbortSignal) => {
       try {
-        const user = await fetcher<CurrentUser>(
+        const user = await fetcher<CurrentUser | null>(
           `${config.apiBaseRoute}/${config.apiUserEndpoint}`,
-          {
-            signal,
-          },
+          { signal },
         );
 
-        if (!currentUser || !isSameObject(currentUser, user)) {
+        if (!currentUser || !user || !isSameObject(currentUser, user)) {
           setCurrentUser(user);
         }
       } catch (error) {

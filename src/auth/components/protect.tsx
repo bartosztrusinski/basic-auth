@@ -11,7 +11,7 @@ type Props = {
 export async function Protect({ children, fallback, role }: Props) {
   const { userId, userRole } = await auth();
 
-  if (!userId || userRole !== role) {
+  if (!userId || (role && userRole !== role)) {
     return fallback ? <>{fallback}</> : null;
   }
 
