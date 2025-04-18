@@ -5,6 +5,7 @@ import { db, type Session } from '@/db';
 import { loginSchema } from '@/schemas';
 import { createUserSession, deleteUserSession } from './session';
 import { comparePasswords } from './password';
+import { redirectToLogin } from './util';
 import { generateAuthorizationUrl } from './oauth';
 import { type OAuthProvider } from './oauth/types';
 
@@ -63,6 +64,7 @@ export async function logIn(_: LoginActionState, formData: FormData): Promise<Lo
 
 export async function logOut() {
   await deleteUserSession();
+  redirectToLogin({ redirectReason: null });
 }
 
 export async function oAuthLogIn(provider: OAuthProvider) {

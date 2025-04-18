@@ -21,7 +21,7 @@ type SessionUser = {
 };
 
 export type Auth = Partial<SessionUser> & {
-  redirectToLogin: (returnBackUrl?: string) => never;
+  redirectToLogin: typeof redirectToLogin;
 };
 
 interface AuthFunction {
@@ -29,12 +29,13 @@ interface AuthFunction {
   protect: (options?: ProtectOptions) => Promise<{ userId: User['id'] }>;
 }
 
+type RedirectToLoginOptions = Parameters<typeof redirectToLogin>[0];
+
 type ProtectOptions = {
   role?: User['role'];
   unauthorizedUrl?: string;
   unauthenticatedUrl?: string;
-  returnBackUrl?: string;
-};
+} & RedirectToLoginOptions;
 
 export type BackendUser = Pick<User, 'id' | 'email' | 'name' | 'role'>;
 
@@ -70,7 +71,7 @@ async function protect({
   role,
   unauthorizedUrl,
   unauthenticatedUrl,
-  returnBackUrl,
+  ...redirectParams
 }: ProtectOptions = {}) {
   const { userId, userRole } = await auth();
 
@@ -85,7 +86,7 @@ async function protect({
       redirect(unauthenticatedUrl);
     }
 
-    redirectToLogin(returnBackUrl);
+    redirectToLogin(redirectParams);
   }
 
   if (role && userRole !== role) {

@@ -95,7 +95,7 @@ async function handleOAuthCallback(
     });
   } catch (error) {
     console.error(error);
-    redirectToLogin(null, 'Could not log in with your provider. Please try again.');
+    redirectToLogin({ redirectReason: 'Could not log in with your provider. Please try again.' });
   }
 
   redirect(config.defaultRedirectRoute);

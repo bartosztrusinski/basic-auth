@@ -8,7 +8,7 @@ export default async function ProfilePage() {
   const user = await currentUser();
 
   if (!user) {
-    return redirectToLogin('/profile');
+    return redirectToLogin({ returnBackUrl: '/profile' });
   }
 
   const { email, name, role } = user;

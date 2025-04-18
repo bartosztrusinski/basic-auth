@@ -8,7 +8,7 @@ type Props = {
 export async function RedirectToLogin({ returnBackUrl, searchParams }: Props) {
   const url = returnBackUrl ?? (searchParams && (await getReturnBackSearchParam(searchParams)));
 
-  redirectToLogin(url);
+  redirectToLogin({ returnBackUrl: url });
 
   return null;
 }

@@ -38,9 +38,19 @@ export async function getRedirectReasonSearchParam(
   return getSearchParam(searchParams, config.redirectReasonKey);
 }
 
-export function redirectToLogin(returnBackUrl?: string | null, redirectReason?: string): never {
+type RedirectOptions = {
+  returnBackUrl?: string | null;
+  redirectReason?: string | null;
+};
+
+export function redirectToLogin({
+  returnBackUrl,
+  redirectReason = config.defaultRedirectReason,
+}: RedirectOptions = {}): never {
   const redirectUrl = new URL(config.loginRoute, env.BASE_URL);
-  setRedirectReasonParam(redirectUrl, redirectReason);
+  if (redirectReason) {
+    setRedirectReasonParam(redirectUrl, redirectReason);
+  }
 
   if (returnBackUrl) {
     setReturnBackParam(redirectUrl, returnBackUrl);
@@ -53,10 +63,7 @@ export function setReturnBackParam(url: URL, returnBackUrl: string) {
   url.searchParams.set(config.returnBackUrlKey, returnBackUrl);
 }
 
-export function setRedirectReasonParam(
-  url: URL,
-  redirectReason: string = config.defaultRedirectReason,
-) {
+export function setRedirectReasonParam(url: URL, redirectReason: string) {
   url.searchParams.set(config.redirectReasonKey, encodeURIComponent(redirectReason));
 }
 
