@@ -1,5 +1,6 @@
 import 'server-only';
 import { randomBytes, hash } from 'node:crypto';
+import { type z } from 'zod';
 import { db, type User } from '@/db';
 import { env } from '@/env';
 import {
@@ -82,6 +83,9 @@ async function fetchOAuthUser(
   tokenType: string,
 ): Promise<OAuthUser> {
   const { userUrl, userSchema, userMapper } = providerConfig[provider];
+  // TODO type this properly
+  // Use type assertion to get the correct type for userMapper
+  const typedUserMapper = userMapper as (data: z.infer<typeof userSchema>) => OAuthUser;
 
   const data = await fetcher(userUrl, {
     headers: {
@@ -96,7 +100,7 @@ async function fetchOAuthUser(
     throw new Error('Invalid user response from provider');
   }
 
-  return userMapper(providerUser);
+  return typedUserMapper(providerUser);
 }
 
 async function connectUserToAccount(
