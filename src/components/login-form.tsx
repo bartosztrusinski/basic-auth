@@ -12,6 +12,9 @@ export function LoginForm() {
         <form action={oAuthLogIn.bind(null, 'discord')}>
           <button className='w-full rounded bg-zinc-800 p-2 font-bold shadow-lg'>Discord</button>
         </form>
+        <form action={oAuthLogIn.bind(null, 'github')}>
+          <button className='w-full rounded bg-zinc-800 p-2 font-bold shadow-lg'>GitHub</button>
+        </form>
       </div>
       <form action={action} className='flex flex-col gap-5'>
         <input

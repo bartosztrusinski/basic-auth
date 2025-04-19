@@ -10,6 +10,8 @@ export const env = createEnv({
     BASE_URL: z.string().url(),
     DISCORD_CLIENT_ID: z.string(),
     DISCORD_CLIENT_SECRET: z.string(),
+    GITHUB_CLIENT_ID: z.string(),
+    GITHUB_CLIENT_SECRET: z.string(),
   },
   client: {
     NEXT_PUBLIC_DEFAULT_REDIRECT_ROUTE: z.string().optional(),
@@ -26,6 +28,8 @@ export const env = createEnv({
     BASE_URL: process.env.BASE_URL,
     DISCORD_CLIENT_ID: process.env.DISCORD_CLIENT_ID,
     DISCORD_CLIENT_SECRET: process.env.DISCORD_CLIENT_SECRET,
+    GITHUB_CLIENT_ID: process.env.GITHUB_CLIENT_ID,
+    GITHUB_CLIENT_SECRET: process.env.GITHUB_CLIENT_SECRET,
     NEXT_PUBLIC_DEFAULT_REDIRECT_ROUTE: process.env.NEXT_PUBLIC_DEFAULT_REDIRECT_ROUTE,
     NEXT_PUBLIC_LOGIN_ROUTE: process.env.NEXT_PUBLIC_LOGIN_ROUTE,
     NEXT_PUBLIC_SIGNUP_ROUTE: process.env.NEXT_PUBLIC_SIGNUP_ROUTE,

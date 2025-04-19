@@ -3,9 +3,9 @@ import { z } from 'zod';
 const oAuthTokenSchema = z.object({
   token_type: z.string(),
   access_token: z.string(),
-  expires_in: z.number(),
-  refresh_token: z.string(),
   scope: z.string(),
+  expires_in: z.number().optional(),
+  refresh_token: z.string().optional(),
 });
 
 const discordUserSchema = z.object({
@@ -22,6 +22,7 @@ const discordUserSchema = z.object({
   system: z.boolean().optional(),
   mfa_enabled: z.boolean().optional(),
   banner: z.string().nullish(),
+  banner_color: z.string().nullish(),
   accent_color: z.number().int().nullish(),
   locale: z.string().optional(),
   flags: z.number().int().optional(),
@@ -29,4 +30,17 @@ const discordUserSchema = z.object({
   public_flags: z.number().int().optional(),
 });
 
-export { oAuthTokenSchema, discordUserSchema };
+const githubUserSchema = z.object({
+  id: z.number(),
+  login: z.string(),
+  email: z.string().email(),
+  avatar_url: z.string().url(),
+  node_id: z.string(),
+  name: z.string().nullable(),
+  gravatar_id: z.string().nullable(),
+  bio: z.string().nullable(),
+  location: z.string().nullable(),
+  html_url: z.string().url(),
+});
+
+export { oAuthTokenSchema, discordUserSchema, githubUserSchema };
