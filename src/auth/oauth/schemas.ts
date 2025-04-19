@@ -8,39 +8,32 @@ const oAuthTokenSchema = z.object({
   refresh_token: z.string().optional(),
 });
 
+// Provider specific user schemas - add more properties as needed
+
 const discordUserSchema = z.object({
   id: z.string(),
   email: z.string().email(),
   username: z.string(),
-  discriminator: z.string(),
   verified: z.boolean().refine((val) => val, {
     message: 'Verify your email with Discord first',
   }),
   global_name: z.string().nullable(),
   avatar: z.string().nullable(),
-  bot: z.boolean().optional(),
-  system: z.boolean().optional(),
-  mfa_enabled: z.boolean().optional(),
   banner: z.string().nullish(),
-  banner_color: z.string().nullish(),
   accent_color: z.number().int().nullish(),
-  locale: z.string().optional(),
-  flags: z.number().int().optional(),
-  premium_type: z.number().int().optional(),
-  public_flags: z.number().int().optional(),
 });
 
 const githubUserSchema = z.object({
   id: z.number(),
-  login: z.string(),
   email: z.string().email(),
+  login: z.string(),
   avatar_url: z.string().url(),
-  node_id: z.string(),
+  html_url: z.string().url(),
   name: z.string().nullable(),
-  gravatar_id: z.string().nullable(),
   bio: z.string().nullable(),
   location: z.string().nullable(),
-  html_url: z.string().url(),
+  company: z.string().nullable(),
+  blog: z.string().url().nullable(),
 });
 
 export { oAuthTokenSchema, discordUserSchema, githubUserSchema };
