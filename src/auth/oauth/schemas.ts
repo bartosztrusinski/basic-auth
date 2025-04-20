@@ -14,7 +14,7 @@ const discordUserSchema = z.object({
   id: z.string(),
   email: z.string().email(),
   username: z.string(),
-  verified: z.boolean().refine((val) => val, {
+  verified: z.boolean().refine((value) => value, {
     message: 'Verify your email with Discord first',
   }),
   global_name: z.string().nullable(),
@@ -33,7 +33,19 @@ const githubUserSchema = z.object({
   bio: z.string().nullable(),
   location: z.string().nullable(),
   company: z.string().nullable(),
-  blog: z.string().url().nullable(),
+  blog: z.string().nullable(),
 });
 
-export { oAuthTokenSchema, discordUserSchema, githubUserSchema };
+const googleUserSchema = z.object({
+  sub: z.string(),
+  email: z.string().email(),
+  email_verified: z.boolean().refine((value) => value, {
+    message: 'Verify your email with Google first',
+  }),
+  name: z.string().optional(),
+  given_name: z.string().optional(),
+  family_name: z.string().optional(),
+  picture: z.string().url().optional(),
+});
+
+export { oAuthTokenSchema, discordUserSchema, githubUserSchema, googleUserSchema };

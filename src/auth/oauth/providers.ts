@@ -1,7 +1,7 @@
 import 'server-only';
 import { z } from 'zod';
 import { env } from '@/env';
-import { discordUserSchema, githubUserSchema } from './schemas';
+import { discordUserSchema, githubUserSchema, googleUserSchema } from './schemas';
 import { type OAuthProviderConfig } from './types';
 
 const providerConfig = {
@@ -31,6 +31,24 @@ const providerConfig = {
       id: providerUser.id.toString(),
       email: providerUser.email,
       name: providerUser.name ?? providerUser.login,
+    }),
+  }),
+  google: createProvider({
+    clientId: env.GOOGLE_CLIENT_ID,
+    clientSecret: env.GOOGLE_CLIENT_SECRET,
+    authorizationUrl: new URL('https://accounts.google.com/o/oauth2/v2/auth'),
+    tokenUrl: new URL('https://www.googleapis.com/oauth2/v4/token'),
+    userUrl: new URL('https://www.googleapis.com/oauth2/v3/userinfo'),
+    scope: [
+      'https://www.googleapis.com/auth/userinfo.email',
+      'https://www.googleapis.com/auth/userinfo.profile',
+      'openid',
+    ],
+    userSchema: googleUserSchema,
+    userMapper: (providerUser) => ({
+      id: providerUser.sub,
+      email: providerUser.email,
+      name: providerUser.name ?? 'User',
     }),
   }),
 } satisfies Record<string, OAuthProviderConfig>;
