@@ -1,7 +1,7 @@
 'use client';
 
 import { useActionState } from 'react';
-import { logIn, oAuthLogIn } from '@/auth/actions';
+import { logIn, logInWithProvider } from '@/auth/actions';
 
 export function LoginForm() {
   const [state, action, isPending] = useActionState(logIn, { isSuccess: false });
@@ -9,13 +9,13 @@ export function LoginForm() {
   return (
     <>
       <div className='grid grid-flow-col gap-2'>
-        <form action={oAuthLogIn.bind(null, 'discord')}>
+        <form action={logInWithProvider.bind(null, 'discord')}>
           <button className='w-full rounded bg-zinc-800 p-2 font-bold shadow-lg'>Discord</button>
         </form>
-        <form action={oAuthLogIn.bind(null, 'github')}>
+        <form action={logInWithProvider.bind(null, 'github')}>
           <button className='w-full rounded bg-zinc-800 p-2 font-bold shadow-lg'>GitHub</button>
         </form>
-        <form action={oAuthLogIn.bind(null, 'google')}>
+        <form action={logInWithProvider.bind(null, 'google')}>
           <button className='w-full rounded bg-zinc-800 p-2 font-bold shadow-lg'>Google</button>
         </form>
       </div>

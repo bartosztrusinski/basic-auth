@@ -62,12 +62,12 @@ export async function logIn(_: LoginActionState, formData: FormData): Promise<Lo
   }
 }
 
+export async function logInWithProvider(provider: OAuthProvider) {
+  const authorizationUrl = await generateAuthorizationUrl(provider);
+  redirect(authorizationUrl.toString());
+}
+
 export async function logOut() {
   await deleteUserSession();
   redirectToLogin({ redirectReason: null });
-}
-
-export async function oAuthLogIn(provider: OAuthProvider) {
-  const authorizationUrl = await generateAuthorizationUrl(provider);
-  redirect(authorizationUrl.toString());
 }
