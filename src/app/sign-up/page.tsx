@@ -1,6 +1,7 @@
 import { LoggedIn } from '@/auth/components/logged-in';
 import { ReturnBack } from '@/auth/components/return-back';
 import { LoginLink } from '@/auth/components/auth-link';
+import { ProviderButtons } from '@/auth/components/provider-buttons';
 import { Page } from '@/components/page';
 import { SignupForm } from '@/components/signup-form';
 
@@ -22,6 +23,7 @@ export default async function SignupPage({
             Log in
           </LoginLink>
         </Page.Description>
+        <ProviderButtons />
         <SignupForm />
       </Page>
     </>
