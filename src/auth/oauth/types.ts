@@ -9,6 +9,7 @@ export type OAuthUser = {
 } & Pick<User, 'email' | 'name'>;
 
 export type OAuthProviderConfig<Schema extends z.ZodSchema = z.ZodSchema> = {
+  name: string;
   clientId: string;
   clientSecret: string;
   authorizationUrl: URL;

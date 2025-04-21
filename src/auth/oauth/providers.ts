@@ -6,6 +6,7 @@ import { type OAuthProviderConfig } from './types';
 
 const providerConfig = {
   discord: createProvider({
+    name: 'Discord',
     clientId: env.DISCORD_CLIENT_ID,
     clientSecret: env.DISCORD_CLIENT_SECRET,
     authorizationUrl: new URL('https://discord.com/oauth2/authorize'),
@@ -20,6 +21,7 @@ const providerConfig = {
     }),
   }),
   github: createProvider({
+    name: 'GitHub',
     clientId: env.GITHUB_CLIENT_ID,
     clientSecret: env.GITHUB_CLIENT_SECRET,
     authorizationUrl: new URL('https://github.com/login/oauth/authorize'),
@@ -34,6 +36,7 @@ const providerConfig = {
     }),
   }),
   google: createProvider({
+    name: 'Google',
     clientId: env.GOOGLE_CLIENT_ID,
     clientSecret: env.GOOGLE_CLIENT_SECRET,
     authorizationUrl: new URL('https://accounts.google.com/o/oauth2/v2/auth'),
