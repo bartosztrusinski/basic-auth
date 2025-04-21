@@ -113,15 +113,15 @@ async function connectUserToAccount(
   if (existingUser) {
     const accounts = await db.getUserAccounts(existingUser.id);
     const hasProviderAccount = accounts.some((account) => account.provider === provider);
-    const otherUserProviders = accounts
+    const otherUserProvider = accounts
       .map((account) => account.provider)
-      .filter((p) => p !== provider);
+      .find((p) => p !== provider);
 
-    if (!hasProviderAccount && otherUserProviders.length > 0) {
+    if (!hasProviderAccount && otherUserProvider) {
       throw new Error('User already registered with given email address', {
-        cause: `This email is already registered with ${otherUserProviders.join(', ')}. 
-        Please log in using that provider instead. 
-        You can link your ${provider} account after logging in.`,
+        cause: `This email is already registered with another provider. 
+        Please try to log in using  ${providerConfig[otherUserProvider].name}. 
+        You can link your ${providerConfig[provider].name} account after logging in.`,
       });
     }
   }
