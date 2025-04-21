@@ -109,6 +109,23 @@ async function connectUserToAccount(
 ): Promise<Pick<User, 'id' | 'role'>> {
   // Start transaction to ensure atomicity when using db
   const existingUser = await db.getUserByEmail(email);
+
+  if (existingUser) {
+    const accounts = await db.getUserAccounts(existingUser.id);
+    const hasProviderAccount = accounts.some((account) => account.provider === provider);
+    const otherUserProviders = accounts
+      .map((account) => account.provider)
+      .filter((p) => p !== provider);
+
+    if (!hasProviderAccount && otherUserProviders.length > 0) {
+      throw new Error('User already registered with given email address', {
+        cause: `This email is already registered with ${otherUserProviders.join(', ')}. 
+        Please log in using that provider instead. 
+        You can link your ${provider} account after logging in.`,
+      });
+    }
+  }
+
   const user = existingUser ?? (await db.createUser({ ...oAuthData, email }));
 
   // Do nothing on conflict

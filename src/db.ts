@@ -98,6 +98,19 @@ async function writeAccounts(accounts: Account[]) {
   await fs.writeFile(`${DATA_PATH}/accounts.json`, JSON.stringify(accounts, null, 2));
 }
 
+async function getAccounts() {
+  try {
+    return await readAccounts();
+  } catch {
+    return [];
+  }
+}
+
+async function getUserAccounts(userId: User['id']) {
+  const accounts = await getAccounts();
+  return accounts.filter((account) => account.userId === userId);
+}
+
 async function createAccount(newAccount: Account) {
   const accounts = await readAccounts();
   const isExistingAccount = accounts.some(
@@ -217,6 +230,8 @@ export const db = {
   getUsers,
   getUserByEmail,
   getUserById,
+  createAccount,
+  getUserAccounts,
   createSession,
   updateSession,
   deleteSession,
@@ -224,7 +239,6 @@ export const db = {
   deleteExpiredUserSession,
   getSessions,
   getSessionById,
-  createAccount,
 };
 
 export type { Session, User };

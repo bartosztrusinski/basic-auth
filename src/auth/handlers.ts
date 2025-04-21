@@ -95,7 +95,13 @@ async function handleOAuthCallback(
     });
   } catch (error) {
     console.error(error);
-    redirectToLogin({ redirectReason: 'Could not log in with your provider. Please try again.' });
+    // TODO handle error properly
+    redirectToLogin({
+      redirectReason:
+        error instanceof Error && typeof error.cause === 'string'
+          ? error.cause
+          : 'Could not log in with your provider. Please try again.',
+    });
   }
 
   redirect(config.defaultRedirectRoute);
