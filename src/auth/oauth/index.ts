@@ -107,37 +107,47 @@ async function connectUserToAccount(
   provider: OAuthProvider,
   { id, email, ...oAuthData }: OAuthUser,
 ): Promise<Pick<User, 'id' | 'role'>> {
-  // Start transaction to ensure atomicity when using db
-  const existingUser = await db.getUserByEmail(email);
+  const existingUser = await db.getUserByProvider(provider, id);
 
   if (existingUser) {
-    const accounts = await db.getUserAccounts(existingUser.id);
-    const hasProviderAccount = accounts.some((account) => account.provider === provider);
+    return {
+      id: existingUser.id,
+      role: existingUser.role,
+    };
+  }
+
+  const existingUserWithEmail = await db.getUserByEmail(email);
+
+  if (existingUserWithEmail) {
+    const accounts = await db.getUserAccounts(existingUserWithEmail.id);
     const otherUserProvider = accounts
       .map((account) => account.provider)
       .find((p) => p !== provider);
 
-    if (!hasProviderAccount && otherUserProvider) {
+    if (otherUserProvider) {
       throw new Error('User already registered with given email address', {
-        cause: `This email is already registered with another provider. 
-        Please try to log in using  ${providerConfig[otherUserProvider].name}. 
+        cause: `This email is already registered with another provider.
+        Please try to log in using ${providerConfig[otherUserProvider].name}.
+        You can link your ${providerConfig[provider].name} account after logging in.`,
+      });
+    }
+
+    if (existingUserWithEmail.password) {
+      throw new Error('User already registered with given email address', {
+        cause: `This email is already registered with another provider.
+        Please try to log in using password.
         You can link your ${providerConfig[provider].name} account after logging in.`,
       });
     }
   }
 
-  const user = existingUser ?? (await db.createUser({ ...oAuthData, email }));
-
-  // Do nothing on conflict
-  await db.createAccount({
-    userId: user.id,
-    provider,
-    providerAccountId: id,
-  });
+  // Start transaction to ensure atomicity when using db
+  const newUser = await db.createUser({ ...oAuthData, email });
+  await db.createAccount({ userId: newUser.id, provider, providerAccountId: id });
 
   return {
-    id: user.id,
-    role: user.role,
+    id: newUser.id,
+    role: newUser.role,
   };
 }
 

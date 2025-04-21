@@ -81,6 +81,28 @@ async function getUserById(id: User['id']) {
   return users.find((user) => user.id === id);
 }
 
+async function getUserByProvider(
+  provider: Account['provider'],
+  providerAccountId: Account['providerAccountId'],
+): Promise<(User & { account: Account }) | null> {
+  const account = await getAccountByProvider(provider, providerAccountId);
+
+  if (!account) {
+    return null;
+  }
+
+  const user = await getUserById(account.userId);
+
+  if (!user) {
+    return null;
+  }
+
+  return {
+    ...user,
+    account,
+  };
+}
+
 // ======= ACCOUNT =========
 
 type Account = {
@@ -109,6 +131,16 @@ async function getAccounts() {
 async function getUserAccounts(userId: User['id']) {
   const accounts = await getAccounts();
   return accounts.filter((account) => account.userId === userId);
+}
+
+async function getAccountByProvider(
+  provider: Account['provider'],
+  providerAccountId: Account['providerAccountId'],
+) {
+  const accounts = await getAccounts();
+  return accounts.find(
+    (account) => account.provider === provider && account.providerAccountId === providerAccountId,
+  );
 }
 
 async function createAccount(newAccount: Account) {
@@ -230,8 +262,10 @@ export const db = {
   getUsers,
   getUserByEmail,
   getUserById,
+  getUserByProvider,
   createAccount,
   getUserAccounts,
+  getAccountByProvider,
   createSession,
   updateSession,
   deleteSession,
