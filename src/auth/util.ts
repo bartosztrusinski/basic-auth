@@ -2,29 +2,12 @@ import { redirect, RedirectType } from 'next/navigation';
 import { type NextRequest } from 'next/server';
 import { env } from '@/env';
 import config from './config';
+import oAuthConfig from './oauth/config';
 
-async function getSearchParam(
-  searchParams: Promise<Record<string, string | undefined>> | undefined,
-  key: string,
-) {
-  if (!searchParams) {
-    return null;
-  }
-
-  const params = await searchParams;
-
-  if (!params) {
-    return null;
-  }
-
-  const value = params[key];
-
-  if (!value) {
-    return null;
-  }
-
-  return decodeURIComponent(value);
-}
+type RedirectOptions = {
+  returnBackUrl?: string | null;
+  redirectReason?: string | null;
+};
 
 export async function getReturnBackSearchParam(
   searchParams: Promise<Record<string, string | undefined>> | undefined,
@@ -38,10 +21,11 @@ export async function getRedirectReasonSearchParam(
   return getSearchParam(searchParams, config.redirectReasonKey);
 }
 
-type RedirectOptions = {
-  returnBackUrl?: string | null;
-  redirectReason?: string | null;
-};
+export async function getAccountLinkErrorSearchParam(
+  searchParams: Promise<Record<string, string | undefined>> | undefined,
+) {
+  return getSearchParam(searchParams, oAuthConfig.accountLinkErrorKey);
+}
 
 export function redirectToLogin({
   returnBackUrl,
@@ -94,4 +78,27 @@ export function isSameObject<T extends Record<string, unknown>>(objA: T, objB: T
   }
 
   return true;
+}
+
+async function getSearchParam(
+  searchParams: Promise<Record<string, string | undefined>> | undefined,
+  key: string,
+) {
+  if (!searchParams) {
+    return null;
+  }
+
+  const params = await searchParams;
+
+  if (!params) {
+    return null;
+  }
+
+  const value = params[key];
+
+  if (!value) {
+    return null;
+  }
+
+  return decodeURIComponent(value);
 }
