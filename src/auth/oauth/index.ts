@@ -192,6 +192,23 @@ async function linkUserAccount(provider: OAuthProvider, { id, email }: OAuthUser
 }
 
 async function unlinkUserAccount(provider: OAuthProvider, userId: User['id']) {
+  const user = await db.getUserById(userId);
+
+  if (!user) {
+    throw new Error('Could not find user');
+  }
+
+  const accounts = await db.getUserAccounts(userId);
+
+  const hasOtherAccounts = accounts.some((account) => account.provider !== provider);
+  const isPasswordSet = Boolean(user.password);
+
+  if (!hasOtherAccounts && !isPasswordSet) {
+    throw new Error('Cannot unlink last account without password set', {
+      cause: `You must have at least one account linked to your profile. Please set a password or link another account.`,
+    });
+  }
+
   await db.deleteAccount(userId, provider);
 }
 

@@ -75,5 +75,9 @@ export async function logOut() {
 export async function unlinkAccount(provider: OAuthProvider) {
   const { userId } = await auth.protect();
 
-  await unlinkUserAccount(provider, userId);
+  try {
+    await unlinkUserAccount(provider, userId);
+  } catch (error) {
+    console.error(error);
+  }
 }

@@ -37,7 +37,9 @@ type ProtectOptions = {
   unauthenticatedUrl?: string;
 } & RedirectToLoginOptions;
 
-export type BackendUser = Pick<User, 'id' | 'email' | 'name' | 'role'>;
+export type BackendUser = Pick<User, 'id' | 'email' | 'name' | 'role'> & {
+  hasPassword: boolean;
+};
 
 export const auth: AuthFunction = Object.assign(cache(authFn), { protect });
 
@@ -114,6 +116,7 @@ export const currentUser = cache<() => Promise<BackendUser | null>>(async () => 
     email: user.email,
     name: user.name,
     role: user.role,
+    hasPassword: Boolean(user.password),
   } satisfies BackendUser;
 });
 

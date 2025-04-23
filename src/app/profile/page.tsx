@@ -32,6 +32,7 @@ export default async function ProfilePage({
         </Page.Description>
       </Protect>
       <UserProfile user={{ name, email, role }} />
+      <h2 className='pt-4 text-center text-2xl font-bold'>Linked Accounts</h2>
       <AccountLinkError searchParams={searchParams} />
       <LinkedAccounts accounts={accounts} />
     </Page>
