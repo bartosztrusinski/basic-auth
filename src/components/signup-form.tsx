@@ -2,6 +2,7 @@
 
 import { useActionState } from 'react';
 import { signUp } from '@/actions';
+import { ErrorAlert } from '@/components/error-alert';
 
 export function SignupForm() {
   const [state, action, isPending] = useActionState(signUp, { isSuccess: false });
@@ -32,13 +33,7 @@ export function SignupForm() {
         className='rounded bg-white px-2 py-1 text-base text-black'
       />
 
-      {state.errors && (
-        <div className='text-sm font-light text-red-500'>
-          {state.errors.map((error, index) => (
-            <p key={index}>{error}</p>
-          ))}
-        </div>
-      )}
+      {state.errors && <ErrorAlert error={state.errors} />}
 
       <button disabled={isPending} className='rounded border-2 border-white p-1'>
         {isPending ? 'Submitting...' : 'Sign Up'}

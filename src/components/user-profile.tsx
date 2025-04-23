@@ -2,8 +2,9 @@
 
 import { useActionState, useEffect, useState } from 'react';
 import { type User } from '@/db';
-import { editProfile } from '@/actions';
 import { useCurrentUser } from '@/auth/hooks/use-current-user';
+import { editProfile } from '@/actions';
+import { ErrorAlert } from '@/components/error-alert';
 
 type Props = {
   user: Pick<User, 'email' | 'name' | 'role'>;
@@ -57,13 +58,7 @@ export function UserProfile({ user }: Props) {
             </select>
           </div>
 
-          {state.errors && (
-            <div className='text-sm font-light text-red-500'>
-              {state.errors.map((error, index) => (
-                <p key={index}>{error}</p>
-              ))}
-            </div>
-          )}
+          {state.errors && <ErrorAlert error={state.errors} />}
 
           <div className='flex gap-2'>
             <button
