@@ -159,6 +159,15 @@ async function createAccount(newAccount: Account) {
   return newAccount;
 }
 
+async function deleteAccount(userId: User['id'], provider: Account['provider']) {
+  const accounts = await getAccounts();
+  const updatedAccounts = accounts.filter(
+    (account) => !(account.userId === userId && account.provider === provider),
+  );
+
+  await writeAccounts(updatedAccounts);
+}
+
 // ======== SESSION =========
 
 type Session = {
@@ -264,6 +273,7 @@ export const db = {
   getUserById,
   getUserByProvider,
   createAccount,
+  deleteAccount,
   getUserAccounts,
   getAccountByProvider,
   createSession,
@@ -275,4 +285,4 @@ export const db = {
   getSessionById,
 };
 
-export type { Session, User };
+export type { Session, User, Account };

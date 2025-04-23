@@ -191,6 +191,10 @@ async function linkUserAccount(provider: OAuthProvider, { id, email }: OAuthUser
   });
 }
 
+async function unlinkUserAccount(provider: OAuthProvider, userId: User['id']) {
+  await db.deleteAccount(userId, provider);
+}
+
 function getProviderName(provider: OAuthProvider) {
   return providers[provider].name;
 }
@@ -237,6 +241,7 @@ export {
   fetchOAuthUser,
   createUserAccount,
   linkUserAccount,
+  unlinkUserAccount,
   getProviderName,
   getRedirectUrl,
   validateState,

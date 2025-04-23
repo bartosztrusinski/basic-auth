@@ -3,10 +3,10 @@
 import { redirect } from 'next/navigation';
 import { db, type Session } from '@/db';
 import { loginSchema } from '@/schemas';
-import { createUserSession, deleteUserSession } from './session';
+import { auth, createUserSession, deleteUserSession } from './session';
 import { comparePasswords } from './password';
 import { redirectToLogin } from './util';
-import { generateAuthorizationUrl } from './oauth';
+import { generateAuthorizationUrl, unlinkUserAccount } from './oauth';
 import { type OAuthProvider } from './oauth/types';
 
 // eslint-disable-next-line @typescript-eslint/no-empty-object-type
@@ -70,4 +70,10 @@ export async function logInWithProvider(provider: OAuthProvider) {
 export async function logOut() {
   await deleteUserSession();
   redirectToLogin({ redirectReason: null });
+}
+
+export async function unlinkAccount(provider: OAuthProvider) {
+  const { userId } = await auth.protect();
+
+  await unlinkUserAccount(provider, userId);
 }
