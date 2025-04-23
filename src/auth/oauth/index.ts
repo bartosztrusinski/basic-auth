@@ -10,14 +10,15 @@ import {
   setCodeVerifierCookie,
   getCodeVerifierCookie,
 } from '../cookie';
+import { currentUser } from '../session';
 import { fetcher } from '../util';
+import config from '../config';
 import { oAuthTokenSchema } from './schemas';
 import { type OAuthUser, type OAuthProvider } from './types';
-import config from '../config';
-import providerConfig from './providers';
+import providers from './providers';
 
 async function generateAuthorizationUrl(provider: OAuthProvider) {
-  const { authorizationUrl, clientId, scope } = providerConfig[provider];
+  const { authorizationUrl, clientId, scope } = providers[provider];
   const responseType = 'code';
   const redirectUrl = getRedirectUrl(provider);
   const state = await generateState();
@@ -37,7 +38,7 @@ async function generateAuthorizationUrl(provider: OAuthProvider) {
 }
 
 async function fetchOAuthToken(provider: OAuthProvider, code: string) {
-  const { tokenUrl, clientId, clientSecret } = providerConfig[provider];
+  const { tokenUrl, clientId, clientSecret } = providers[provider];
   const grantType = 'authorization_code';
   const redirectUrl = getRedirectUrl(provider);
   const codeVerifier = await getCodeVerifierCookie();
@@ -82,7 +83,7 @@ async function fetchOAuthUser(
   accessToken: string,
   tokenType: string,
 ): Promise<OAuthUser> {
-  const { userUrl, userSchema, userMapper } = providerConfig[provider];
+  const { userUrl, userSchema, userMapper } = providers[provider];
   // TODO type this properly
   // Use type assertion to get the correct type for userMapper
   const typedUserMapper = userMapper as (data: z.infer<typeof userSchema>) => OAuthUser;
@@ -103,7 +104,7 @@ async function fetchOAuthUser(
   return typedUserMapper(providerUser);
 }
 
-async function connectUserToAccount(
+async function createUserAccount(
   provider: OAuthProvider,
   { id, email, ...oAuthData }: OAuthUser,
 ): Promise<Pick<User, 'id' | 'role'>> {
@@ -117,6 +118,7 @@ async function connectUserToAccount(
   }
 
   const existingUserWithEmail = await db.getUserByEmail(email);
+  const providerName = getProviderName(provider);
 
   if (existingUserWithEmail) {
     const accounts = await db.getUserAccounts(existingUserWithEmail.id);
@@ -127,8 +129,8 @@ async function connectUserToAccount(
     if (otherUserProvider) {
       throw new Error('User already registered with given email address', {
         cause: `This email is already registered with another provider.
-        Please try to log in using ${providerConfig[otherUserProvider].name}.
-        You can link your ${providerConfig[provider].name} account after logging in.`,
+        Please try to log in using ${getProviderName(otherUserProvider)}.
+        You can link your ${providerName} account after logging in.`,
       });
     }
 
@@ -136,19 +138,61 @@ async function connectUserToAccount(
       throw new Error('User already registered with given email address', {
         cause: `This email is already registered with another provider.
         Please try to log in using password.
-        You can link your ${providerConfig[provider].name} account after logging in.`,
+        You can link your ${providerName} account after logging in.`,
       });
     }
   }
 
   // Start transaction to ensure atomicity when using db
-  const newUser = await db.createUser({ ...oAuthData, email });
-  await db.createAccount({ userId: newUser.id, provider, providerAccountId: id });
+  const newUser = await db.createUser({ email, ...oAuthData });
+  await db.createAccount({
+    userId: newUser.id,
+    provider,
+    providerAccountId: id,
+  });
 
   return {
     id: newUser.id,
     role: newUser.role,
   };
+}
+
+async function linkUserAccount(provider: OAuthProvider, { id, email }: OAuthUser) {
+  const user = await currentUser();
+
+  if (!user) {
+    throw new Error('User not logged in');
+  }
+
+  const isCurrentUser = (userId: User['id']) => user.id === userId;
+  const existingAccount = await db.getAccountByProvider(provider, id);
+  const providerName = getProviderName(provider);
+
+  if (existingAccount) {
+    if (isCurrentUser(existingAccount.userId)) return;
+
+    throw new Error('This account is already in use', {
+      cause: `This ${providerName} account is already linked to another user.`,
+    });
+  }
+
+  const existingUserWithEmail = await db.getUserByEmail(email);
+
+  if (existingUserWithEmail && !isCurrentUser(existingUserWithEmail.id)) {
+    throw new Error('Providers email is already used by another user', {
+      cause: `Email of this ${providerName} account is already linked to another user.`,
+    });
+  }
+
+  await db.createAccount({
+    userId: user.id,
+    provider,
+    providerAccountId: id,
+  });
+}
+
+function getProviderName(provider: OAuthProvider) {
+  return providers[provider].name;
 }
 
 function getRedirectUrl(provider: OAuthProvider) {
@@ -191,7 +235,9 @@ export {
   generateAuthorizationUrl,
   fetchOAuthToken,
   fetchOAuthUser,
-  connectUserToAccount,
+  createUserAccount,
+  linkUserAccount,
+  getProviderName,
   getRedirectUrl,
   validateState,
 };

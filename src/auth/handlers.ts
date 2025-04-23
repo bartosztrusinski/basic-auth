@@ -5,8 +5,16 @@ import { auth, createUserSession, currentUser } from './session';
 import { redirectToLogin } from './util';
 import { deleteSessionCookie } from './cookie';
 import config from './config';
-import { connectUserToAccount, fetchOAuthToken, fetchOAuthUser, validateState } from './oauth';
+import {
+  createUserAccount,
+  fetchOAuthToken,
+  fetchOAuthUser,
+  getProviderName,
+  linkUserAccount,
+  validateState,
+} from './oauth';
 import { OAuthProviderEnum } from './oauth/providers';
+import oAuthConfig from './oauth/config';
 
 export const handlers = { GET };
 
@@ -59,6 +67,7 @@ async function getCurrentUser(): Promise<NextResponse> {
   );
 }
 
+// TODO big function, split and make it do one thing
 async function handleOAuthCallback(
   providerParam: string | undefined,
   request: NextRequest,
@@ -66,6 +75,8 @@ async function handleOAuthCallback(
   const code = request.nextUrl.searchParams.get('code');
   const state = request.nextUrl.searchParams.get('state');
   const { success: isValidProvider, data: provider } = OAuthProviderEnum.safeParse(providerParam);
+  const { userId } = await auth();
+  const isLoggedIn = Boolean(userId);
 
   try {
     if (!isValidProvider) {
@@ -88,21 +99,35 @@ async function handleOAuthCallback(
 
     const { tokenType, accessToken } = await fetchOAuthToken(provider, code);
     const oAuthUser = await fetchOAuthUser(provider, accessToken, tokenType);
-    const user = await connectUserToAccount(provider, oAuthUser);
-    await createUserSession({
-      userId: user.id,
-      userRole: user.role,
-    });
+
+    if (isLoggedIn) {
+      await linkUserAccount(provider, oAuthUser);
+    } else {
+      const user = await createUserAccount(provider, oAuthUser);
+      await createUserSession({
+        userId: user.id,
+        userRole: user.role,
+      });
+    }
   } catch (error) {
-    console.error(error);
     // TODO handle error properly
+    console.error(error);
+
+    const providerName = provider ? getProviderName(provider) : null;
+    const errorCause =
+      error instanceof Error && typeof error.cause === 'string' ? error.cause : null;
+
+    if (isLoggedIn) {
+      redirect(
+        `${oAuthConfig.redirectRoute}?${oAuthConfig.accountLinkErrorKey}=${errorCause ?? `Could not link your ${providerName ?? ''} account. Please try again.`}`,
+      );
+    }
+
     redirectToLogin({
       redirectReason:
-        error instanceof Error && typeof error.cause === 'string'
-          ? error.cause
-          : 'Could not log in with your provider. Please try again.',
+        errorCause ?? `Could not log in with ${providerName ?? 'your provider'}. Please try again.`,
     });
   }
 
-  redirect(config.defaultRedirectRoute);
+  redirect(userId ? oAuthConfig.redirectRoute : config.defaultRedirectRoute);
 }

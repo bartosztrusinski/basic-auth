@@ -9,8 +9,8 @@ const apiSessionEndpoint = 'session';
 const apiUserEndpoint = 'user';
 const apiOAuthEndpoint = 'callback';
 
-const protectedRoutes = ['/private', '/profile', '/admin'];
-const authRoutes = [loginRoute, signupRoute];
+const protectedRoutes = ['/private', '/profile', '/admin'] as const;
+const authRoutes = [loginRoute, signupRoute] as const;
 
 const returnBackUrlKey = 'return_back_url';
 const redirectReasonKey = 'redirect_reason';
