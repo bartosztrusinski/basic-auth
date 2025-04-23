@@ -4,7 +4,7 @@ import { useActionState, useEffect, useState } from 'react';
 import { type User } from '@/db';
 import { useCurrentUser } from '@/auth/hooks/use-current-user';
 import { editProfile } from '@/actions';
-import { ErrorAlert } from '@/components/error-alert';
+import { Alert } from '@/components/alert';
 
 type Props = {
   user: Pick<User, 'email' | 'name' | 'role'>;
@@ -58,7 +58,7 @@ export function UserProfile({ user }: Props) {
             </select>
           </div>
 
-          {state.errors && <ErrorAlert error={state.errors} />}
+          {state.errors && <Alert variant='error' message={state.errors} />}
 
           <div className='flex gap-2'>
             <button

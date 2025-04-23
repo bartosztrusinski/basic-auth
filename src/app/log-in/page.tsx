@@ -6,6 +6,7 @@ import { ProviderButtons } from '@/auth/components/provider-buttons';
 import { Page } from '@/components/page';
 import { LoginForm } from '@/components/login-form';
 
+// TODO search params message should be a code, show a message based on the reason code
 export default async function LoginPage({
   searchParams,
 }: {

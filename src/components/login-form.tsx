@@ -2,7 +2,7 @@
 
 import { useActionState } from 'react';
 import { logIn } from '@/auth/actions';
-import { ErrorAlert } from '@/components/error-alert';
+import { Alert } from '@/components/alert';
 
 export function LoginForm() {
   const [state, action, isPending] = useActionState(logIn, { isSuccess: false });
@@ -25,7 +25,9 @@ export function LoginForm() {
         autoComplete='current-password'
         className='rounded bg-white px-2 py-1 text-base text-black'
       />
-      {state.errors && <ErrorAlert error={state.errors} />}
+
+      {state.errors && <Alert variant='error' message={state.errors} />}
+
       <button disabled={isPending} className='rounded border-2 border-white p-1'>
         {isPending ? 'Submitting...' : 'Log In'}
       </button>
