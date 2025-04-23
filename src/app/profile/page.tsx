@@ -1,9 +1,16 @@
+import { db } from '@/db';
 import { auth, currentUser } from '@/auth/session';
 import { Protect } from '@/auth/components/protect';
+import { LinkedAccounts } from '@/auth/components/linked-accounts';
+import { AccountLinkError } from '@/auth/components/account-link-error';
 import { UserProfile } from '@/components/user-profile';
 import { Page } from '@/components/page';
 
-export default async function ProfilePage() {
+export default async function ProfilePage({
+  searchParams,
+}: {
+  searchParams: Promise<Record<string, string | undefined>>;
+}) {
   const { redirectToLogin } = await auth();
   const user = await currentUser();
 
@@ -11,6 +18,7 @@ export default async function ProfilePage() {
     return redirectToLogin({ returnBackUrl: '/profile' });
   }
 
+  const accounts = await db.getUserAccounts(user.id);
   const { email, name, role } = user;
 
   return (
@@ -19,11 +27,13 @@ export default async function ProfilePage() {
       <Protect role='admin'>
         <Page.Description>
           <span className='text-zinc-400'>
-            You are logged in as an <code className='text-red-500'>admin</code>.
+            You are logged in as an <code className='text-indigo-500'>admin</code>.
           </span>
         </Page.Description>
       </Protect>
       <UserProfile user={{ name, email, role }} />
+      <AccountLinkError searchParams={searchParams} />
+      <LinkedAccounts accounts={accounts} />
     </Page>
   );
 }
