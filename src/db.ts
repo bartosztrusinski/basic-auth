@@ -151,7 +151,7 @@ async function createAccount(newAccount: Account) {
   );
 
   if (isExistingAccount) {
-    return newAccount;
+    return null;
   }
 
   await writeAccounts([...accounts, newAccount]);
@@ -232,15 +232,6 @@ async function deleteUserSession(userId: User['id']) {
   await writeSessions(updatedSessions);
 }
 
-async function deleteExpiredUserSession(userId: User['id']) {
-  const sessions = await getSessions();
-  const now = new Date();
-  const updatedSessions = sessions.filter(
-    (session) => session.userId !== userId || new Date(session.expirationTime) > now,
-  );
-  await writeSessions(updatedSessions);
-}
-
 async function getSessions() {
   try {
     return await readSessions();
@@ -265,6 +256,66 @@ async function getSessionById(id: Session['id']) {
   return session;
 }
 
+// ======= VERIFICATION TOKENS =========
+
+type VerificationToken = {
+  email: User['email'];
+  token: string;
+  expirationTime: number;
+};
+
+async function readVerificationTokens() {
+  const data = await fs.readFile(`${DATA_PATH}/verification-tokens.json`, 'utf-8');
+  const tokens = JSON.parse(data || '[]') as VerificationToken[];
+  const now = Date.now();
+  const nonExpiredTokens = tokens.filter((token) => token.expirationTime > now);
+
+  return nonExpiredTokens;
+}
+
+async function writeVerificationTokens(tokens: VerificationToken[]) {
+  await fs.writeFile(`${DATA_PATH}/verification-tokens.json`, JSON.stringify(tokens, null, 2));
+}
+
+async function createVerificationToken(newToken: VerificationToken) {
+  const tokens = await readVerificationTokens();
+
+  await writeVerificationTokens([...tokens, newToken]);
+
+  return newToken;
+}
+
+async function deleteVerificationToken(email: VerificationToken['email']) {
+  const tokens = await readVerificationTokens();
+  const updatedTokens = tokens.filter((token) => token.email !== email);
+
+  await writeVerificationTokens(updatedTokens);
+}
+
+async function getVerificationTokenByEmail(email: VerificationToken['email']) {
+  const verificationTokens = await readVerificationTokens();
+  const verificationToken = verificationTokens.find((token) => token.email === email);
+
+  if (!verificationToken) {
+    return null;
+  }
+
+  return verificationToken;
+}
+
+async function getVerificationTokenByToken(token: VerificationToken['token']) {
+  const verificationTokens = await readVerificationTokens();
+  const verificationToken = verificationTokens.find(
+    (verificationToken) => verificationToken.token === token,
+  );
+
+  if (!verificationToken) {
+    return null;
+  }
+
+  return verificationToken;
+}
+
 export const db = {
   createUser,
   updateUser,
@@ -280,9 +331,12 @@ export const db = {
   updateSession,
   deleteSession,
   deleteUserSession,
-  deleteExpiredUserSession,
   getSessions,
   getSessionById,
+  createVerificationToken,
+  deleteVerificationToken,
+  getVerificationTokenByEmail,
+  getVerificationTokenByToken,
 };
 
-export type { Session, User, Account };
+export type { Session, User, Account, VerificationToken };
