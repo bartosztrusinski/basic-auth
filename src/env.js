@@ -8,6 +8,7 @@ export const env = createEnv({
     OAUTH_STATE_EXPIRATION_IN_SECONDS: z.coerce.number().optional(),
     OAUTH_CODE_VERIFIER_EXPIRATION_IN_SECONDS: z.coerce.number().optional(),
     BASE_URL: z.string().url(),
+    RESEND_API_KEY: z.string(),
     DISCORD_CLIENT_ID: z.string(),
     DISCORD_CLIENT_SECRET: z.string(),
     GITHUB_CLIENT_ID: z.string(),
@@ -28,6 +29,7 @@ export const env = createEnv({
     OAUTH_CODE_VERIFIER_EXPIRATION_IN_SECONDS:
       process.env.OAUTH_CODE_VERIFIER_EXPIRATION_IN_SECONDS,
     BASE_URL: process.env.BASE_URL,
+    RESEND_API_KEY: process.env.RESEND_API_KEY,
     DISCORD_CLIENT_ID: process.env.DISCORD_CLIENT_ID,
     DISCORD_CLIENT_SECRET: process.env.DISCORD_CLIENT_SECRET,
     GITHUB_CLIENT_ID: process.env.GITHUB_CLIENT_ID,
