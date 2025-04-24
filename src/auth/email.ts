@@ -3,7 +3,7 @@ import 'server-only';
 import { Resend } from 'resend';
 import { env } from '@/env';
 import { type VerificationToken } from '@/db';
-import { VerificationEmail } from './components/verification-email';
+import { VerificationEmail } from './components/emails/verification-email';
 import config from './config';
 
 const resend = new Resend(env.RESEND_API_KEY);
@@ -29,6 +29,7 @@ export async function sendVerificationEmail(
       to: email,
       subject: 'Welcome to Basic Auth! Please verify your email',
       react: VerificationEmail({
+        // TODO name
         name: email,
         verificationUrl: verificationUrl.toString(),
         expirationTimeHours,
