@@ -1,11 +1,12 @@
 'use server';
 
+import { db } from '@/db';
+import { editProfileSchema, signupSchema } from '@/schemas';
 import { generateSalt, hashPassword } from '@/auth/password';
 import { auth, updateUserSession } from '@/auth/session';
 import { createEmailVerificationToken } from '@/auth/verification-token';
+import { sendVerificationEmail } from '@/auth/email';
 import { type ActionState } from '@/auth/actions';
-import { db } from '@/db';
-import { editProfileSchema, signupSchema } from '@/schemas';
 
 export async function signUp(_: ActionState, formData: FormData): Promise<ActionState> {
   const { data, error } = signupSchema.safeParse(Object.fromEntries(formData.entries()));
@@ -24,6 +25,7 @@ export async function signUp(_: ActionState, formData: FormData): Promise<Action
     const hashedPassword = await hashPassword(password, salt);
     await db.createUser({ email, name, password: hashedPassword, salt });
     const verificationToken = await createEmailVerificationToken(email);
+    await sendVerificationEmail(verificationToken.email, verificationToken.token);
 
     return {
       isSuccess: true,

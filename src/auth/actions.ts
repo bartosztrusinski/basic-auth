@@ -8,6 +8,7 @@ import { comparePasswords } from './password';
 import { redirectToLogin } from './util';
 import { generateAuthorizationUrl, unlinkUserAccount } from './oauth';
 import { type OAuthProvider } from './oauth/types';
+import { sendVerificationEmail } from './email';
 import { createEmailVerificationToken } from './verification-token';
 
 // eslint-disable-next-line @typescript-eslint/no-empty-object-type
@@ -50,7 +51,8 @@ export async function logIn(_: LoginActionState, formData: FormData): Promise<Lo
     }
 
     if (!user.emailVerified) {
-      await createEmailVerificationToken(user.email);
+      const verificationToken = await createEmailVerificationToken(user.email);
+      await sendVerificationEmail(verificationToken.email, verificationToken.token);
 
       return {
         isSuccess: true,
