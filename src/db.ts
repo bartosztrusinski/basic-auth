@@ -281,6 +281,12 @@ async function writeVerificationTokens(tokens: VerificationToken[]) {
 async function createVerificationToken(newToken: VerificationToken) {
   const tokens = await readVerificationTokens();
 
+  const isExistingToken = tokens.some(({ token }) => token === newToken.token);
+
+  if (isExistingToken) {
+    throw new Error('Token already exists');
+  }
+
   await writeVerificationTokens([...tokens, newToken]);
 
   return newToken;
