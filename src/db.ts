@@ -10,6 +10,7 @@ const DATA_PATH = `${process.cwd()}/src/data`;
 type User = {
   id: UUID;
   email: string;
+  emailVerified?: number;
   name: string;
   role: 'user' | 'admin';
   password?: string;

@@ -8,6 +8,7 @@ import { comparePasswords } from './password';
 import { redirectToLogin } from './util';
 import { generateAuthorizationUrl, unlinkUserAccount } from './oauth';
 import { type OAuthProvider } from './oauth/types';
+import { createEmailVerificationToken } from './verification-token';
 
 // eslint-disable-next-line @typescript-eslint/no-empty-object-type
 export type ActionState<T extends Record<string, unknown> = {}> = {
@@ -45,6 +46,14 @@ export async function logIn(_: LoginActionState, formData: FormData): Promise<Lo
       return {
         isSuccess: false,
         errors: ['Invalid email or password'],
+      };
+    }
+
+    if (!user.emailVerified) {
+      await createEmailVerificationToken(user.email);
+
+      return {
+        isSuccess: true,
       };
     }
 

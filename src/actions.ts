@@ -1,7 +1,8 @@
 'use server';
 
 import { generateSalt, hashPassword } from '@/auth/password';
-import { createUserSession, auth, updateUserSession } from '@/auth/session';
+import { auth, updateUserSession } from '@/auth/session';
+import { createEmailVerificationToken } from '@/auth/verification-token';
 import { type ActionState } from '@/auth/actions';
 import { db } from '@/db';
 import { editProfileSchema, signupSchema } from '@/schemas';
@@ -21,8 +22,8 @@ export async function signUp(_: ActionState, formData: FormData): Promise<Action
   try {
     const salt = generateSalt();
     const hashedPassword = await hashPassword(password, salt);
-    const user = await db.createUser({ email, name, password: hashedPassword, salt });
-    await createUserSession({ userId: user.id, userRole: user.role });
+    await db.createUser({ email, name, password: hashedPassword, salt });
+    const verificationToken = await createEmailVerificationToken(email);
 
     return {
       isSuccess: true,
