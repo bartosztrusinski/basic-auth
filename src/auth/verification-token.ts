@@ -1,3 +1,4 @@
+import 'server-only';
 import { db, type VerificationToken } from '@/db';
 import { randomBytes } from 'crypto';
 
