@@ -15,7 +15,6 @@ import {
 } from './oauth';
 import { OAuthProviderEnum } from './oauth/providers';
 import oAuthConfig from './oauth/config';
-import { verifyEmail } from './email';
 
 export const handlers = { GET };
 
@@ -33,18 +32,6 @@ async function GET(request: NextRequest, { params }: { params: Promise<{ endpoin
 
   if (resource === config.apiOAuthEndpoint) {
     await handleOAuthCallback(provider, request);
-  }
-
-  if (resource === 'verify-email') {
-    const token = request.nextUrl.searchParams.get('token');
-
-    if (!token) {
-      redirect(
-        `/resend-verification?redirect_reason=${encodeURIComponent('Missing verification token')}`,
-      );
-    }
-
-    await verifyEmail(token);
   }
 
   return NextResponse.json({ error: 'Invalid endpoint' }, { status: 404 });

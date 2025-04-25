@@ -1,7 +1,7 @@
 'use server';
 
 import { redirect } from 'next/navigation';
-import { db, type Session } from '@/db';
+import { db, type VerificationToken, type Session } from '@/db';
 import { loginSchema } from '@/schemas';
 import { auth, createUserSession, deleteUserSession } from './session';
 import { comparePasswords } from './password';
@@ -91,4 +91,35 @@ export async function unlinkAccount(provider: OAuthProvider) {
   } catch (error) {
     console.error(error);
   }
+}
+
+export async function verifyEmail(token: VerificationToken['token'], _: unknown) {
+  try {
+    const verificationToken = await db.getVerificationTokenByToken(token);
+
+    if (!verificationToken || verificationToken.expirationTime < Date.now()) {
+      throw new Error('Invalid or expired verification token');
+    }
+
+    const { email } = verificationToken;
+    const user = await db.getUserByEmail(email);
+
+    if (!user) {
+      throw new Error('Email does not exist');
+    }
+
+    if (!user.emailVerified) {
+      await db.updateUser(user.id, { emailVerified: Date.now() });
+    }
+
+    await db.deleteVerificationToken(verificationToken.email);
+  } catch (error) {
+    console.error('Error verifying email: ', error);
+    const errorMessage = error instanceof Error ? error.message : 'Email verification failed';
+
+    // TODO
+    redirect(`/resend-verification?redirect_reason=${encodeURIComponent(errorMessage)}`);
+  }
+
+  redirectToLogin({ redirectReason: 'Email verified successfully! You can now log in.' });
 }
