@@ -10,7 +10,7 @@ const apiUserEndpoint = 'user';
 const apiOAuthEndpoint = 'callback';
 
 const protectedRoutes = ['/private', '/profile', '/admin'] as const;
-const authRoutes = [loginRoute, signupRoute, '/resend-verification'] as const;
+const authRoutes = [loginRoute, signupRoute, '/resend-verification', '/verify-email'] as const;
 
 const returnBackUrlKey = 'return_back_url';
 const redirectReasonKey = 'redirect_reason';

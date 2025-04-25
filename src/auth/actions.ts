@@ -93,7 +93,7 @@ export async function unlinkAccount(provider: OAuthProvider) {
   }
 }
 
-export async function verifyEmail(token: VerificationToken['token'], _: unknown) {
+export async function verifyEmail(token: VerificationToken['token']) {
   try {
     const verificationToken = await db.getVerificationTokenByToken(token);
 
