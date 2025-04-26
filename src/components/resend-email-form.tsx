@@ -4,7 +4,7 @@ import { useActionState } from 'react';
 import { Alert } from '@/components/alert';
 import { resendVerificationEmail } from '@/auth/actions';
 
-export function ResendVerificationForm() {
+export function ResendEmailForm() {
   const [state, action, isPending] = useActionState(resendVerificationEmail, {
     isSuccess: false,
   });
