@@ -2,7 +2,7 @@
 
 import { redirect } from 'next/navigation';
 import { db, type VerificationToken, type Session } from '@/db';
-import { loginSchema } from '@/schemas';
+import { loginSchema, resendVerificationEmailSchema } from '@/schemas';
 import { auth, createUserSession, deleteUserSession } from './session';
 import { comparePasswords } from './password';
 import { redirectToLogin } from './util';
@@ -122,4 +122,52 @@ export async function verifyEmail(token: VerificationToken['token']) {
   }
 
   redirectToLogin({ redirectReason: 'Email verified successfully! You can now log in.' });
+}
+
+export async function resendVerificationEmail(
+  _: unknown,
+  formData: FormData,
+): Promise<ActionState> {
+  const { data, error } = resendVerificationEmailSchema.safeParse(
+    Object.fromEntries(formData.entries()),
+  );
+
+  if (error) {
+    return {
+      isSuccess: false,
+      errors: error.errors.map((err) => err.message),
+    };
+  }
+
+  const { email } = data;
+
+  try {
+    const user = await db.getUserByEmail(email);
+
+    if (!user) {
+      return {
+        isSuccess: true,
+      };
+    }
+
+    if (user.emailVerified) {
+      return {
+        isSuccess: true,
+      };
+    }
+
+    const verificationToken = await createEmailVerificationToken(user.email);
+    await sendVerificationEmail(verificationToken.email, verificationToken.token);
+
+    return {
+      isSuccess: true,
+    };
+  } catch (error) {
+    console.error('Error resending verification email: ', error);
+
+    return {
+      isSuccess: false,
+      errors: [error instanceof Error ? error.message : 'An unknown error occurred'],
+    };
+  }
 }

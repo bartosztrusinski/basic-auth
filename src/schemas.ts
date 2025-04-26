@@ -1,7 +1,9 @@
 import { z } from 'zod';
 
+const email = z.string().email('Invalid email address');
+
 const signupSchema = z.object({
-  email: z.string().email('Invalid email address'),
+  email,
   name: z.string().min(1, 'Name is required'),
   password: z
     .string()
@@ -12,7 +14,7 @@ const signupSchema = z.object({
 });
 
 const loginSchema = z.object({
-  email: z.string().email('Invalid email address'),
+  email,
   password: z.string().min(1, 'Password is required'),
 });
 
@@ -24,4 +26,8 @@ const editProfileSchema = z.object({
   }),
 });
 
-export { signupSchema, loginSchema, editProfileSchema };
+const resendVerificationEmailSchema = z.object({
+  email,
+});
+
+export { signupSchema, loginSchema, editProfileSchema, resendVerificationEmailSchema };
