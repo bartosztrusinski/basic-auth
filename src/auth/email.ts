@@ -28,6 +28,12 @@ export async function sendVerificationEmail(
         name,
         expirationTimeHours,
       }),
+      text: `Hi ${name},\n\n
+      Thanks for signing up. Please click the link below to verify your email address and activate your account.\n\n
+      ${url.toString()}\n\n
+      This verification link will expire in ${expirationTimeHours} hour${
+        expirationTimeHours !== 1 ? 's' : ''
+      }.\n\n`,
     });
 
     if (error) {
