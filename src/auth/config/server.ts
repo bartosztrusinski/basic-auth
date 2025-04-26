@@ -17,8 +17,7 @@ const sessionCookieAttributes = {
   path: '/',
 };
 
-const stateExpirationInSeconds =
-  env.OAUTH_STATE_EXPIRATION_IN_SECONDS ?? oAuthCookiesDefaultExpirationInSeconds;
+const stateExpirationInSeconds = oAuthCookiesDefaultExpirationInSeconds;
 const stateCookieKey = 'oauth-state';
 const stateCookieAttributes = {
   ...secureCookieAttributes,
@@ -26,14 +25,16 @@ const stateCookieAttributes = {
   path: `${config.apiBaseRoute}/${config.apiOAuthEndpoint}`,
 };
 
-const codeVerifierExpirationInSeconds =
-  env.OAUTH_CODE_VERIFIER_EXPIRATION_IN_SECONDS ?? oAuthCookiesDefaultExpirationInSeconds;
+const codeVerifierExpirationInSeconds = oAuthCookiesDefaultExpirationInSeconds;
 const codeVerifierCookieKey = 'oauth-code-verifier';
 const codeVerifierCookieAttributes = {
   ...secureCookieAttributes,
   maxAge: codeVerifierExpirationInSeconds,
   path: `${config.apiBaseRoute}/${config.apiOAuthEndpoint}`,
 };
+
+const verificationTokenExpirationInSeconds = 60 * 60 * 12;
+const fromEmailAddress = env.FROM_EMAIL_ADDRESS ?? 'onboarding@resend.dev';
 
 export default Object.freeze({
   sessionExpirationInSeconds,
@@ -45,4 +46,6 @@ export default Object.freeze({
   codeVerifierExpirationInSeconds,
   codeVerifierCookieKey,
   codeVerifierCookieAttributes,
+  verificationTokenExpirationInSeconds,
+  fromEmailAddress,
 });

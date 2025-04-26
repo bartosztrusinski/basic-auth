@@ -14,6 +14,7 @@ import {
   Text,
 } from '@react-email/components';
 import { env } from '@/env';
+import config from '../../config';
 
 type Props = {
   name: string;
@@ -21,21 +22,20 @@ type Props = {
   expirationTimeHours: number;
 };
 
-// TODO move to config
-const APP_NAME = 'Basic Auth';
-
 export function VerificationEmail({ name, verificationUrl, expirationTimeHours }: Props) {
   return (
     <Tailwind>
       <Html>
         <Head />
         <Body className='bg-zinc-100 p-[8px]'>
-          <Preview>Welcome to {APP_NAME}! Please verify your email</Preview>
+          <Preview>
+            Welcome to {config.appName}! Verify your email address to activate your account.
+          </Preview>
           <Container className='rounded-[4px] border border-solid border-zinc-300 bg-white p-[20px] pb-[5px] font-sans text-zinc-900 shadow'>
-            <Img src={`${env.BASE_URL}/basic-auth.png`} width={48} height={48} />
+            <Img src={`${env.BASE_URL}/${config.logoFilename}`} width={48} height={48} />
             <Section>
               <Heading as='h1' className='text-[24px] leading-[32px]'>
-                Welcome to {APP_NAME}!
+                Welcome to {config.appName}!
               </Heading>
               <Text className='font-sans text-[16px] leading-[24px] text-zinc-800'>Hi {name},</Text>
               <Text className='font-sans text-[16px] leading-[24px] text-zinc-800'>
@@ -61,11 +61,11 @@ export function VerificationEmail({ name, verificationUrl, expirationTimeHours }
                 .
               </Text>
               <Text className='text-[14px] leading-[16px] text-zinc-500'>
-                If you did not sign up for {APP_NAME}, please ignore this email.
+                If you did not sign up for {config.appName}, please ignore this email.
               </Text>
               <Hr />
               <Text className='text-center text-[14px] leading-[16px] text-zinc-500'>
-                &copy; {new Date().getFullYear()} {APP_NAME}. All rights reserved.
+                &copy; {new Date().getFullYear()} {config.appName}. All rights reserved.
               </Text>
             </Section>
           </Container>

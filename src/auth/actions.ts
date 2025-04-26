@@ -2,6 +2,7 @@
 
 import { redirect } from 'next/navigation';
 import { db, type VerificationToken, type Session } from '@/db';
+// TODO move to auth
 import { loginSchema, resendVerificationEmailSchema } from '@/schemas';
 import { auth, createUserSession, deleteUserSession } from './session';
 import { comparePasswords } from './password';
@@ -10,16 +11,17 @@ import { generateAuthorizationUrl, unlinkUserAccount } from './oauth';
 import { type OAuthProvider } from './oauth/types';
 import { sendVerificationEmail } from './email';
 import { createEmailVerificationToken } from './verification-token';
+import config from './config';
 
-// eslint-disable-next-line @typescript-eslint/no-empty-object-type
-export type ActionState<T extends Record<string, unknown> = {}> = {
+type ActionState = {
   isSuccess: boolean;
   errors?: string[];
-} & T;
+};
 
-type LoginActionState = ActionState<{ session?: Session }>;
-
-export async function logIn(_: LoginActionState, formData: FormData): Promise<LoginActionState> {
+export async function logIn(
+  _: unknown,
+  formData: FormData,
+): Promise<ActionState & { session?: Session }> {
   const { data, error } = loginSchema.safeParse(Object.fromEntries(formData.entries()));
 
   if (error) {
@@ -52,7 +54,7 @@ export async function logIn(_: LoginActionState, formData: FormData): Promise<Lo
 
     if (!user.emailVerified) {
       const verificationToken = await createEmailVerificationToken(user.email);
-      await sendVerificationEmail(verificationToken.email, verificationToken.token);
+      await sendVerificationEmail(verificationToken.email, verificationToken.token, user.name);
 
       return {
         isSuccess: true,
@@ -114,11 +116,13 @@ export async function verifyEmail(token: VerificationToken['token']) {
 
     await db.deleteVerificationToken(verificationToken.email);
   } catch (error) {
-    console.error('Error verifying email: ', error);
     const errorMessage = error instanceof Error ? error.message : 'Email verification failed';
 
+    console.error('Error verifying email: ', error);
     // TODO
-    redirect(`/resend-verification?redirect_reason=${encodeURIComponent(errorMessage)}`);
+    redirect(
+      `${config.resendVerificationEmailRoute}?redirect_reason=${encodeURIComponent(errorMessage)}`,
+    );
   }
 
   redirectToLogin({ redirectReason: 'Email verified successfully! You can now log in.' });
@@ -157,7 +161,7 @@ export async function resendVerificationEmail(
     }
 
     const verificationToken = await createEmailVerificationToken(user.email);
-    await sendVerificationEmail(verificationToken.email, verificationToken.token);
+    await sendVerificationEmail(verificationToken.email, verificationToken.token, user.name);
 
     return {
       isSuccess: true,

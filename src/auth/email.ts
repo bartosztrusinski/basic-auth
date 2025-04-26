@@ -3,30 +3,29 @@ import { Resend } from 'resend';
 import { env } from '@/env';
 import { type VerificationToken } from '@/db';
 import { VerificationEmail } from './components/emails/verification-email';
+import config from './config';
+import serverConfig from './config/server';
 
 const resend = new Resend(env.RESEND_API_KEY);
 
 export async function sendVerificationEmail(
   email: VerificationToken['email'],
   token: VerificationToken['token'],
+  name: string,
 ) {
-  // TODO add endpoint, key, from email and expiration time to config
-  const emailVerificationRoute = 'verify-email';
-  const verificationTokenKey = 'token';
-  const expirationTimeHours = 1;
-  const verificationUrl = new URL(emailVerificationRoute, env.BASE_URL);
+  const expirationTimeHours = serverConfig.verificationTokenExpirationInSeconds / 60 / 60;
+  const url = new URL(config.emailVerificationRoute, env.BASE_URL);
 
-  verificationUrl.searchParams.set(verificationTokenKey, token);
+  url.searchParams.set(config.verificationTokenKey, token);
 
   try {
     const { error } = await resend.emails.send({
-      from: 'Basic Auth <onboarding@resend.dev>',
+      from: `${config.appName} <${serverConfig.fromEmailAddress}>`,
       to: email,
-      subject: 'Welcome to Basic Auth! Please verify your email',
+      subject: 'Verify your email address to activate your account',
       react: VerificationEmail({
-        // TODO name
-        name: email,
-        verificationUrl: verificationUrl.toString(),
+        verificationUrl: url.toString(),
+        name,
         expirationTimeHours,
       }),
     });

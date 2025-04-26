@@ -1,11 +1,11 @@
 import 'server-only';
-import { db, type VerificationToken } from '@/db';
 import { randomBytes } from 'crypto';
+import { db, type VerificationToken } from '@/db';
+import serverConfig from './config/server';
 
 export async function createEmailVerificationToken(email: VerificationToken['email']) {
   const token = randomBytes(64).toString('hex');
-  // TODO move to config
-  const expirationTime = Date.now() + 60 * 60 * 1000; // 1 hour
+  const expirationTime = Date.now() + serverConfig.verificationTokenExpirationInSeconds * 1000;
 
   await db.deleteVerificationToken(email);
 
