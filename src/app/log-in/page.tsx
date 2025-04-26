@@ -1,3 +1,5 @@
+import Link from 'next/link';
+import config from '@/auth/config';
 import { LoggedIn } from '@/auth/components/logged-in';
 import { ReturnBack } from '@/auth/components/return-back';
 import { SignupLink } from '@/auth/components/auth-link';
@@ -24,6 +26,14 @@ export default async function LoginPage({
           <SignupLink searchParams={searchParams} className='text-teal-500 hover:underline'>
             Sign up
           </SignupLink>
+          <br />
+          Verification email did not arrive?{' '}
+          <Link
+            href={config.resendVerificationEmailRoute}
+            className='text-teal-500 hover:underline'
+          >
+            Resend email
+          </Link>
         </Page.Description>
         <RedirectReason searchParams={searchParams} />
         <ProviderButtons />
