@@ -1,6 +1,5 @@
 import { redirect, RedirectType } from 'next/navigation';
 import { type NextRequest } from 'next/server';
-import { env } from '@/env';
 import config from './config';
 import oAuthConfig from './oauth/config';
 
@@ -31,7 +30,7 @@ export function redirectToLogin({
   returnBackUrl,
   redirectReason = config.defaultRedirectReason,
 }: RedirectOptions = {}): never {
-  const redirectUrl = new URL(config.loginRoute, env.BASE_URL);
+  const redirectUrl = new URL(config.loginRoute, config.baseUrl);
   if (redirectReason) {
     setRedirectReasonParam(redirectUrl, redirectReason);
   }

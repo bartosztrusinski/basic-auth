@@ -14,7 +14,7 @@ export async function sendVerificationEmail(
   name: string,
 ) {
   const expirationTimeHours = serverConfig.verificationTokenExpirationInSeconds / 60 / 60;
-  const url = new URL(config.emailVerificationRoute, env.BASE_URL);
+  const url = new URL(config.emailVerificationRoute, config.baseUrl);
 
   url.searchParams.set(config.verificationTokenKey, token);
 

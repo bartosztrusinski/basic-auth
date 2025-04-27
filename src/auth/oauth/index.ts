@@ -2,7 +2,6 @@ import 'server-only';
 import { randomBytes, hash } from 'node:crypto';
 import { type z } from 'zod';
 import { db, type User } from '@/db';
-import { env } from '@/env';
 import {
   getStateCookie,
   setStateCookie,
@@ -217,7 +216,7 @@ function getProviderName(provider: OAuthProvider) {
 }
 
 function getRedirectUrl(provider: OAuthProvider) {
-  return `${env.BASE_URL}${config.apiBaseRoute}/${config.apiOAuthEndpoint}/${provider}`;
+  return `${config.baseUrl}${config.apiBaseRoute}/${config.apiOAuthEndpoint}/${provider}`;
 }
 
 async function validateState(state: string) {

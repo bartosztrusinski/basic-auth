@@ -17,6 +17,7 @@ export const env = createEnv({
   },
   client: {
     NEXT_PUBLIC_APP_NAME: z.string().optional(),
+    NEXT_PUBLIC_BASE_URL: z.string().optional(),
     NEXT_PUBLIC_DEFAULT_REDIRECT_ROUTE: z.string().optional(),
     NEXT_PUBLIC_LOGIN_ROUTE: z.string().optional(),
     NEXT_PUBLIC_SIGNUP_ROUTE: z.string().optional(),
@@ -37,6 +38,7 @@ export const env = createEnv({
     GOOGLE_CLIENT_ID: process.env.GOOGLE_CLIENT_ID,
     GOOGLE_CLIENT_SECRET: process.env.GOOGLE_CLIENT_SECRET,
     NEXT_PUBLIC_APP_NAME: process.env.NEXT_PUBLIC_APP_NAME,
+    NEXT_PUBLIC_BASE_URL: process.env.NEXT_PUBLIC_BASE_URL,
     NEXT_PUBLIC_DEFAULT_REDIRECT_ROUTE: process.env.NEXT_PUBLIC_DEFAULT_REDIRECT_ROUTE,
     NEXT_PUBLIC_LOGIN_ROUTE: process.env.NEXT_PUBLIC_LOGIN_ROUTE,
     NEXT_PUBLIC_SIGNUP_ROUTE: process.env.NEXT_PUBLIC_SIGNUP_ROUTE,

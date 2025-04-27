@@ -13,7 +13,6 @@ import {
   Tailwind,
   Text,
 } from '@react-email/components';
-import { env } from '@/env';
 import config from '../../config';
 
 type Props = {
@@ -32,7 +31,7 @@ export function VerificationEmail({ name, verificationUrl, expirationTimeHours }
             Welcome to {config.appName}! Verify your email address to activate your account.
           </Preview>
           <Container className='rounded-[4px] border border-solid border-zinc-300 bg-white p-[20px] pb-[5px] font-sans text-zinc-900 shadow'>
-            <Img src={`${env.BASE_URL}/${config.logoFilename}`} width={48} height={48} />
+            <Img src={`${config.baseUrl}/${config.logoFilename}`} width={48} height={48} />
             <Section>
               <Heading as='h1' className='text-[24px] leading-[32px]'>
                 Welcome to {config.appName}!
