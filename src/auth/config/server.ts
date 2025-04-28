@@ -9,7 +9,7 @@ const secureCookieAttributes = {
   sameSite: 'lax',
 } as const;
 
-const sessionExpirationInSeconds = env.SESSION_EXPIRATION_IN_SECONDS;
+const sessionExpirationInSeconds = env.SESSION_EXPIRATION_IN_SECONDS ?? 60 * 60 * 24 * 7;
 const sessionCookieKey = 'session-id';
 const sessionCookieAttributes = {
   ...secureCookieAttributes,
