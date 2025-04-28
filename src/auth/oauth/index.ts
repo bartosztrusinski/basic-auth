@@ -154,15 +154,6 @@ async function linkUserAccount(provider: OAuthProvider, { id }: OAuthUser) {
     throw new AuthError('oauth-link-existing-account');
   }
 
-  // TODO remove
-  // const existingUserWithEmail = await db.getUserByEmail(email);
-
-  // if (existingUserWithEmail && !isCurrentUser(existingUserWithEmail.id)) {
-  //   throw new Error('Providers email is already used by another user', {
-  //     cause: `Email of this ${providerName} account is already linked to another user.`,
-  //   });
-  // }
-
   if (!existingAccount) {
     await db.createAccount({
       userId: user.id,
