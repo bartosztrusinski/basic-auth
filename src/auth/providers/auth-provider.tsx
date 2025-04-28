@@ -12,6 +12,7 @@ export async function AuthProvider({ children }: { children: ReactNode }) {
         id: user.id,
         email: user.email,
         name: user.name,
+        hasPassword: user.hasPassword,
       }
     : null;
 

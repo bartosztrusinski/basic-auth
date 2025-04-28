@@ -1,8 +1,8 @@
 import { type Account } from '@/db';
 import { logInWithProvider, unlinkAccount } from '../actions';
+import { currentUser } from '../session';
 import { getProviderName } from '../oauth';
 import { OAuthProviderEnum } from '../oauth/providers';
-import { currentUser } from '@/auth/session';
 
 type Props = {
   accounts: Account[];
@@ -11,10 +11,14 @@ type Props = {
 export async function LinkedAccounts({ accounts }: Props) {
   const user = await currentUser();
 
+  if (!user) {
+    return null;
+  }
+
   return OAuthProviderEnum.options.map((provider) => {
     const isLinked = accounts.some((account) => account.provider === provider);
     const action = isLinked ? unlinkAccount : logInWithProvider;
-    const isUnlinkingEnabled = accounts.length > 1 || user?.hasPassword;
+    const isUnlinkingEnabled = accounts.length > 1 || user.hasPassword;
 
     return (
       <div key={provider} className='flex min-h-14 justify-between rounded-lg bg-zinc-800 p-3'>
