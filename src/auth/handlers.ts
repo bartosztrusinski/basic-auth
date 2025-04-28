@@ -2,18 +2,18 @@ import 'server-only';
 import { NextResponse, type NextRequest } from 'next/server';
 import { redirect } from 'next/navigation';
 import { auth, createUserSession, currentUser } from './session';
-import { redirectToLogin } from './util';
+import { redirectAuth, redirectToLogin } from './util';
 import { deleteSessionCookie } from './cookie';
-import config from './config';
+import { AuthError } from './message';
 import {
   createUserAccount,
   fetchOAuthToken,
   fetchOAuthUser,
-  getProviderName,
   linkUserAccount,
   validateState,
 } from './oauth';
 import { OAuthProviderEnum } from './oauth/providers';
+import config from './config';
 import oAuthConfig from './oauth/config';
 
 export const handlers = { GET };
@@ -110,24 +110,24 @@ async function handleOAuthCallback(
       });
     }
   } catch (error) {
-    // TODO handle error properly
-    console.error(error);
+    const authCode = error instanceof AuthError ? error.authCode : null;
 
-    const providerName = provider ? getProviderName(provider) : null;
-    const errorCause =
-      error instanceof Error && typeof error.cause === 'string' ? error.cause : null;
+    console.error('OAuth callback error:', error);
 
     if (isLoggedIn) {
-      redirect(
-        `${oAuthConfig.redirectRoute}?${oAuthConfig.accountLinkErrorKey}=${errorCause ?? `Could not link your ${providerName ?? ''} account. Please try again.`}`,
-      );
+      redirectAuth(oAuthConfig.redirectRoute, {
+        authCode: authCode ?? 'oauth-link-failed',
+      });
     }
 
     redirectToLogin({
-      redirectReason:
-        errorCause ?? `Could not log in with ${providerName ?? 'your provider'}. Please try again.`,
+      authCode: authCode ?? 'oauth-log-in-failed',
     });
   }
 
-  redirect(userId ? oAuthConfig.redirectRoute : config.defaultRedirectRoute);
+  if (isLoggedIn) {
+    redirectAuth(oAuthConfig.redirectRoute, { authCode: 'oauth-link' });
+  }
+
+  redirect(config.defaultRedirectRoute);
 }

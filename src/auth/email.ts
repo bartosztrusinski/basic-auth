@@ -3,6 +3,7 @@ import { Resend } from 'resend';
 import { env } from '@/env';
 import { type VerificationToken } from '@/db';
 import { VerificationEmail } from './components/emails/verification-email';
+import { getAuthMessage } from './message';
 import config from './config';
 import serverConfig from './config/server';
 
@@ -37,10 +38,11 @@ export async function sendVerificationEmail(
     });
 
     if (error) {
-      throw new Error(error.message);
+      throw new Error(error.message, { cause: error });
     }
   } catch (error) {
-    console.error('Error sending email: ', error);
-    throw new Error('Failed to send verification email. Please try again.');
+    console.error('Error sending email: ', error instanceof Error ? error.cause : error);
+    
+    throw new Error(getAuthMessage('verification-email-not-sent').message);
   }
 }

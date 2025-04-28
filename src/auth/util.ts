@@ -1,75 +1,60 @@
 import { redirect, RedirectType } from 'next/navigation';
 import { type NextRequest } from 'next/server';
+import { type AuthCode } from './message';
 import config from './config';
-import oAuthConfig from './oauth/config';
 
 type RedirectOptions = {
+  type?: RedirectType;
+  authCode?: AuthCode | null;
   returnBackUrl?: string | null;
-  redirectReason?: string | null;
 };
 
-export async function getReturnBackSearchParam(
-  searchParams: Promise<Record<string, string | undefined>> | undefined,
-) {
-  return getSearchParam(searchParams, config.returnBackUrlKey);
-}
+function redirectAuth(
+  url: string,
+  { type, authCode }: Omit<RedirectOptions, 'returnBackUrl'> = {},
+): never {
+  const redirectUrl = new URL(url, config.baseUrl);
 
-export async function getRedirectReasonSearchParam(
-  searchParams: Promise<Record<string, string | undefined>> | undefined,
-) {
-  return getSearchParam(searchParams, config.redirectReasonKey);
-}
-
-export async function getAccountLinkErrorSearchParam(
-  searchParams: Promise<Record<string, string | undefined>> | undefined,
-) {
-  return getSearchParam(searchParams, oAuthConfig.accountLinkErrorKey);
-}
-
-export function redirectToLogin({
-  returnBackUrl,
-  redirectReason = config.defaultRedirectReason,
-}: RedirectOptions = {}): never {
-  const redirectUrl = new URL(config.loginRoute, config.baseUrl);
-  if (redirectReason) {
-    setRedirectReasonParam(redirectUrl, redirectReason);
+  if (authCode) {
+    redirectUrl.searchParams.set(config.authCodeKey, authCode);
   }
+
+  redirect(redirectUrl.toString(), type);
+}
+
+function redirectToLogin({
+  authCode = 'unauthenticated',
+  returnBackUrl,
+}: Omit<RedirectOptions, 'type'> = {}): never {
+  const redirectUrl = new URL(config.loginRoute, config.baseUrl);
 
   if (returnBackUrl) {
-    setReturnBackParam(redirectUrl, returnBackUrl);
+    redirectUrl.searchParams.set(config.returnBackUrlKey, returnBackUrl);
   }
 
-  redirect(redirectUrl.toString(), RedirectType.replace);
+  redirectAuth(redirectUrl.toString(), { type: RedirectType.replace, authCode });
 }
 
-export function setReturnBackParam(url: URL, returnBackUrl: string) {
-  url.searchParams.set(config.returnBackUrlKey, returnBackUrl);
-}
-
-export function setRedirectReasonParam(url: URL, redirectReason: string) {
-  url.searchParams.set(config.redirectReasonKey, encodeURIComponent(redirectReason));
-}
-
-export function isAuthRoute(request: NextRequest) {
+function isAuthRoute(request: NextRequest) {
   const { pathname } = request.nextUrl;
   return config.authRoutes.some((route) => pathname.startsWith(route));
 }
 
-export function isProtectedRoute(request: NextRequest) {
+function isProtectedRoute(request: NextRequest) {
   const { pathname } = request.nextUrl;
   return config.protectedRoutes.some((route) => pathname.startsWith(route));
 }
 
-export function isApiAuthRoute(request: NextRequest) {
+function isApiAuthRoute(request: NextRequest) {
   const { pathname } = request.nextUrl;
   return pathname.startsWith(config.apiBaseRoute);
 }
 
-export const fetcher = <T>(...args: Parameters<typeof fetch>) =>
+const fetcher = <T>(...args: Parameters<typeof fetch>) =>
   fetch(...args).then((res) => res.json() as T);
 
 /** Shallow object comparison */
-export function isSameObject<T extends Record<string, unknown>>(objA: T, objB: T) {
+function isSameObject<T extends Record<string, unknown>>(objA: T, objB: T) {
   for (const key in objA) {
     if (objA[key as keyof T] !== objB[key as keyof T]) {
       return false;
@@ -79,7 +64,7 @@ export function isSameObject<T extends Record<string, unknown>>(objA: T, objB: T
   return true;
 }
 
-async function getSearchParam(
+async function getSearchParam<T extends string>(
   searchParams: Promise<Record<string, string | undefined>> | undefined,
   key: string,
 ) {
@@ -99,5 +84,16 @@ async function getSearchParam(
     return null;
   }
 
-  return decodeURIComponent(value);
+  return decodeURIComponent(value) as T;
 }
+
+export {
+  redirectAuth,
+  redirectToLogin,
+  isAuthRoute,
+  isProtectedRoute,
+  isApiAuthRoute,
+  fetcher,
+  isSameObject,
+  getSearchParam,
+};

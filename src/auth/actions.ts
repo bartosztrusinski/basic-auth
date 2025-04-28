@@ -6,11 +6,12 @@ import { db, type VerificationToken, type Session } from '@/db';
 import { loginSchema, resendVerificationEmailSchema } from '@/schemas';
 import { auth, createUserSession, deleteUserSession } from './session';
 import { comparePasswords } from './password';
-import { redirectToLogin } from './util';
+import { redirectAuth, redirectToLogin } from './util';
 import { generateAuthorizationUrl, unlinkUserAccount } from './oauth';
 import { type OAuthProvider } from './oauth/types';
 import { sendVerificationEmail } from './email';
 import { createEmailVerificationToken } from './verification-token';
+import { AuthError } from './message';
 import config from './config';
 
 type ActionState = {
@@ -82,7 +83,7 @@ export async function logInWithProvider(provider: OAuthProvider) {
 
 export async function logOut() {
   await deleteUserSession();
-  redirectToLogin({ redirectReason: null });
+  redirectToLogin({ authCode: null });
 }
 
 export async function unlinkAccount(provider: OAuthProvider) {
@@ -100,7 +101,7 @@ export async function verifyEmail(token: VerificationToken['token']) {
     const verificationToken = await db.getVerificationTokenByToken(token);
 
     if (!verificationToken || verificationToken.expirationTime < Date.now()) {
-      throw new Error('Invalid or expired verification token');
+      throw new AuthError('email-verification-expired');
     }
 
     const { email } = verificationToken;
@@ -116,16 +117,14 @@ export async function verifyEmail(token: VerificationToken['token']) {
 
     await db.deleteVerificationToken(verificationToken.email);
   } catch (error) {
-    const errorMessage = error instanceof Error ? error.message : 'Email verification failed';
-
     console.error('Error verifying email: ', error);
-    // TODO
-    redirect(
-      `${config.resendVerificationEmailRoute}?redirect_reason=${encodeURIComponent(errorMessage)}`,
-    );
+
+    redirectAuth(config.resendVerificationEmailRoute, {
+      authCode: error instanceof AuthError ? error.authCode : 'email-verification-failed',
+    });
   }
 
-  redirectToLogin({ redirectReason: 'Email verified successfully! You can now log in.' });
+  redirectToLogin({ authCode: 'email-verified' });
 }
 
 export async function resendVerificationEmail(
@@ -167,7 +166,7 @@ export async function resendVerificationEmail(
       isSuccess: true,
     };
   } catch (error) {
-    console.error('Error resending verification email: ', error);
+    console.error('Error sending verification email: ', error);
 
     return {
       isSuccess: false,

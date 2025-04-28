@@ -1,5 +1,5 @@
 import { redirect, RedirectType } from 'next/navigation';
-import { getReturnBackSearchParam } from '../util';
+import { getSearchParam } from '../util';
 import config from '../config';
 
 type Props = {
@@ -8,9 +8,9 @@ type Props = {
 };
 
 export async function ReturnBack({ returnUrl, searchParams }: Props) {
-  const url = returnUrl ?? (searchParams && (await getReturnBackSearchParam(searchParams)));
+  const url = returnUrl ?? (await getSearchParam(searchParams, config.returnBackUrlKey));
 
-  redirect(url ? decodeURIComponent(url) : config.defaultRedirectRoute, RedirectType.replace);
+  redirect(url ?? config.defaultRedirectRoute, RedirectType.replace);
 
   return null;
 }

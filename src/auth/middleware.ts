@@ -1,11 +1,7 @@
 import 'server-only';
 import { type NextRequest, NextResponse } from 'next/server';
 import { getSessionCookie, setAuthSyncCookie } from './cookie';
-import {
-  type redirectToLogin as redirectToLoginUtil,
-  setRedirectReasonParam,
-  setReturnBackParam,
-} from './util';
+import { type redirectToLogin as redirectToLoginUtil } from './util';
 import config from './config';
 
 type MiddlewareAuth = {
@@ -14,16 +10,16 @@ type MiddlewareAuth = {
   redirectToDefault: (options?: RedirectOptions) => NextResponse;
 };
 
-type MiddlewareHandler = (
-  auth: () => Promise<MiddlewareAuth>,
-  request: NextRequest,
-) => Promise<NextResponse | void>;
+type RedirectToLoginOptions = RedirectOptions & Parameters<typeof redirectToLoginUtil>[0];
 
 type RedirectOptions = {
   requestAuthSync?: boolean;
 };
 
-type RedirectToLoginOptions = RedirectOptions & Parameters<typeof redirectToLoginUtil>[0];
+type MiddlewareHandler = (
+  auth: () => Promise<MiddlewareAuth>,
+  request: NextRequest,
+) => Promise<NextResponse | void>;
 
 export function authMiddleware(middlewareHandler: MiddlewareHandler) {
   return async function middleware(request: NextRequest): Promise<NextResponse> {
@@ -48,13 +44,13 @@ const authClosure = (request: NextRequest) => async () =>
 
 function redirectToLogin(
   request: NextRequest,
-  { redirectReason, requestAuthSync, returnBackUrl }: RedirectToLoginOptions = {},
+  { requestAuthSync, returnBackUrl, authCode }: RedirectToLoginOptions = {},
 ) {
   const { pathname } = request.nextUrl;
   const redirectUrl = new URL(config.loginRoute, request.url);
 
-  setReturnBackParam(redirectUrl, returnBackUrl ?? pathname);
-  setRedirectReasonParam(redirectUrl, redirectReason ?? config.defaultRedirectReason);
+  redirectUrl.searchParams.set(config.returnBackUrlKey, returnBackUrl ?? pathname);
+  redirectUrl.searchParams.set(config.authCodeKey, authCode ?? 'unauthenticated');
 
   const response = NextResponse.redirect(redirectUrl);
 
@@ -65,9 +61,7 @@ function redirectToLogin(
   return response;
 }
 
-function redirectToDefault(request: NextRequest, options: RedirectOptions = {}) {
-  const { requestAuthSync } = options;
-
+function redirectToDefault(request: NextRequest, { requestAuthSync }: RedirectOptions = {}) {
   const response = NextResponse.redirect(new URL(config.defaultRedirectRoute, request.url));
 
   if (requestAuthSync) {

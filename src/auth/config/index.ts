@@ -23,12 +23,10 @@ const authRoutes = [
 ] as const;
 
 const syncAuthCookieKey = 'sync-auth';
-const returnBackUrlKey = 'return_back_url';
-const redirectReasonKey = 'redirect_reason';
+const returnBackUrlKey = 'return-back-url';
 const verificationTokenKey = 'token';
+const authCodeKey = 'auth-code';
 
-// TODO
-const defaultRedirectReason = 'Please log in to continue';
 const logoFilename = 'basic-auth.png';
 
 export default Object.freeze({
@@ -47,8 +45,7 @@ export default Object.freeze({
   authRoutes,
   syncAuthCookieKey,
   returnBackUrlKey,
-  redirectReasonKey,
   verificationTokenKey,
-  defaultRedirectReason,
+  authCodeKey,
   logoFilename,
 });

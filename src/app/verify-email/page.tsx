@@ -1,7 +1,7 @@
-import { redirect } from 'next/navigation';
+import config from '@/auth/config';
+import { redirectAuth } from '@/auth/util';
 import { Page } from '@/components/page';
 import { VerifyEmailForm } from '@/components/verify-email-form';
-import config from '@/auth/config';
 
 export default async function VerifyEmailPage({
   searchParams,
@@ -12,10 +12,9 @@ export default async function VerifyEmailPage({
   const { token } = params;
 
   if (!token) {
-    // TODO
-    redirect(
-      `${config.resendVerificationEmailRoute}?redirect_reason=${encodeURIComponent('Missing token')}`,
-    );
+    redirectAuth(config.resendVerificationEmailRoute, {
+      authCode: 'email-verification-failed',
+    });
   }
 
   return (

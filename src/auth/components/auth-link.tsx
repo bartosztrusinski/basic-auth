@@ -1,6 +1,6 @@
 import { type AnchorHTMLAttributes } from 'react';
 import Link, { type LinkProps } from 'next/link';
-import { getReturnBackSearchParam } from '../util';
+import { getSearchParam } from '../util';
 import config from '../config';
 
 type AuthProps = LinkProps &
@@ -29,7 +29,7 @@ function AuthLink({ returnBackUrl, searchParams, href, ...props }: AuthProps) {
 }
 
 async function AuthLinkAsync({ searchParams, href, ...props }: AuthProps) {
-  const returnBackUrl = await getReturnBackSearchParam(searchParams);
+  const returnBackUrl = await getSearchParam(searchParams, config.returnBackUrlKey);
 
   if (!returnBackUrl) {
     return <Link {...props} href={href} />;

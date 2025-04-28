@@ -44,7 +44,7 @@ const authMessages = {
   'oauth-log-in-email-taken': {
     type: 'error',
     message:
-      'Email already registered with another provider. Please log in using the original method. You can link your account after logging in.',
+      'This email is already registered with another provider. Please log in using the original method. You can link your account after logging in.',
   },
   'oauth-link': {
     type: 'success',

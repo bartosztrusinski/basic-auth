@@ -11,6 +11,7 @@ import {
 } from '../cookie';
 import { currentUser } from '../session';
 import { fetcher } from '../util';
+import { AuthError, getAuthMessage } from '../message';
 import config from '../config';
 import { oAuthTokenSchema } from './schemas';
 import { type OAuthUser, type OAuthProvider } from './types';
@@ -65,8 +66,7 @@ async function fetchOAuthToken(provider: OAuthProvider, code: string) {
   const { success: isTokenValid, data: tokenData, error } = oAuthTokenSchema.safeParse(data);
 
   if (!isTokenValid) {
-    console.error(error);
-    throw new Error('Invalid token response from provider');
+    throw new Error('Invalid token response from provider', error);
   }
 
   const { token_type, access_token } = tokenData;
@@ -96,8 +96,7 @@ async function fetchOAuthUser(
   const { success: isValidUser, data: providerUser, error } = userSchema.safeParse(data);
 
   if (!isValidUser) {
-    console.error(error);
-    throw new Error('Invalid user response from provider');
+    throw new Error('Invalid user response from provider', error);
   }
 
   return typedUserMapper(providerUser);
@@ -117,28 +116,13 @@ async function createUserAccount(
   }
 
   const existingUserWithEmail = await db.getUserByEmail(email);
-  const providerName = getProviderName(provider);
 
   if (existingUserWithEmail) {
     const accounts = await db.getUserAccounts(existingUserWithEmail.id);
-    const otherUserProvider = accounts
-      .map((account) => account.provider)
-      .find((p) => p !== provider);
+    const isAnotherProviderUsed = accounts.some((account) => account.provider !== provider);
 
-    if (otherUserProvider) {
-      throw new Error('User already registered with given email address', {
-        cause: `This email is already registered with another provider.
-        Please try to log in using ${getProviderName(otherUserProvider)}.
-        You can link your ${providerName} account after logging in.`,
-      });
-    }
-
-    if (existingUserWithEmail.password) {
-      throw new Error('User already registered with given email address', {
-        cause: `This email is already registered with another provider.
-        Please try to log in using password.
-        You can link your ${providerName} account after logging in.`,
-      });
+    if (isAnotherProviderUsed || existingUserWithEmail.password) {
+      throw new AuthError('oauth-log-in-email-taken');
     }
   }
 
@@ -156,38 +140,36 @@ async function createUserAccount(
   };
 }
 
-async function linkUserAccount(provider: OAuthProvider, { id, email }: OAuthUser) {
+async function linkUserAccount(provider: OAuthProvider, { id }: OAuthUser) {
   const user = await currentUser();
 
   if (!user) {
     throw new Error('User not logged in');
   }
 
-  const isCurrentUser = (userId: User['id']) => user.id === userId;
   const existingAccount = await db.getAccountByProvider(provider, id);
-  const providerName = getProviderName(provider);
+  const isAccountLinkedToAnotherUser = existingAccount && existingAccount.userId !== user.id;
 
-  if (existingAccount) {
-    if (isCurrentUser(existingAccount.userId)) return;
-
-    throw new Error('This account is already in use', {
-      cause: `This ${providerName} account is already linked to another user.`,
-    });
+  if (isAccountLinkedToAnotherUser) {
+    throw new AuthError('oauth-link-existing-account');
   }
 
-  const existingUserWithEmail = await db.getUserByEmail(email);
+  // TODO remove
+  // const existingUserWithEmail = await db.getUserByEmail(email);
 
-  if (existingUserWithEmail && !isCurrentUser(existingUserWithEmail.id)) {
-    throw new Error('Providers email is already used by another user', {
-      cause: `Email of this ${providerName} account is already linked to another user.`,
+  // if (existingUserWithEmail && !isCurrentUser(existingUserWithEmail.id)) {
+  //   throw new Error('Providers email is already used by another user', {
+  //     cause: `Email of this ${providerName} account is already linked to another user.`,
+  //   });
+  // }
+
+  if (!existingAccount) {
+    await db.createAccount({
+      userId: user.id,
+      provider,
+      providerAccountId: id,
     });
   }
-
-  await db.createAccount({
-    userId: user.id,
-    provider,
-    providerAccountId: id,
-  });
 }
 
 async function unlinkUserAccount(provider: OAuthProvider, userId: User['id']) {
@@ -203,9 +185,7 @@ async function unlinkUserAccount(provider: OAuthProvider, userId: User['id']) {
   const isPasswordSet = Boolean(user.password);
 
   if (!hasOtherAccounts && !isPasswordSet) {
-    throw new Error('Cannot unlink last account without password set', {
-      cause: `You must have at least one account linked to your profile. Please set a password or link another account.`,
-    });
+    throw new Error(getAuthMessage('oauth-unlink-only-account').message);
   }
 
   await db.deleteAccount(userId, provider);

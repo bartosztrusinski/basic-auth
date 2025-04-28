@@ -2,6 +2,7 @@
 
 import { useActionState } from 'react';
 import { logIn } from '@/auth/actions';
+import { getAuthMessage } from '@/auth/message';
 import { Alert } from '@/components/alert';
 
 export function LoginForm() {
@@ -27,7 +28,9 @@ export function LoginForm() {
       />
 
       {state.errors && <Alert variant='error' message={state.errors} />}
-      {state.isSuccess && <Alert variant='success' message='Confirmation email has been sent!' />}
+      {state.isSuccess && (
+        <Alert variant='success' message={getAuthMessage('verification-email-sent').message} />
+      )}
 
       <button disabled={isPending} className='rounded border-2 border-white p-1'>
         {isPending ? 'Submitting...' : 'Log In'}

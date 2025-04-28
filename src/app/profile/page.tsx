@@ -1,10 +1,11 @@
 import { db } from '@/db';
 import { auth, currentUser } from '@/auth/session';
+import { getAuthCode, getAuthMessage } from '@/auth/message';
 import { Protect } from '@/auth/components/protect';
 import { LinkedAccounts } from '@/auth/components/linked-accounts';
-import { AccountLinkError } from '@/auth/components/account-link-error';
 import { UserProfile } from '@/components/user-profile';
 import { Page } from '@/components/page';
+import { Alert } from '@/components/alert';
 
 export default async function ProfilePage({
   searchParams,
@@ -20,6 +21,8 @@ export default async function ProfilePage({
 
   const accounts = await db.getUserAccounts(user.id);
   const { email, name, role } = user;
+  const authCode = await getAuthCode(searchParams);
+  const authMessage = authCode ? getAuthMessage(authCode) : null;
 
   return (
     <Page>
@@ -33,7 +36,7 @@ export default async function ProfilePage({
       </Protect>
       <UserProfile user={{ name, email, role }} />
       <h2 className='pt-4 text-center text-2xl font-bold'>Linked Accounts</h2>
-      <AccountLinkError searchParams={searchParams} />
+      {authMessage && <Alert variant={authMessage.type} message={authMessage.message} />}
       <LinkedAccounts accounts={accounts} />
     </Page>
   );
