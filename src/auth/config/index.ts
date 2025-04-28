@@ -4,6 +4,7 @@ const appName = env.NEXT_PUBLIC_APP_NAME ?? 'Basic Auth';
 
 const baseUrl = env.NEXT_PUBLIC_BASE_URL ?? 'http://localhost:3000';
 const defaultRedirectRoute = '/';
+const oAuthRedirectRoute = '/profile';
 const loginRoute = '/log-in';
 const signupRoute = '/sign-up';
 const resendVerificationEmailRoute = '/resend-email';
@@ -33,6 +34,7 @@ export default Object.freeze({
   baseUrl,
   appName,
   defaultRedirectRoute,
+  oAuthRedirectRoute,
   loginRoute,
   signupRoute,
   resendVerificationEmailRoute,

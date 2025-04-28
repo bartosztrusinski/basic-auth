@@ -14,7 +14,6 @@ import {
 } from './oauth';
 import { OAuthProviderEnum } from './oauth/providers';
 import config from './config';
-import oAuthConfig from './oauth/config';
 
 export const handlers = { GET };
 
@@ -115,7 +114,7 @@ async function handleOAuthCallback(
     console.error('OAuth callback error:', error);
 
     if (isLoggedIn) {
-      redirectAuth(oAuthConfig.redirectRoute, {
+      redirectAuth(config.oAuthRedirectRoute, {
         authCode: authCode ?? 'oauth-link-failed',
       });
     }
@@ -126,7 +125,7 @@ async function handleOAuthCallback(
   }
 
   if (isLoggedIn) {
-    redirectAuth(oAuthConfig.redirectRoute, { authCode: 'oauth-link' });
+    redirectAuth(config.oAuthRedirectRoute, { authCode: 'oauth-link' });
   }
 
   redirect(config.defaultRedirectRoute);
