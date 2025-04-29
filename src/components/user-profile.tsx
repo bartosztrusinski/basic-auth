@@ -86,9 +86,7 @@ export function UserProfile({ user }: Props) {
             <strong>Role:</strong> {user.role}
           </p>
 
-          {state.isSuccess && (
-            <p className='text-sm font-light text-green-500'>Profile updated successfully!</p>
-          )}
+          {state.isSuccess && <Alert variant='success' message='Profile updated successfully!' />}
 
           <button
             onClick={() => setIsEditing(true)}
