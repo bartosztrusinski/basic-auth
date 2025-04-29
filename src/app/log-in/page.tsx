@@ -30,7 +30,7 @@ export default async function LoginPage({
             Sign up
           </SignupLink>
           <br />
-          Verification email did not arrive?{' '}
+          Didn&apos;t get verification email?{' '}
           <Link
             href={config.resendVerificationEmailRoute}
             className='text-teal-500 hover:underline'
