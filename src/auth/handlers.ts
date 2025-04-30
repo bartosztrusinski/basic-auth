@@ -75,7 +75,6 @@ async function handleOAuthCallback(
   const state = request.nextUrl.searchParams.get('state');
   const { success: isValidProvider, data: provider } = OAuthProviderEnum.safeParse(providerParam);
   const { userId } = await auth();
-  const isLoggedIn = Boolean(userId);
 
   try {
     if (!isValidProvider) {
@@ -99,8 +98,8 @@ async function handleOAuthCallback(
     const { tokenType, accessToken } = await fetchOAuthToken(provider, code);
     const oAuthUser = await fetchOAuthUser(provider, accessToken, tokenType);
 
-    if (isLoggedIn) {
-      await linkUserAccount(provider, oAuthUser);
+    if (userId) {
+      await linkUserAccount(provider, oAuthUser.id, userId);
     } else {
       const user = await createUserAccount(provider, oAuthUser);
       await createUserSession({
@@ -113,7 +112,7 @@ async function handleOAuthCallback(
 
     console.error('OAuth callback error:', error);
 
-    if (isLoggedIn) {
+    if (userId) {
       redirectAuth(config.oAuthRedirectRoute, {
         authCode: authCode ?? 'oauth-link-failed',
       });
@@ -124,7 +123,7 @@ async function handleOAuthCallback(
     });
   }
 
-  if (isLoggedIn) {
+  if (userId) {
     redirectAuth(config.oAuthRedirectRoute, { authCode: 'oauth-link' });
   }
 

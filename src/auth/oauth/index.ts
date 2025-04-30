@@ -9,7 +9,6 @@ import {
   setCodeVerifierCookie,
   getCodeVerifierCookie,
 } from '../cookie';
-import { currentUser } from '../session';
 import { fetcher } from '../util';
 import { AuthError, getAuthMessage } from '../message';
 import config from '../config';
@@ -140,15 +139,13 @@ async function createUserAccount(
   };
 }
 
-async function linkUserAccount(provider: OAuthProvider, { id }: OAuthUser) {
-  const user = await currentUser();
-
-  if (!user) {
-    throw new Error('User not logged in');
-  }
-
-  const existingAccount = await db.getAccountByProvider(provider, id);
-  const isAccountLinkedToAnotherUser = existingAccount && existingAccount.userId !== user.id;
+async function linkUserAccount(
+  provider: OAuthProvider,
+  accountId: OAuthUser['id'],
+  userId: User['id'],
+) {
+  const existingAccount = await db.getAccountByProvider(provider, accountId);
+  const isAccountLinkedToAnotherUser = existingAccount && existingAccount.userId !== userId;
 
   if (isAccountLinkedToAnotherUser) {
     throw new AuthError('oauth-link-existing-account');
@@ -156,9 +153,9 @@ async function linkUserAccount(provider: OAuthProvider, { id }: OAuthUser) {
 
   if (!existingAccount) {
     await db.createAccount({
-      userId: user.id,
+      userId: userId,
       provider,
-      providerAccountId: id,
+      providerAccountId: accountId,
     });
   }
 }

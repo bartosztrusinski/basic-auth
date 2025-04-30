@@ -1,6 +1,6 @@
 import { z } from 'zod';
 
-const email = z.string().email('Invalid email address');
+const email = z.string().email('Please enter a correct email address').min(1, 'Email is required');
 
 const signupSchema = z.object({
   email,
