@@ -17,6 +17,10 @@ const authMessages = {
     type: 'error',
     message: 'You do not have permissions to access this page',
   },
+  'invalid-credentials': {
+    type: 'error',
+    message: 'Invalid email or password',
+  },
   'email-verified': {
     type: 'success',
     message: 'Email verified successfully! You can now log in.',
@@ -44,7 +48,7 @@ const authMessages = {
   'oauth-log-in-email-taken': {
     type: 'error',
     message:
-      'This email is already registered with another provider. Please log in using the original method. You can link your account after logging in.',
+      'An account already exists with this email address. Please log in using the original method. You can link your account after logging in.',
   },
   'oauth-link': {
     type: 'success',
