@@ -11,7 +11,7 @@ import { generateAuthorizationUrl, unlinkUserAccount } from './oauth';
 import { type OAuthProvider } from './oauth/types';
 import { sendVerificationEmail } from './email';
 import { createEmailVerificationToken } from './verification-token';
-import { AuthError } from './message';
+import { AuthError, getAuthMessage } from './message';
 import config from './config';
 
 type ActionState = {
@@ -40,25 +40,16 @@ export async function logIn(
     if (!user?.password || !user?.salt) {
       return {
         isSuccess: false,
-        errors: ['Invalid email or password'],
+        errors: [getAuthMessage('invalid-credentials').message],
       };
     }
 
     const isCorrectPassword = await comparePasswords(password, user.password, user.salt);
 
-    if (!isCorrectPassword) {
+    if (!isCorrectPassword || !user.emailVerified) {
       return {
         isSuccess: false,
-        errors: ['Invalid email or password'],
-      };
-    }
-
-    if (!user.emailVerified) {
-      const verificationToken = await createEmailVerificationToken(user.email);
-      await sendVerificationEmail(verificationToken.email, verificationToken.token, user.name);
-
-      return {
-        isSuccess: true,
+        errors: [getAuthMessage('invalid-credentials').message],
       };
     }
 
