@@ -5,7 +5,7 @@ import { editProfileSchema, signupSchema } from '@/schemas';
 import { generateSalt, hashPassword } from '@/auth/password';
 import { auth, updateUserSession } from '@/auth/session';
 import { createEmailVerificationToken } from '@/auth/verification-token';
-import { sendVerificationEmail } from '@/auth/email';
+import { sendExistingUserLoginGuidanceEmail, sendVerificationEmail } from '@/auth/email';
 
 type ActionState = {
   isSuccess: boolean;
@@ -28,7 +28,7 @@ export async function signUp(_: unknown, formData: FormData): Promise<ActionStat
     const existingUser = await db.getUserByEmail(email);
 
     if (existingUser?.emailVerified) {
-      // send instructions to log in
+      await sendExistingUserLoginGuidanceEmail(existingUser.email, existingUser.name);
 
       return {
         isSuccess: true,
@@ -42,7 +42,11 @@ export async function signUp(_: unknown, formData: FormData): Promise<ActionStat
     }
 
     const verificationToken = await createEmailVerificationToken(email);
-    await sendVerificationEmail(verificationToken.email, verificationToken.token, name);
+    await sendVerificationEmail(
+      verificationToken.email,
+      verificationToken.token,
+      existingUser?.name ?? name,
+    );
 
     return {
       isSuccess: true,
