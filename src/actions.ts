@@ -25,19 +25,32 @@ export async function signUp(_: unknown, formData: FormData): Promise<ActionStat
   const { email, name, password } = data;
 
   try {
-    const salt = generateSalt();
-    const hashedPassword = await hashPassword(password, salt);
-    await db.createUser({ email, name, password: hashedPassword, salt });
+    const existingUser = await db.getUserByEmail(email);
+
+    if (existingUser?.emailVerified) {
+      // send instructions to log in
+
+      return {
+        isSuccess: true,
+      };
+    }
+
+    if (!existingUser) {
+      const salt = generateSalt();
+      const hashedPassword = await hashPassword(password, salt);
+      await db.createUser({ email, name, password: hashedPassword, salt });
+    }
+
     const verificationToken = await createEmailVerificationToken(email);
     await sendVerificationEmail(verificationToken.email, verificationToken.token, name);
 
     return {
       isSuccess: true,
     };
-  } catch (error) {
+  } catch {
     return {
       isSuccess: false,
-      errors: [error instanceof Error ? error.message : 'An unknown error occurred'],
+      errors: ['An error occurred while creating your account. Please try again.'],
     };
   }
 }
