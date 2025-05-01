@@ -2,8 +2,14 @@ import 'server-only';
 import { Resend } from 'resend';
 import { env } from '@/env';
 import { type VerificationToken } from '@/db';
-import { VerificationEmail } from '@/auth/components/emails/verification-email';
-import { ExistingUserLoginGuidanceEmail } from '@/auth/components/emails/existing-user-login-guidance-email';
+import {
+  VerificationEmail,
+  VerificationEmailPlainText,
+} from '@/auth/components/emails/verification-email';
+import {
+  ExistingUserLoginGuidanceEmail,
+  ExistingUserLoginGuidanceEmailPlainText,
+} from '@/auth/components/emails/existing-user-login-guidance-email';
 import { AuthError } from '@/auth/message';
 import config from '@/auth/config';
 import serverConfig from '@/auth/config/server';
@@ -20,23 +26,19 @@ export async function sendVerificationEmail(
 
   url.searchParams.set(config.verificationTokenKey, token);
 
+  const props = {
+    verificationUrl: url.toString(),
+    name,
+    expirationTimeHours,
+  };
+
   try {
     const { error } = await resend.emails.send({
       from: `${config.appName} <${serverConfig.fromEmailAddress}>`,
       to: email,
       subject: 'Verify your email address to activate your account',
-      react: VerificationEmail({
-        verificationUrl: url.toString(),
-        name,
-        expirationTimeHours,
-      }),
-      // TODO move to component
-      text: `Hi ${name},\n\n
-      Thanks for signing up. Please click the link below to verify your email address and activate your account.\n\n
-      ${url.toString()}\n\n
-      This verification link will expire in ${expirationTimeHours} hour${
-        expirationTimeHours !== 1 ? 's' : ''
-      }.\n\n`,
+      react: VerificationEmail(props),
+      text: VerificationEmailPlainText(props),
     });
 
     if (error) {
@@ -53,14 +55,17 @@ export async function sendExistingUserLoginGuidanceEmail(
   email: VerificationToken['email'],
   name: string,
 ) {
+  const props = {
+    name,
+  };
+
   try {
     const { error } = await resend.emails.send({
       from: `${config.appName} <${serverConfig.fromEmailAddress}>`,
       to: email,
       subject: `You already have an account with ${config.appName}`,
-      react: ExistingUserLoginGuidanceEmail({ name }),
-      // TODO
-      text: `Hi`,
+      react: ExistingUserLoginGuidanceEmail(props),
+      text: ExistingUserLoginGuidanceEmailPlainText(props),
     });
 
     if (error) {

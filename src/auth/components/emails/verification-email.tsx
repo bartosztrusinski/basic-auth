@@ -74,6 +74,19 @@ export function VerificationEmail({ name, verificationUrl, expirationTimeHours }
   );
 }
 
+export const VerificationEmailPlainText = ({
+  name,
+  verificationUrl,
+  expirationTimeHours,
+}: Props) => {
+  return `Hi ${name},\n\n
+      Thanks for signing up. Please click the link below to verify your email address and activate your account.\n\n
+      ${verificationUrl}\n\n
+      This verification link will expire in ${expirationTimeHours} hour${expirationTimeHours !== 1 ? 's' : ''}.\n\n
+      If you did not sign up for ${config.appName}, please ignore this email.
+      ${new Date().getFullYear()} ${config.appName}. All rights reserved.`;
+};
+
 VerificationEmail.PreviewProps = {
   name: 'Bartosz Trusiński',
   expirationTimeHours: 24,

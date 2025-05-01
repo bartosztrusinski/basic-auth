@@ -36,7 +36,7 @@ export function ExistingUserLoginGuidanceEmail({ name }: Props) {
               <Text className='font-sans text-[16px] leading-[24px] text-zinc-800'>
                 We received a request related to this email address for {config.appName}. An account
                 associated with this email address already exists and is active. If this was you
-                trying to sign up again, please log in using your existing credentials:
+                trying to sign up again, please log in using your existing credentials.
               </Text>
               <Section className='py-[12px] text-center'>
                 <Button
@@ -60,6 +60,16 @@ export function ExistingUserLoginGuidanceEmail({ name }: Props) {
       </Html>
     </Tailwind>
   );
+}
+
+export function ExistingUserLoginGuidanceEmailPlainText({ name }: Props) {
+  return `Hi ${name},\n\n
+      We received a request related to this email address for ${config.appName}. 
+      An account associated with this email address already exists and is active. 
+      If this was you trying to sign up again, please log in using your existing credentials:\n\n
+      ${config.baseUrl + config.loginRoute}\n\n
+      If you didn't attempt to sign up or perform this action, you can safely ignore this email. Your account remains secure.
+      ${new Date().getFullYear()} ${config.appName}. All rights reserved.`;
 }
 
 ExistingUserLoginGuidanceEmail.PreviewProps = {
