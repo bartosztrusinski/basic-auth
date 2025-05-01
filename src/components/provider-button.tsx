@@ -1,5 +1,5 @@
-import { logInWithProvider } from '../actions';
-import { type OAuthProvider } from '../oauth/types';
+import { logInWithProvider } from '@/auth/actions';
+import { type OAuthProvider } from '@/auth/oauth/types';
 
 type Props = {
   provider: OAuthProvider;

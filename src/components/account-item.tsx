@@ -1,8 +1,8 @@
 'use client';
 
 import { useActionState } from 'react';
-import { unlinkAccount, linkAccount } from '../actions';
-import { type OAuthProvider } from '../oauth/types';
+import { unlinkAccount, linkAccount } from '@/auth/actions';
+import { type OAuthProvider } from '@/auth/oauth/types';
 
 type Props = {
   provider: OAuthProvider;

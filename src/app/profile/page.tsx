@@ -2,7 +2,7 @@ import { db } from '@/db';
 import { auth, currentUser } from '@/auth/session';
 import { getAuthCode } from '@/auth/message';
 import { Protect } from '@/auth/components/protect';
-import { AccountsManager } from '@/auth/components/accounts-manager';
+import { AccountsManager } from '@/components/accounts-manager';
 import { UserProfile } from '@/components/user-profile';
 import { Page } from '@/components/page';
 import { AuthAlert } from '@/components/auth-alert';

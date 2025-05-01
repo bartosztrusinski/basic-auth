@@ -4,7 +4,7 @@ import { getAuthCode } from '@/auth/message';
 import { LoggedIn } from '@/auth/components/logged-in';
 import { ReturnBack } from '@/auth/components/return-back';
 import { SignupLink } from '@/auth/components/auth-link';
-import { ProviderButtons } from '@/auth/components/provider-buttons';
+import { ProviderButtons } from '@/components/provider-buttons';
 import { Page } from '@/components/page';
 import { LoginForm } from '@/components/login-form';
 import { AuthAlert } from '@/components/auth-alert';

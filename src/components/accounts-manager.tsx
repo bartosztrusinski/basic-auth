@@ -1,9 +1,9 @@
 import { type Account } from '@/db';
-import { currentUser } from '../session';
-import { getProviderName } from '../oauth';
-import { OAuthProviderEnum } from '../oauth/providers';
-import { type OAuthProvider } from '../oauth/types';
-import { AccountItem } from '../components/account-item';
+import { getProviderName } from '@/auth/oauth';
+import { OAuthProviderEnum } from '@/auth/oauth/providers';
+import { type OAuthProvider } from '@/auth/oauth/types';
+import { currentUser } from '@/auth/session';
+import { AccountItem } from '@/components/account-item';
 
 type Props = {
   accounts: Account[];

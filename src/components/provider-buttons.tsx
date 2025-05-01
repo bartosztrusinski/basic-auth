@@ -1,6 +1,6 @@
-import { getProviderName } from '../oauth';
-import { OAuthProviderEnum } from '../oauth/providers';
-import { ProviderButton } from './provider-button';
+import { getProviderName } from '@/auth/oauth';
+import { OAuthProviderEnum } from '@/auth/oauth/providers';
+import { ProviderButton } from '@/components/provider-button';
 
 export function ProviderButtons() {
   return (
