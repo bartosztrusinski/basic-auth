@@ -1,10 +1,10 @@
 import 'server-only';
 import { randomBytes } from 'node:crypto';
 import { cache } from 'react';
-import { redirect } from 'next/navigation';
+import { RedirectType } from 'next/navigation';
 import { type NextRequest } from 'next/server';
 import { db, type User } from '@/db';
-import { redirectToLogin } from '@/auth/util';
+import { redirectAuth, redirectToLogin } from '@/auth/util';
 import {
   getSessionCookie,
   setSessionCookie,
@@ -85,14 +85,20 @@ async function protect({
 
   if (!userId) {
     if (unauthenticatedUrl) {
-      redirect(unauthenticatedUrl);
+      redirectAuth(unauthenticatedUrl, {
+        type: RedirectType.replace,
+        authCode: 'unauthenticated',
+      });
     }
 
     redirectToLogin(redirectParams);
   }
 
   if (role && userRole !== role) {
-    redirect(unauthorizedUrl ?? config.defaultRedirectRoute);
+    redirectAuth(unauthorizedUrl ?? config.defaultRedirectRoute, {
+      type: RedirectType.replace,
+      authCode: 'unauthorized',
+    });
   }
 
   return { userId };
@@ -144,6 +150,12 @@ export async function deleteUserSession() {
   }
 
   await db.deleteSession(sessionId);
+  await deleteSessionCookie();
+  await setAuthSyncCookie();
+}
+
+export async function deleteAllUserSessions(userId: User['id']) {
+  await db.deleteUserSessions(userId);
   await deleteSessionCookie();
   await setAuthSyncCookie();
 }

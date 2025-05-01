@@ -4,7 +4,7 @@ import { redirect } from 'next/navigation';
 import { db, type VerificationToken, type Session } from '@/db';
 // TODO move to auth
 import { loginSchema, resendVerificationEmailSchema } from '@/schemas';
-import { auth, createUserSession, deleteUserSession } from '@/auth/session';
+import { auth, createUserSession, deleteAllUserSessions, deleteUserSession } from '@/auth/session';
 import { comparePasswords } from '@/auth/password';
 import { redirectAuth, redirectToLogin } from '@/auth/util';
 import { generateAuthorizationUrl, deleteProviderAccount } from '@/auth/oauth';
@@ -73,6 +73,21 @@ export async function logIn(
 
 export async function logOut(): Promise<ActionState> {
   await deleteUserSession();
+  redirectToLogin({ authCode: null });
+}
+
+export async function logOutEverywhere(): Promise<ActionState> {
+  const { userId } = await auth();
+
+  if (!userId) {
+    return {
+      isSuccess: false,
+      errors: [getAuthMessage('unauthenticated').message],
+    };
+  }
+
+  await deleteAllUserSessions(userId);
+
   redirectToLogin({ authCode: null });
 }
 

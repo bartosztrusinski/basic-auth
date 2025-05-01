@@ -203,6 +203,12 @@ async function deleteSession(id: Session['id']) {
   await writeSessions(updatedSessions);
 }
 
+async function deleteUserSessions(userId: User['id']) {
+  const sessions = await getSessions();
+  const updatedSessions = sessions.filter((session) => session.userId !== userId);
+  await writeSessions(updatedSessions);
+}
+
 async function updateSession(
   sessionId: Session['id'],
   updatedSessionData: Partial<Omit<Session, 'id'>>,
@@ -337,6 +343,7 @@ export const db = {
   createSession,
   updateSession,
   deleteSession,
+  deleteUserSessions,
   deleteUserSession,
   getSessions,
   getSessionById,
