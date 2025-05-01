@@ -5,14 +5,7 @@ import { auth, createUserSession, currentUser } from '@/auth/session';
 import { redirectAuth, redirectToLogin } from '@/auth/util';
 import { deleteSessionCookie } from '@/auth/cookie';
 import { AuthError } from '@/auth/message';
-import {
-  createUserAccount,
-  fetchOAuthToken,
-  fetchOAuthUser,
-  linkUserAccount,
-  validateState,
-} from '@/auth/oauth';
-import { OAuthProviderEnum } from '@/auth/oauth/providers';
+import { signUp, exchangeCodeForOAuthUser, createProviderAccount } from '@/auth/oauth';
 import config from '@/auth/config';
 
 export const handlers = { GET };
@@ -22,11 +15,11 @@ async function GET(request: NextRequest, { params }: { params: Promise<{ endpoin
   const [resource, provider] = endpoint;
 
   if (resource === config.apiSessionEndpoint) {
-    return await getSession();
+    return getSession();
   }
 
   if (resource === config.apiUserEndpoint) {
-    return await getCurrentUser();
+    return getCurrentUser();
   }
 
   if (resource === config.apiOAuthEndpoint) {
@@ -67,65 +60,57 @@ async function getCurrentUser(): Promise<NextResponse> {
   );
 }
 
-// TODO big function, split and make it do one thing
-async function handleOAuthCallback(
-  providerParam: string | undefined,
-  request: NextRequest,
-): Promise<void> {
+async function handleOAuthCallback(rawProvider: string | undefined, request: NextRequest) {
+  const { userId } = await auth();
   const code = request.nextUrl.searchParams.get('code');
   const state = request.nextUrl.searchParams.get('state');
-  const { success: isValidProvider, data: provider } = OAuthProviderEnum.safeParse(providerParam);
+
+  if (userId) {
+    await linkProviderAccount(rawProvider, code, state);
+  } else {
+    await signUpWithProvider(rawProvider, code, state);
+  }
+}
+
+async function linkProviderAccount(
+  rawProvider: string | undefined,
+  code: string | null,
+  state: string | null,
+): Promise<void> {
   const { userId } = await auth();
 
   try {
-    if (!isValidProvider) {
-      throw new Error('Invalid provider');
+    if (!userId) {
+      throw new Error('User not logged in');
     }
 
-    if (!code) {
-      throw new Error('Missing code');
-    }
-
-    if (!state) {
-      throw new Error('Missing state');
-    }
-
-    const isValidState = await validateState(state);
-
-    if (!isValidState) {
-      throw new Error('Invalid state');
-    }
-
-    const { tokenType, accessToken } = await fetchOAuthToken(provider, code);
-    const oAuthUser = await fetchOAuthUser(provider, accessToken, tokenType);
-
-    if (userId) {
-      await linkUserAccount(provider, oAuthUser.id, userId);
-    } else {
-      const user = await createUserAccount(provider, oAuthUser);
-      await createUserSession({
-        userId: user.id,
-        userRole: user.role,
-      });
-    }
+    const { provider, oAuthUser } = await exchangeCodeForOAuthUser(rawProvider, code, state);
+    await createProviderAccount(provider, oAuthUser.id, userId);
   } catch (error) {
-    const authCode = error instanceof AuthError ? error.authCode : null;
-
-    console.error('OAuth callback error:', error);
-
-    if (userId) {
-      redirectAuth(config.oAuthRedirectRoute, {
-        authCode: authCode ?? 'oauth-link-failed',
-      });
-    }
-
-    redirectToLogin({
-      authCode: authCode ?? 'oauth-login-failed',
+    redirectAuth(config.oAuthRedirectRoute, {
+      authCode: error instanceof AuthError ? error.authCode : 'oauth-link-failed',
     });
   }
 
-  if (userId) {
-    redirectAuth(config.oAuthRedirectRoute, { authCode: 'oauth-link' });
+  redirectAuth(config.oAuthRedirectRoute, { authCode: 'oauth-link' });
+}
+
+async function signUpWithProvider(
+  rawProvider: string | undefined,
+  code: string | null,
+  state: string | null,
+): Promise<void> {
+  try {
+    const { provider, oAuthUser } = await exchangeCodeForOAuthUser(rawProvider, code, state);
+    const user = await signUp(provider, oAuthUser);
+    await createUserSession({
+      userId: user.id,
+      userRole: user.role,
+    });
+  } catch (error) {
+    redirectToLogin({
+      authCode: error instanceof AuthError ? error.authCode : 'oauth-login-failed',
+    });
   }
 
   redirect(config.defaultRedirectRoute);

@@ -11,10 +11,10 @@ import {
 } from '@/auth/cookie';
 import { fetcher } from '@/auth/util';
 import { AuthError } from '@/auth/message';
-import config from '@/auth/config';
 import { oAuthTokenSchema } from '@/auth/oauth/schemas';
 import { type OAuthUser, type OAuthProvider } from '@/auth/oauth/types';
-import providers from '@/auth/oauth/providers';
+import config from '@/auth/config';
+import providers, { OAuthProviderEnum } from '@/auth/oauth/providers';
 
 async function generateAuthorizationUrl(provider: OAuthProvider) {
   const { authorizationUrl, clientId, scope } = providers[provider];
@@ -34,6 +34,37 @@ async function generateAuthorizationUrl(provider: OAuthProvider) {
   authorizationUrl.searchParams.set('code_challenge_method', codeChallengeMethod);
 
   return authorizationUrl;
+}
+
+async function exchangeCodeForOAuthUser(
+  rawProvider: string | undefined,
+  code: string | null,
+  state: string | null,
+) {
+  const { success: isValidProvider, data: provider } = OAuthProviderEnum.safeParse(rawProvider);
+
+  if (!isValidProvider) {
+    throw new Error('Invalid provider');
+  }
+
+  if (!code) {
+    throw new Error('Missing code');
+  }
+
+  if (!state) {
+    throw new Error('Missing state');
+  }
+
+  const isValidState = await validateState(state);
+
+  if (!isValidState) {
+    throw new Error('Invalid state');
+  }
+
+  const { tokenType, accessToken } = await fetchOAuthToken(provider, code);
+  const oAuthUser = await fetchOAuthUser(provider, accessToken, tokenType);
+
+  return { oAuthUser, provider };
 }
 
 async function fetchOAuthToken(provider: OAuthProvider, code: string) {
@@ -83,7 +114,7 @@ async function fetchOAuthUser(
 ): Promise<OAuthUser> {
   const { userUrl, userSchema, userMapper } = providers[provider];
   // TODO type this properly
-  // Use type assertion to get the correct type for userMapper
+  // Uses type assertion to get the correct type for userMapper
   const typedUserMapper = userMapper as (data: z.infer<typeof userSchema>) => OAuthUser;
 
   const data = await fetcher(userUrl, {
@@ -101,7 +132,7 @@ async function fetchOAuthUser(
   return typedUserMapper(providerUser);
 }
 
-async function createUserAccount(
+async function signUp(
   provider: OAuthProvider,
   { id, email, ...oAuthData }: OAuthUser,
 ): Promise<Pick<User, 'id' | 'role'>> {
@@ -139,7 +170,7 @@ async function createUserAccount(
   };
 }
 
-async function linkUserAccount(
+async function createProviderAccount(
   provider: OAuthProvider,
   accountId: OAuthUser['id'],
   userId: User['id'],
@@ -160,7 +191,7 @@ async function linkUserAccount(
   }
 }
 
-async function unlinkUserAccount(provider: OAuthProvider, userId: User['id']) {
+async function deleteProviderAccount(provider: OAuthProvider, userId: User['id']) {
   const user = await db.getUserById(userId);
 
   if (!user) {
@@ -219,12 +250,10 @@ async function generateCodeChallenge(codeVerifier: string) {
 
 export {
   generateAuthorizationUrl,
-  fetchOAuthToken,
-  fetchOAuthUser,
-  createUserAccount,
-  linkUserAccount,
-  unlinkUserAccount,
+  exchangeCodeForOAuthUser,
+  signUp,
+  createProviderAccount,
+  deleteProviderAccount,
   getProviderName,
   getRedirectUrl,
-  validateState,
 };

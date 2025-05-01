@@ -7,7 +7,7 @@ import { loginSchema, resendVerificationEmailSchema } from '@/schemas';
 import { auth, createUserSession, deleteUserSession } from '@/auth/session';
 import { comparePasswords } from '@/auth/password';
 import { redirectAuth, redirectToLogin } from '@/auth/util';
-import { generateAuthorizationUrl, unlinkUserAccount } from '@/auth/oauth';
+import { generateAuthorizationUrl, deleteProviderAccount } from '@/auth/oauth';
 import { type OAuthProvider } from '@/auth/oauth/types';
 import { sendVerificationEmail } from '@/auth/email';
 import { createEmailVerificationToken } from '@/auth/verification-token';
@@ -108,7 +108,7 @@ export async function unlinkAccount(provider: OAuthProvider): Promise<ActionStat
   const { userId } = await auth.protect();
 
   try {
-    await unlinkUserAccount(provider, userId);
+    await deleteProviderAccount(provider, userId);
 
     return {
       isSuccess: true,
