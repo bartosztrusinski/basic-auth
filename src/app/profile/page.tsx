@@ -6,6 +6,7 @@ import { AccountsManager } from '@/components/accounts-manager';
 import { UserProfile } from '@/components/user-profile';
 import { Page } from '@/components/page';
 import { AuthAlert } from '@/components/auth-alert';
+import { LogoutEverywhereButton } from '@/components/logout-everywhere-button';
 
 export default async function ProfilePage({
   searchParams,
@@ -33,10 +34,17 @@ export default async function ProfilePage({
           </span>
         </Page.Description>
       </Protect>
-      <UserProfile user={{ name, email, role }} />
-      <h2 className='pt-4 text-center text-2xl font-bold'>Linked Accounts</h2>
       <AuthAlert authCode={authCode} />
-      <AccountsManager accounts={accounts} />
+      <section>
+        <UserProfile user={{ name, email, role }} />
+      </section>
+      <section className='space-y-3 pt-4'>
+        <AccountsManager accounts={accounts} />
+      </section>
+      <section className='space-y-3 pt-4 text-center'>
+        <LogoutEverywhereButton />
+        <p className='text-sm text-zinc-400'>This will log you out from all devices and sessions</p>
+      </section>
     </Page>
   );
 }

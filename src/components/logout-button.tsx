@@ -8,7 +8,7 @@ export function LogoutButton() {
 
   return (
     <form action={action}>
-      <button disabled={isPending} className='disabled:cursor-not-allowed disabled:text-zinc-400'>
+      <button disabled={isPending} className='disabled:cursor-not-allowed disabled:opacity-50'>
         Log Out
       </button>
     </form>
