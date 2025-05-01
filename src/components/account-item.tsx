@@ -16,7 +16,7 @@ export function AccountItem({ provider, name, isLinked, isUnlinkingEnabled }: Pr
   const [, action, isPending] = useActionState(accountAction.bind(null, provider), null);
 
   return (
-    <div key={provider} className='flex min-h-14 justify-between rounded-lg bg-zinc-800 p-3'>
+    <div className='flex min-h-14 justify-between rounded-lg bg-zinc-800 p-3'>
       <div className='flex items-center gap-2'>
         <span className='font-semibold'>{name}</span>
         {isLinked && (
@@ -25,7 +25,7 @@ export function AccountItem({ provider, name, isLinked, isUnlinkingEnabled }: Pr
           </div>
         )}
       </div>
-      <form key={provider} action={action} className='basis-20'>
+      <form action={action} className='basis-20'>
         {!isLinked ? (
           <button
             disabled={isPending}

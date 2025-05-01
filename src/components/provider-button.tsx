@@ -9,7 +9,6 @@ type Props = {
 export function ProviderButton({ provider, name }: Props) {
   return (
     <form
-      key={provider}
       action={async () => {
         'use server';
         await logInWithProvider(provider);

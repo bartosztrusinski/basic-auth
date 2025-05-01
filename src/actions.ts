@@ -59,7 +59,7 @@ export async function signUp(_: unknown, formData: FormData): Promise<ActionStat
   }
 }
 
-export async function editProfile(_: ActionState, formData: FormData): Promise<ActionState> {
+export async function editProfile(_: unknown, formData: FormData): Promise<ActionState> {
   const { data: userData, error } = editProfileSchema.safeParse(
     Object.fromEntries(formData.entries()),
   );

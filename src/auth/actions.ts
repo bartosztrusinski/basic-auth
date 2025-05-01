@@ -71,7 +71,7 @@ export async function logIn(
   }
 }
 
-export async function logOut() {
+export async function logOut(): Promise<ActionState> {
   await deleteUserSession();
   redirectToLogin({ authCode: null });
 }
@@ -84,7 +84,10 @@ export async function linkAccount(provider: OAuthProvider): Promise<ActionState>
   return initializeOAuth(provider, 'oauth-link-failed');
 }
 
-async function initializeOAuth(provider: OAuthProvider, defaultAuthCode: AuthCode) {
+async function initializeOAuth(
+  provider: OAuthProvider,
+  defaultAuthCode: AuthCode,
+): Promise<ActionState> {
   let authorizationUrl: URL;
 
   try {
@@ -120,7 +123,7 @@ export async function unlinkAccount(provider: OAuthProvider): Promise<ActionStat
   }
 }
 
-export async function verifyEmail(token: VerificationToken['token']) {
+export async function verifyEmail(token: VerificationToken['token']): Promise<ActionState> {
   try {
     const verificationToken = await db.getVerificationTokenByToken(token);
 
