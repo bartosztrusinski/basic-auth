@@ -2,15 +2,17 @@ import { useEffect } from 'react';
 import { useAuth } from './use-auth';
 
 export function useSyncAuth() {
-  const { syncAuth } = useAuth();
+  const { isLoggedIn, syncAuth } = useAuth();
 
   useEffect(() => {
-    const controller = new AbortController();
+    if (isLoggedIn) {
+      const controller = new AbortController();
 
-    void syncAuth(controller.signal);
+      void syncAuth(controller.signal);
 
-    return () => {
-      controller.abort();
-    };
-  }, [syncAuth]);
+      return () => {
+        controller.abort();
+      };
+    }
+  }, [isLoggedIn, syncAuth]);
 }

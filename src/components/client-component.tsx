@@ -6,7 +6,7 @@ import { useSyncAuth } from '@/auth/hooks/use-sync-auth';
 export function ClientComponent() {
   const { isLoading, isLoggedIn, currentUser } = useCurrentUser();
 
-  // Sync auth state in public route for layout client components as they do not re-render
+  // Sync auth state in public route for client components in layout as they do not re-render
   useSyncAuth();
 
   if (isLoading) {

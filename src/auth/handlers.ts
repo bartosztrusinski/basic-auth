@@ -61,6 +61,7 @@ async function getCurrentUser(): Promise<NextResponse> {
           id: backendUser.id,
           email: backendUser.email,
           name: backendUser.name,
+          hasPassword: backendUser.hasPassword,
         }
       : null,
   );
@@ -119,7 +120,7 @@ async function handleOAuthCallback(
     }
 
     redirectToLogin({
-      authCode: authCode ?? 'oauth-log-in-failed',
+      authCode: authCode ?? 'oauth-login-failed',
     });
   }
 

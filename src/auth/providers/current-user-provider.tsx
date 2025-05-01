@@ -62,10 +62,6 @@ export function CurrentUserProvider({ children, initialUser = null }: Props) {
     [currentUser],
   );
 
-  const userData: UserData = currentUser
-    ? { isLoggedIn: true, currentUser: { ...currentUser, reload: fetchUser } }
-    : { isLoggedIn: false, currentUser: null };
-
   // This effect synchronizes the current user state with the auth state
   useEffect(() => {
     if (isLoggedIn && !currentUser) {
@@ -85,6 +81,10 @@ export function CurrentUserProvider({ children, initialUser = null }: Props) {
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isLoggedIn]);
+
+  const userData: UserData = currentUser
+    ? { isLoggedIn: true, currentUser: { ...currentUser, reload: fetchUser } }
+    : { isLoggedIn: false, currentUser: null };
 
   return (
     <CurrentUserContext.Provider value={{ isLoading, ...userData }}>
