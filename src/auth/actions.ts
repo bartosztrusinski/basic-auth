@@ -9,7 +9,7 @@ import { comparePasswords } from '@/auth/password';
 import { redirectAuth, redirectToLogin } from '@/auth/util';
 import { generateAuthorizationUrl, deleteProviderAccount } from '@/auth/oauth';
 import { type OAuthProvider } from '@/auth/oauth/types';
-import { sendVerificationEmail } from '@/auth/email';
+import { sendExistingUserLoginGuidanceEmail, sendVerificationEmail } from '@/auth/email';
 import { createEmailVerificationToken } from '@/auth/verification-token';
 import { type AuthCode, AuthError, getAuthMessage } from '@/auth/message';
 import config from '@/auth/config';
@@ -179,6 +179,8 @@ export async function resendVerificationEmail(
     }
 
     if (user.emailVerified) {
+      await sendExistingUserLoginGuidanceEmail(user.email, user.name);
+
       return {
         isSuccess: true,
       };
