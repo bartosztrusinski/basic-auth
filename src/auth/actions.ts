@@ -62,7 +62,11 @@ export async function logIn(
   } catch (error) {
     return {
       isSuccess: false,
-      errors: [error instanceof Error ? error.message : 'An unknown error occurred'],
+      errors: [
+        error instanceof Error
+          ? error.message
+          : 'An error occurred while logging in. Please try again.',
+      ],
     };
   }
 }

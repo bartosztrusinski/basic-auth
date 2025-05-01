@@ -83,7 +83,11 @@ export async function editProfile(_: ActionState, formData: FormData): Promise<A
   } catch (error) {
     return {
       isSuccess: false,
-      errors: [error instanceof Error ? error.message : 'An unknown error occurred'],
+      errors: [
+        error instanceof Error
+          ? error.message
+          : 'An error occurred while updating your profile. Please try again.',
+      ],
     };
   }
 }
