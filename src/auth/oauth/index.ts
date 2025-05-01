@@ -145,28 +145,28 @@ async function signUp(
     };
   }
 
-  const existingUserWithEmail = await db.getUserByEmail(email);
+  const existingEmailUser = await db.getUserByEmail(email);
 
-  if (existingUserWithEmail) {
-    const accounts = await db.getUserAccounts(existingUserWithEmail.id);
-    const isAnotherProviderUsed = accounts.some((account) => account.provider !== provider);
-
-    if (isAnotherProviderUsed || existingUserWithEmail.password) {
-      throw new AuthError('oauth-login-email-taken');
-    }
+  if (existingEmailUser?.emailVerified) {
+    throw new AuthError('oauth-login-email-taken');
   }
 
-  // Start transaction to ensure atomicity when using db
-  const newUser = await db.createUser({ email, ...oAuthData });
+  if (existingEmailUser) {
+    await db.updateUser(existingEmailUser.id, { emailVerified: Date.now() });
+  }
+
+  const user =
+    existingEmailUser ?? (await db.createUser({ email, ...oAuthData, emailVerified: Date.now() }));
+
   await db.createAccount({
-    userId: newUser.id,
+    userId: user.id,
     provider,
     providerAccountId: id,
   });
 
   return {
-    id: newUser.id,
-    role: newUser.role,
+    id: user.id,
+    role: user.role,
   };
 }
 
