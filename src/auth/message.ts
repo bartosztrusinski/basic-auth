@@ -1,7 +1,7 @@
 import { getSearchParam } from '@/auth/util';
 import config from './config';
 
-type AuthMessage = {
+export type AuthMessage = {
   type: 'success' | 'error';
   message: string;
 };
@@ -41,11 +41,11 @@ const authMessages = {
     type: 'error',
     message: 'Failed to send verification email. Please try again.',
   },
-  'oauth-log-in-failed': {
+  'oauth-login-failed': {
     type: 'error',
     message: 'Could not log in with provider. Please try again.',
   },
-  'oauth-log-in-email-taken': {
+  'oauth-login-email-taken': {
     type: 'error',
     message:
       'An account already exists with this email address. Please log in using the original method. You can link your account after logging in.',
@@ -61,6 +61,10 @@ const authMessages = {
   'oauth-link-existing-account': {
     type: 'error',
     message: 'This account is already linked to another user.',
+  },
+  'oauth-unlink-failed': {
+    type: 'error',
+    message: 'Could not unlink provider. Please try again.',
   },
   'oauth-unlink-only-account': {
     type: 'error',
