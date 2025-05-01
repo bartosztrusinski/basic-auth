@@ -35,7 +35,7 @@ export function SignupForm() {
       />
 
       {state.errors && <Alert variant='error' message={state.errors} />}
-      {state.isSuccess && <AuthAlert authCode='verification-email-sent' />}
+      {state.isSuccess && <AuthAlert authCode='verification-email-sent' isClosable={false} />}
 
       <button disabled={isPending} className='rounded border-2 border-white p-1'>
         {isPending ? 'Submitting...' : 'Sign Up'}

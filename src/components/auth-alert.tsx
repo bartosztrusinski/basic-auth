@@ -6,9 +6,10 @@ import { Alert } from '@/components/alert';
 
 type Props = {
   authCode: AuthCode | null;
+  isClosable?: boolean;
 };
 
-export function AuthAlert({ authCode }: Props) {
+export function AuthAlert({ authCode, isClosable = true }: Props) {
   const removeAuthCode = useRemoveAuthCode();
 
   if (!authCode) {
@@ -18,6 +19,11 @@ export function AuthAlert({ authCode }: Props) {
   const authMessage = getAuthMessage(authCode);
 
   return (
-    <Alert variant={authMessage.type} message={authMessage.message} onClose={removeAuthCode} />
+    <Alert
+      variant={authMessage.type}
+      message={authMessage.message}
+      onClose={removeAuthCode}
+      isClosable={isClosable}
+    />
   );
 }
