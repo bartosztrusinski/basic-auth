@@ -1,7 +1,7 @@
 import 'server-only';
 import { randomBytes } from 'crypto';
 import { db, type VerificationToken } from '@/db';
-import serverConfig from './config/server';
+import serverConfig from '@/auth/config/server';
 
 export async function createEmailVerificationToken(email: VerificationToken['email']) {
   const token = randomBytes(64).toString('hex');

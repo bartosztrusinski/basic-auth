@@ -1,6 +1,6 @@
 import { redirect, RedirectType } from 'next/navigation';
-import { getSearchParam } from '../util';
-import config from '../config';
+import { getSearchParam } from '@/auth/util';
+import config from '@/auth/config';
 
 type Props = {
   returnUrl?: string;

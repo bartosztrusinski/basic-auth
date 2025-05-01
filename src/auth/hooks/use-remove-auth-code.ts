@@ -1,6 +1,6 @@
 import { useCallback } from 'react';
 import { usePathname, useSearchParams, useRouter } from 'next/navigation';
-import config from '../config';
+import config from '@/auth/config';
 
 export function useRemoveAuthCode() {
   const router = useRouter();

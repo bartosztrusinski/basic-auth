@@ -1,19 +1,19 @@
 import 'server-only';
 import { NextResponse, type NextRequest } from 'next/server';
 import { redirect } from 'next/navigation';
-import { auth, createUserSession, currentUser } from './session';
-import { redirectAuth, redirectToLogin } from './util';
-import { deleteSessionCookie } from './cookie';
-import { AuthError } from './message';
+import { auth, createUserSession, currentUser } from '@/auth/session';
+import { redirectAuth, redirectToLogin } from '@/auth/util';
+import { deleteSessionCookie } from '@/auth/cookie';
+import { AuthError } from '@/auth/message';
 import {
   createUserAccount,
   fetchOAuthToken,
   fetchOAuthUser,
   linkUserAccount,
   validateState,
-} from './oauth';
-import { OAuthProviderEnum } from './oauth/providers';
-import config from './config';
+} from '@/auth/oauth';
+import { OAuthProviderEnum } from '@/auth/oauth/providers';
+import config from '@/auth/config';
 
 export const handlers = { GET };
 

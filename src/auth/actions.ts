@@ -4,15 +4,15 @@ import { redirect } from 'next/navigation';
 import { db, type VerificationToken, type Session } from '@/db';
 // TODO move to auth
 import { loginSchema, resendVerificationEmailSchema } from '@/schemas';
-import { auth, createUserSession, deleteUserSession } from './session';
-import { comparePasswords } from './password';
-import { redirectAuth, redirectToLogin } from './util';
-import { generateAuthorizationUrl, unlinkUserAccount } from './oauth';
-import { type OAuthProvider } from './oauth/types';
-import { sendVerificationEmail } from './email';
-import { createEmailVerificationToken } from './verification-token';
-import { type AuthCode, AuthError, getAuthMessage } from './message';
-import config from './config';
+import { auth, createUserSession, deleteUserSession } from '@/auth/session';
+import { comparePasswords } from '@/auth/password';
+import { redirectAuth, redirectToLogin } from '@/auth/util';
+import { generateAuthorizationUrl, unlinkUserAccount } from '@/auth/oauth';
+import { type OAuthProvider } from '@/auth/oauth/types';
+import { sendVerificationEmail } from '@/auth/email';
+import { createEmailVerificationToken } from '@/auth/verification-token';
+import { type AuthCode, AuthError, getAuthMessage } from '@/auth/message';
+import config from '@/auth/config';
 
 type ActionState = {
   isSuccess: boolean;

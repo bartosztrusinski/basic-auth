@@ -2,11 +2,11 @@ import 'server-only';
 import { Resend } from 'resend';
 import { env } from '@/env';
 import { type VerificationToken } from '@/db';
-import { VerificationEmail } from './components/emails/verification-email';
-import { ExistingUserLoginGuidanceEmail } from './components/emails/existing-user-login-guidance-email';
-import { AuthError } from './message';
-import config from './config';
-import serverConfig from './config/server';
+import { VerificationEmail } from '@/auth/components/emails/verification-email';
+import { ExistingUserLoginGuidanceEmail } from '@/auth/components/emails/existing-user-login-guidance-email';
+import { AuthError } from '@/auth/message';
+import config from '@/auth/config';
+import serverConfig from '@/auth/config/server';
 
 const resend = new Resend(env.RESEND_API_KEY);
 

@@ -8,13 +8,13 @@ import {
   deleteStateCookie,
   setCodeVerifierCookie,
   getCodeVerifierCookie,
-} from '../cookie';
-import { fetcher } from '../util';
-import { AuthError } from '../message';
-import config from '../config';
-import { oAuthTokenSchema } from './schemas';
-import { type OAuthUser, type OAuthProvider } from './types';
-import providers from './providers';
+} from '@/auth/cookie';
+import { fetcher } from '@/auth/util';
+import { AuthError } from '@/auth/message';
+import config from '@/auth/config';
+import { oAuthTokenSchema } from '@/auth/oauth/schemas';
+import { type OAuthUser, type OAuthProvider } from '@/auth/oauth/types';
+import providers from '@/auth/oauth/providers';
 
 async function generateAuthorizationUrl(provider: OAuthProvider) {
   const { authorizationUrl, clientId, scope } = providers[provider];

@@ -1,5 +1,5 @@
-import { getSearchParam, redirectToLogin } from '../util';
-import config from '../config';
+import { getSearchParam, redirectToLogin } from '@/auth/util';
+import config from '@/auth/config';
 
 type Props = {
   returnBackUrl?: string;

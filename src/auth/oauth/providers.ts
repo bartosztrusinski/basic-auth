@@ -1,8 +1,8 @@
 import 'server-only';
 import { z } from 'zod';
 import { env } from '@/env';
-import { discordUserSchema, githubUserSchema, googleUserSchema } from './schemas';
-import { type OAuthProviderConfig } from './types';
+import { discordUserSchema, githubUserSchema, googleUserSchema } from '@/auth/oauth/schemas';
+import { type OAuthProviderConfig } from '@/auth/oauth/types';
 
 const providerConfig = {
   discord: createProvider({

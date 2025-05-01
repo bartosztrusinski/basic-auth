@@ -4,15 +4,15 @@ import { cache } from 'react';
 import { redirect } from 'next/navigation';
 import { type NextRequest } from 'next/server';
 import { db, type User } from '@/db';
-import { redirectToLogin } from './util';
+import { redirectToLogin } from '@/auth/util';
 import {
   getSessionCookie,
   setSessionCookie,
   deleteSessionCookie,
   setAuthSyncCookie,
-} from './cookie';
-import config from './config';
-import serverConfig from './config/server';
+} from '@/auth/cookie';
+import config from '@/auth/config';
+import serverConfig from '@/auth/config/server';
 
 type SessionUser = {
   userId: User['id'];

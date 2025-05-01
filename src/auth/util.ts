@@ -1,7 +1,7 @@
 import { redirect, RedirectType } from 'next/navigation';
 import { type NextRequest } from 'next/server';
-import { type AuthCode } from './message';
-import config from './config';
+import { type AuthCode } from '@/auth/message';
+import config from '@/auth/config';
 
 type RedirectOptions = {
   type?: RedirectType;

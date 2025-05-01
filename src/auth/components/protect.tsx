@@ -1,6 +1,6 @@
 import { type ReactNode } from 'react';
 import { type User } from '@/db';
-import { auth } from '../session';
+import { auth } from '@/auth/session';
 
 type Props = {
   children: ReactNode;

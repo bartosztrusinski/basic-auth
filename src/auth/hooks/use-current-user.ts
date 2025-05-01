@@ -1,5 +1,5 @@
 import { useContext } from 'react';
-import { CurrentUserContext } from '../providers/current-user-provider';
+import { CurrentUserContext } from '@/auth/providers/current-user-provider';
 
 export function useCurrentUser() {
   const context = useContext(CurrentUserContext);

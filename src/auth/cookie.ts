@@ -1,8 +1,8 @@
 import 'server-only';
 import { cookies } from 'next/headers';
 import { type NextResponse, type NextRequest } from 'next/server';
-import config from './config';
-import serverConfig from './config/server';
+import config from '@/auth/config';
+import serverConfig from '@/auth/config/server';
 
 export async function getSessionCookie(request?: NextRequest) {
   if (request) {

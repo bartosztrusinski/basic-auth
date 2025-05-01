@@ -1,8 +1,8 @@
 import 'server-only';
 import { type NextRequest, NextResponse } from 'next/server';
-import { getSessionCookie, setAuthSyncCookie } from './cookie';
-import { type redirectToLogin as redirectToLoginUtil } from './util';
-import config from './config';
+import { getSessionCookie, setAuthSyncCookie } from '@/auth/cookie';
+import { type redirectToLogin as redirectToLoginUtil } from '@/auth/util';
+import config from '@/auth/config';
 
 type MiddlewareAuth = {
   isAuthenticated: boolean;

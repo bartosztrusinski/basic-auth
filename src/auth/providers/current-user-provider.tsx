@@ -1,10 +1,10 @@
 'use client';
 
 import { createContext, useEffect, useState, useCallback, type ReactNode } from 'react';
-import { useAuth } from '../hooks/use-auth';
-import { fetcher, isSameObject } from '../util';
-import { type BackendUser } from '../session';
-import config from '../config';
+import { useAuth } from '@/auth/hooks/use-auth';
+import { fetcher, isSameObject } from '@/auth/util';
+import { type BackendUser } from '@/auth/session';
+import config from '@/auth/config';
 
 type CurrentUser = Omit<BackendUser, 'role'>;
 

@@ -1,5 +1,5 @@
 import { useEffect } from 'react';
-import { useAuth } from './use-auth';
+import { useAuth } from '@/auth/hooks/use-auth';
 
 export function useSyncAuth() {
   const { isLoggedIn, syncAuth } = useAuth();

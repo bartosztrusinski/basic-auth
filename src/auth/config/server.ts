@@ -1,6 +1,6 @@
 import 'server-only';
 import { env } from '@/env';
-import config from './index';
+import config from '@/auth/config';
 
 const oAuthCookiesDefaultExpirationInSeconds = 60 * 5;
 const secureCookieAttributes = {

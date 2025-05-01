@@ -13,7 +13,7 @@ import {
   Tailwind,
   Text,
 } from '@react-email/components';
-import config from '../../config';
+import config from '@/auth/config';
 
 type Props = {
   name: string;

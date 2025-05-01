@@ -1,6 +1,6 @@
 import { type z } from 'zod';
 import { type User } from '@/db';
-import { type OAuthProviderEnum } from './providers';
+import { type OAuthProviderEnum } from '@/auth/oauth/providers';
 
 export type OAuthProvider = z.infer<typeof OAuthProviderEnum>;
 

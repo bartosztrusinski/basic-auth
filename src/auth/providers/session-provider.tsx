@@ -3,8 +3,8 @@
 import { createContext, useEffect, useState, useCallback, type ReactNode } from 'react';
 import { useRouter } from 'next/navigation';
 import { type User } from '@/db';
-import { fetcher } from '../util';
-import config from '../config';
+import { fetcher } from '@/auth/util';
+import config from '@/auth/config';
 
 type Auth = {
   isLoggedIn: boolean;

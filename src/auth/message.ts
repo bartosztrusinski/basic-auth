@@ -1,5 +1,5 @@
 import { getSearchParam } from '@/auth/util';
-import config from './config';
+import config from '@/auth/config';
 
 export type AuthMessage = {
   type: 'success' | 'error';

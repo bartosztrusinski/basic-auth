@@ -1,7 +1,7 @@
 import { type AnchorHTMLAttributes } from 'react';
 import Link, { type LinkProps } from 'next/link';
-import { getSearchParam } from '../util';
-import config from '../config';
+import { getSearchParam } from '@/auth/util';
+import config from '@/auth/config';
 
 type AuthProps = LinkProps &
   AnchorHTMLAttributes<HTMLAnchorElement> & {

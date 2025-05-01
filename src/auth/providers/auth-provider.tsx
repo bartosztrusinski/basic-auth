@@ -1,7 +1,7 @@
 import { type ReactNode } from 'react';
-import { auth, currentUser } from '../session';
-import { SessionProvider } from './session-provider';
-import { CurrentUserProvider } from './current-user-provider';
+import { auth, currentUser } from '@/auth/session';
+import { SessionProvider } from '@/auth/providers/session-provider';
+import { CurrentUserProvider } from '@/auth/providers/current-user-provider';
 
 export async function AuthProvider({ children }: { children: ReactNode }) {
   const { userId, userRole, expirationTime } = await auth();
