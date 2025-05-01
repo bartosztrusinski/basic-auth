@@ -1,13 +1,13 @@
 import Link from 'next/link';
 import config from '@/auth/config';
-import { getAuthCode, getAuthMessage } from '@/auth/message';
+import { getAuthCode } from '@/auth/message';
 import { LoggedIn } from '@/auth/components/logged-in';
 import { ReturnBack } from '@/auth/components/return-back';
 import { SignupLink } from '@/auth/components/auth-link';
 import { ProviderButtons } from '@/auth/components/provider-buttons';
 import { Page } from '@/components/page';
 import { LoginForm } from '@/components/login-form';
-import { Alert } from '@/components/alert';
+import { AuthAlert } from '@/components/auth-alert';
 
 export default async function LoginPage({
   searchParams,
@@ -15,7 +15,6 @@ export default async function LoginPage({
   searchParams: Promise<Record<string, string | undefined>>;
 }) {
   const authCode = await getAuthCode(searchParams);
-  const authMessage = authCode ? getAuthMessage(authCode) : null;
 
   return (
     <>
@@ -38,7 +37,7 @@ export default async function LoginPage({
             Resend email
           </Link>
         </Page.Description>
-        {authMessage && <Alert variant={authMessage.type} message={authMessage.message} />}
+        <AuthAlert authCode={authCode} />
         <ProviderButtons />
         <LoginForm />
       </Page>

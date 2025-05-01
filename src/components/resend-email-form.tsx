@@ -2,8 +2,8 @@
 
 import { useActionState } from 'react';
 import { resendVerificationEmail } from '@/auth/actions';
-import { getAuthMessage } from '@/auth/message';
 import { Alert } from '@/components/alert';
+import { AuthAlert } from '@/components/auth-alert';
 
 export function ResendEmailForm() {
   const [state, action, isPending] = useActionState(resendVerificationEmail, {
@@ -22,9 +22,7 @@ export function ResendEmailForm() {
       />
 
       {state.errors && <Alert variant='error' message={state.errors} />}
-      {state.isSuccess && (
-        <Alert variant='success' message={getAuthMessage('verification-email-sent').message} />
-      )}
+      {state.isSuccess && <AuthAlert authCode='verification-email-sent' />}
 
       <button disabled={isPending} className='rounded border-2 border-white p-1'>
         {isPending ? 'Sending...' : 'Send Email'}

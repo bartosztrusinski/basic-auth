@@ -1,11 +1,11 @@
 import { db } from '@/db';
 import { auth, currentUser } from '@/auth/session';
-import { getAuthCode, getAuthMessage } from '@/auth/message';
+import { getAuthCode } from '@/auth/message';
 import { Protect } from '@/auth/components/protect';
 import { LinkedAccounts } from '@/auth/components/linked-accounts';
 import { UserProfile } from '@/components/user-profile';
 import { Page } from '@/components/page';
-import { Alert } from '@/components/alert';
+import { AuthAlert } from '@/components/auth-alert';
 
 export default async function ProfilePage({
   searchParams,
@@ -14,6 +14,7 @@ export default async function ProfilePage({
 }) {
   const { redirectToLogin } = await auth();
   const user = await currentUser();
+  const authCode = await getAuthCode(searchParams);
 
   if (!user) {
     return redirectToLogin({ returnBackUrl: '/profile' });
@@ -21,8 +22,6 @@ export default async function ProfilePage({
 
   const accounts = await db.getUserAccounts(user.id);
   const { email, name, role } = user;
-  const authCode = await getAuthCode(searchParams);
-  const authMessage = authCode ? getAuthMessage(authCode) : null;
 
   return (
     <Page>
@@ -36,7 +35,7 @@ export default async function ProfilePage({
       </Protect>
       <UserProfile user={{ name, email, role }} />
       <h2 className='pt-4 text-center text-2xl font-bold'>Linked Accounts</h2>
-      {authMessage && <Alert variant={authMessage.type} message={authMessage.message} />}
+      <AuthAlert authCode={authCode} />
       <LinkedAccounts accounts={accounts} />
     </Page>
   );
