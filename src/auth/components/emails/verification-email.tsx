@@ -1,19 +1,6 @@
-import {
-  Body,
-  Button,
-  Container,
-  Head,
-  Heading,
-  Hr,
-  Html,
-  Img,
-  Link,
-  Preview,
-  Section,
-  Tailwind,
-  Text,
-} from '@react-email/components';
+import { Link } from '@react-email/components';
 import config from '@/auth/config';
+import { Email } from '@/auth/components/emails/email';
 
 type Props = {
   name: string;
@@ -23,54 +10,31 @@ type Props = {
 
 export function VerificationEmail({ name, verificationUrl, expirationTimeHours }: Props) {
   return (
-    <Tailwind>
-      <Html>
-        <Head />
-        <Body className='bg-zinc-100 p-[8px]'>
-          <Preview>
-            Welcome to {config.appName}! Verify your email address to activate your account.
-          </Preview>
-          <Container className='rounded-[4px] border border-solid border-zinc-300 bg-white p-[20px] pb-[5px] font-sans text-zinc-900 shadow'>
-            <Img src={`${config.baseUrl}/${config.logoFilename}`} width={48} height={48} />
-            <Section>
-              <Heading as='h1' className='text-[24px] leading-[32px]'>
-                Welcome to {config.appName}!
-              </Heading>
-              <Text className='font-sans text-[16px] leading-[24px] text-zinc-800'>Hi {name},</Text>
-              <Text className='font-sans text-[16px] leading-[24px] text-zinc-800'>
-                Thanks for signing up. Please click the button below to verify your email address
-                and activate your account.
-              </Text>
-              <Section className='py-[12px] text-center'>
-                <Button
-                  href={verificationUrl}
-                  className='rounded-[4px] bg-amber-500 px-[32px] py-[12px] text-[15px] font-bold text-zinc-700 no-underline'
-                >
-                  Activate Account
-                </Button>
-              </Section>
-              <Text className='font-sans text-[16px] leading-[24px] text-zinc-800'>
-                This verification link will expire in {expirationTimeHours} hour
-                {expirationTimeHours !== 1 && 's'}.
-                <br />
-                Having trouble clicking the button? Click{' '}
-                <Link href={verificationUrl} className='font-medium text-indigo-600'>
-                  here
-                </Link>
-                .
-              </Text>
-              <Text className='text-[14px] leading-[16px] text-zinc-500'>
-                If you did not sign up for {config.appName}, please ignore this email.
-              </Text>
-              <Hr />
-              <Text className='text-center text-[14px] leading-[16px] text-zinc-500'>
-                &copy; {new Date().getFullYear()} {config.appName}. All rights reserved.
-              </Text>
-            </Section>
-          </Container>
-        </Body>
-      </Html>
-    </Tailwind>
+    <Email
+      previewText={`Welcome to ${config.appName}! Verify your email address to activate your account.`}
+    >
+      <Email.Heading>Welcome to {config.appName}!</Email.Heading>
+      <Email.Text>Hi {name},</Email.Text>
+      <Email.Text>
+        Thanks for signing up. Please click the button below to verify your email address and
+        activate your account.
+      </Email.Text>
+      <Email.Button href={verificationUrl}>Activate Account</Email.Button>
+      <Email.Text>
+        This verification link will expire in {expirationTimeHours} hour
+        {expirationTimeHours !== 1 && 's'}.
+        <br />
+        Having trouble clicking the button? Click{' '}
+        <Link href={verificationUrl} className='font-medium text-indigo-700'>
+          here
+        </Link>
+        .
+      </Email.Text>
+      <Email.MutedText>
+        If you did not sign up for {config.appName}, please ignore this email.
+      </Email.MutedText>
+      <Email.Footer />
+    </Email>
   );
 }
 
