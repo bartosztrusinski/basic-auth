@@ -8,7 +8,13 @@ type Props = {
 
 export function ProviderButton({ provider, name }: Props) {
   return (
-    <form key={provider} action={logInWithProvider.bind(null, provider)}>
+    <form
+      key={provider}
+      action={async () => {
+        'use server';
+        await logInWithProvider(provider);
+      }}
+    >
       <button className='w-full rounded bg-zinc-800 p-2 font-bold shadow-lg'>{name}</button>
     </form>
   );

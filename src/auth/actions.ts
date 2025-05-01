@@ -11,7 +11,7 @@ import { generateAuthorizationUrl, unlinkUserAccount } from './oauth';
 import { type OAuthProvider } from './oauth/types';
 import { sendVerificationEmail } from './email';
 import { createEmailVerificationToken } from './verification-token';
-import { AuthError, getAuthMessage } from './message';
+import { type AuthCode, AuthError, getAuthMessage } from './message';
 import config from './config';
 
 type ActionState = {
@@ -67,23 +67,52 @@ export async function logIn(
   }
 }
 
-export async function logInWithProvider(provider: OAuthProvider) {
-  const authorizationUrl = await generateAuthorizationUrl(provider);
-  redirect(authorizationUrl.toString());
-}
-
 export async function logOut() {
   await deleteUserSession();
   redirectToLogin({ authCode: null });
 }
 
-export async function unlinkAccount(provider: OAuthProvider) {
+export async function logInWithProvider(provider: OAuthProvider): Promise<ActionState> {
+  return initializeOAuth(provider, 'oauth-login-failed');
+}
+
+export async function linkAccount(provider: OAuthProvider): Promise<ActionState> {
+  return initializeOAuth(provider, 'oauth-link-failed');
+}
+
+async function initializeOAuth(provider: OAuthProvider, defaultAuthCode: AuthCode) {
+  let authorizationUrl: URL;
+
+  try {
+    authorizationUrl = await generateAuthorizationUrl(provider);
+  } catch (error) {
+    return {
+      isSuccess: false,
+      errors: [
+        getAuthMessage(error instanceof AuthError ? error.authCode : defaultAuthCode).message,
+      ],
+    };
+  }
+
+  redirect(authorizationUrl.toString());
+}
+
+export async function unlinkAccount(provider: OAuthProvider): Promise<ActionState> {
   const { userId } = await auth.protect();
 
   try {
     await unlinkUserAccount(provider, userId);
+
+    return {
+      isSuccess: true,
+    };
   } catch (error) {
-    console.error(error);
+    return {
+      isSuccess: false,
+      errors: [
+        getAuthMessage(error instanceof AuthError ? error.authCode : 'oauth-unlink-failed').message,
+      ],
+    };
   }
 }
 
@@ -108,8 +137,6 @@ export async function verifyEmail(token: VerificationToken['token']) {
 
     await db.deleteVerificationToken(verificationToken.email);
   } catch (error) {
-    console.error('Error verifying email: ', error);
-
     redirectAuth(config.resendVerificationEmailRoute, {
       authCode: error instanceof AuthError ? error.authCode : 'email-verification-failed',
     });
@@ -157,11 +184,12 @@ export async function resendVerificationEmail(
       isSuccess: true,
     };
   } catch (error) {
-    console.error('Error sending verification email: ', error);
-
     return {
       isSuccess: false,
-      errors: [error instanceof Error ? error.message : 'An unknown error occurred'],
+      errors: [
+        getAuthMessage(error instanceof AuthError ? error.authCode : 'verification-email-not-sent')
+          .message,
+      ],
     };
   }
 }

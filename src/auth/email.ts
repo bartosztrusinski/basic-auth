@@ -4,7 +4,7 @@ import { env } from '@/env';
 import { type VerificationToken } from '@/db';
 import { VerificationEmail } from './components/emails/verification-email';
 import { ExistingUserLoginGuidanceEmail } from './components/emails/existing-user-login-guidance-email';
-import { getAuthMessage } from './message';
+import { AuthError } from './message';
 import config from './config';
 import serverConfig from './config/server';
 
@@ -45,7 +45,7 @@ export async function sendVerificationEmail(
   } catch (error) {
     console.error('Error sending email: ', error instanceof Error ? error.cause : error);
 
-    throw new Error(getAuthMessage('verification-email-not-sent').message);
+    throw new AuthError('verification-email-not-sent');
   }
 }
 
@@ -69,6 +69,6 @@ export async function sendExistingUserLoginGuidanceEmail(
   } catch (error) {
     console.error('Error sending email: ', error instanceof Error ? error.cause : error);
 
-    throw new Error(getAuthMessage('verification-email-not-sent').message);
+    throw new AuthError('verification-email-not-sent');
   }
 }

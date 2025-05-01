@@ -10,7 +10,7 @@ import {
   getCodeVerifierCookie,
 } from '../cookie';
 import { fetcher } from '../util';
-import { AuthError, getAuthMessage } from '../message';
+import { AuthError } from '../message';
 import config from '../config';
 import { oAuthTokenSchema } from './schemas';
 import { type OAuthUser, type OAuthProvider } from './types';
@@ -121,7 +121,7 @@ async function createUserAccount(
     const isAnotherProviderUsed = accounts.some((account) => account.provider !== provider);
 
     if (isAnotherProviderUsed || existingUserWithEmail.password) {
-      throw new AuthError('oauth-log-in-email-taken');
+      throw new AuthError('oauth-login-email-taken');
     }
   }
 
@@ -168,12 +168,10 @@ async function unlinkUserAccount(provider: OAuthProvider, userId: User['id']) {
   }
 
   const accounts = await db.getUserAccounts(userId);
-
   const hasOtherAccounts = accounts.some((account) => account.provider !== provider);
-  const isPasswordSet = Boolean(user.password);
 
-  if (!hasOtherAccounts && !isPasswordSet) {
-    throw new Error(getAuthMessage('oauth-unlink-only-account').message);
+  if (!hasOtherAccounts && !user.password) {
+    throw new AuthError('oauth-unlink-only-account');
   }
 
   await db.deleteAccount(userId, provider);
