@@ -187,22 +187,14 @@ export async function resendVerificationEmail(
   try {
     const user = await db.getUserByEmail(email);
 
-    if (!user) {
-      return {
-        isSuccess: true,
-      };
-    }
-
-    if (user.emailVerified) {
+    if (user?.emailVerified) {
       await sendExistingUserLoginGuidanceEmail(user.email, user.name);
-
-      return {
-        isSuccess: true,
-      };
     }
 
-    const verificationToken = await createEmailVerificationToken(user.email);
-    await sendVerificationEmail(verificationToken.email, verificationToken.token, user.name);
+    if (user && !user.emailVerified) {
+      const verificationToken = await createEmailVerificationToken(user.email);
+      await sendVerificationEmail(verificationToken.email, verificationToken.token, user.name);
+    }
 
     return {
       isSuccess: true,
