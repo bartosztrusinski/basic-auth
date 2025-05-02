@@ -1,17 +1,16 @@
 import { type ReactNode } from 'react';
-import { type User } from '@/db';
-import { auth } from '@/auth/session';
+import { type BackendUser, currentUser } from '@/auth/session';
 
 type Props = {
   children: ReactNode;
   fallback?: ReactNode;
-  role?: User['role'];
+  when?: (user: BackendUser) => boolean;
 };
 
-export async function Protect({ children, fallback, role }: Props) {
-  const { userId, userRole } = await auth();
+export async function Protect({ children, fallback, when }: Props) {
+  const user = await currentUser();
 
-  if (!userId || (role && userRole !== role)) {
+  if (!user || when?.(user)) {
     return fallback ? <>{fallback}</> : null;
   }
 
