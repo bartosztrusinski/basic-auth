@@ -33,4 +33,21 @@ const resendVerificationEmailSchema = z.object({
   email,
 });
 
-export { signupSchema, loginSchema, editProfileSchema, resendVerificationEmailSchema };
+const addPasswordSchema = z
+  .object({
+    email,
+    password,
+    confirmPassword: z.string().min(1, 'Please confirm your password'),
+  })
+  .refine((data) => data.password === data.confirmPassword, {
+    message: 'Passwords do not match',
+    path: ['confirmPassword'],
+  });
+
+export {
+  signupSchema,
+  loginSchema,
+  editProfileSchema,
+  resendVerificationEmailSchema,
+  addPasswordSchema,
+};

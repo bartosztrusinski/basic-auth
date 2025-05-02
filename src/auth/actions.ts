@@ -3,9 +3,15 @@
 import { redirect } from 'next/navigation';
 import { db, type VerificationToken, type Session } from '@/db';
 // TODO move to auth
-import { loginSchema, resendVerificationEmailSchema } from '@/schemas';
-import { auth, createUserSession, deleteAllUserSessions, deleteUserSession } from '@/auth/session';
-import { comparePasswords } from '@/auth/password';
+import { addPasswordSchema, loginSchema, resendVerificationEmailSchema } from '@/schemas';
+import {
+  auth,
+  createUserSession,
+  currentUser,
+  deleteAllUserSessions,
+  deleteUserSession,
+} from '@/auth/session';
+import { comparePasswords, generateSalt, hashPassword } from '@/auth/password';
 import { redirectAuth, redirectToLogin } from '@/auth/util';
 import { generateAuthorizationUrl, deleteProviderAccount } from '@/auth/oauth';
 import { type OAuthProvider } from '@/auth/oauth/types';
@@ -208,4 +214,53 @@ export async function resendVerificationEmail(
       ],
     };
   }
+}
+
+export async function addPassword(
+  pathname: string,
+  _: unknown,
+  formData: FormData,
+): Promise<ActionState> {
+  const user = await currentUser();
+
+  if (!user) {
+    return {
+      isSuccess: false,
+      errors: [getAuthMessage('unauthenticated').message],
+    };
+  }
+
+  if (user.hasPassword) {
+    return {
+      isSuccess: false,
+      errors: ['You already have a password.'],
+    };
+  }
+
+  const { data, error } = addPasswordSchema.safeParse(Object.fromEntries(formData.entries()));
+
+  if (error) {
+    return {
+      isSuccess: false,
+      errors: error.errors.map((err) => err.message),
+    };
+  }
+
+  const { password } = data;
+
+  try {
+    const salt = generateSalt();
+    const hashedPassword = await hashPassword(password, salt);
+    await db.updateUser(user.id, {
+      password: hashedPassword,
+      salt,
+    });
+  } catch {
+    return {
+      isSuccess: false,
+      errors: ['An error occurred while adding your password. Please try again.'],
+    };
+  }
+
+  redirectAuth(pathname, { authCode: 'password-set' });
 }

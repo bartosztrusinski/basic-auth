@@ -71,6 +71,10 @@ const authMessages = {
     message:
       'You must have at least one account linked to your profile. Please set a password or link another account',
   },
+  'password-set': {
+    type: 'success',
+    message: 'Password set successfully!',
+  },
 } satisfies Record<string, AuthMessage>;
 
 export function getAuthMessage(code: AuthCode): AuthMessage {
