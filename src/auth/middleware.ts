@@ -2,6 +2,7 @@ import 'server-only';
 import { type NextRequest, NextResponse } from 'next/server';
 import { getSessionCookie, setAuthSyncCookie } from '@/auth/cookie';
 import { type redirectToLogin as redirectToLoginUtil } from '@/auth/util';
+import { type AuthCode } from '@/auth/message';
 import config from '@/auth/config';
 
 type MiddlewareAuth = {
@@ -48,9 +49,10 @@ function redirectToLogin(
 ) {
   const { pathname } = request.nextUrl;
   const redirectUrl = new URL(config.loginRoute, request.url);
+  const code: AuthCode = authCode ?? 'unauthenticated';
 
   redirectUrl.searchParams.set(config.returnBackUrlKey, returnBackUrl ?? pathname);
-  redirectUrl.searchParams.set(config.authCodeKey, authCode ?? 'unauthenticated');
+  redirectUrl.searchParams.set(config.authCodeKey, code);
 
   const response = NextResponse.redirect(redirectUrl);
 
