@@ -6,6 +6,7 @@ import { AccountsManager } from '@/components/accounts-manager';
 import { UserProfile } from '@/components/user-profile';
 import { Page } from '@/components/page';
 import { AuthAlert } from '@/components/auth-alert';
+import { AddPasswordForm } from '@/components/add-password-form';
 import { LogoutEverywhereButton } from '@/components/logout-everywhere-button';
 
 export default async function ProfilePage({
@@ -27,7 +28,7 @@ export default async function ProfilePage({
   return (
     <Page>
       <Page.Title>Your Profile</Page.Title>
-      <Protect role='admin'>
+      <Protect when={(user) => user.role !== 'admin'}>
         <Page.Description>
           <span className='text-zinc-400'>
             You are logged in as an <code className='text-indigo-500'>admin</code>.
@@ -35,13 +36,21 @@ export default async function ProfilePage({
         </Page.Description>
       </Protect>
       <AuthAlert authCode={authCode} />
-      <section>
+      <section className='space-y-3 pt-4'>
         <UserProfile user={{ name, email, role }} roles={UserRoles} />
+        <p className='text-sm text-zinc-400'>View and update your profile information</p>
       </section>
+      <Protect when={(user) => user.hasPassword}>
+        <section className='space-y-3 pt-4'>
+          <AddPasswordForm email={user.email} />
+          <p className='text-sm text-zinc-400'>Set a password for your account</p>
+        </section>
+      </Protect>
       <section className='space-y-3 pt-4'>
         <AccountsManager accounts={accounts} />
+        <p className='text-sm text-zinc-400'>View and manage your connected accounts</p>
       </section>
-      <section className='space-y-3 pt-4 text-center'>
+      <section className='space-y-3 pt-4'>
         <LogoutEverywhereButton />
         <p className='text-sm text-zinc-400'>This will log you out from all devices and sessions</p>
       </section>
