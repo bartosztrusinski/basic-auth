@@ -8,9 +8,10 @@ import { Alert } from '@/components/alert';
 
 type Props = {
   user: Pick<User, 'email' | 'name' | 'role'>;
+  roles: readonly User['role'][];
 };
 
-export function UserProfile({ user }: Props) {
+export function UserProfile({ user, roles }: Props) {
   const [isEditing, setIsEditing] = useState(false);
   const [state, action, isPending] = useActionState(editProfile, { isSuccess: false });
   const { currentUser } = useCurrentUser();
@@ -53,8 +54,11 @@ export function UserProfile({ user }: Props) {
               defaultValue={user.role}
               className='h-6 grow rounded bg-white px-1 text-base text-black'
             >
-              <option value='admin'>admin</option>
-              <option value='user'>user</option>
+              {roles.map((role) => (
+                <option key={role} value={role}>
+                  {role}
+                </option>
+              ))}
             </select>
           </div>
 

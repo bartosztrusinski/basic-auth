@@ -7,12 +7,14 @@ const DATA_PATH = `${process.cwd()}/src/data`;
 
 // ======== USER =========
 
+export const UserRoles = ['user', 'admin'] as const;
+
 type User = {
   id: UUID;
   email: string;
   emailVerified?: number;
   name: string;
-  role: 'user' | 'admin';
+  role: (typeof UserRoles)[number];
   password?: string;
   salt?: string;
 };

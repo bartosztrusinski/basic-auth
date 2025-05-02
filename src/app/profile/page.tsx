@@ -1,4 +1,4 @@
-import { db } from '@/db';
+import { db, UserRoles } from '@/db';
 import { auth, currentUser } from '@/auth/session';
 import { getAuthCode } from '@/auth/message';
 import { Protect } from '@/auth/components/protect';
@@ -36,7 +36,7 @@ export default async function ProfilePage({
       </Protect>
       <AuthAlert authCode={authCode} />
       <section>
-        <UserProfile user={{ name, email, role }} />
+        <UserProfile user={{ name, email, role }} roles={UserRoles} />
       </section>
       <section className='space-y-3 pt-4'>
         <AccountsManager accounts={accounts} />
