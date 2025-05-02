@@ -54,7 +54,6 @@ async function getCurrentUser(): Promise<NextResponse> {
           id: backendUser.id,
           email: backendUser.email,
           name: backendUser.name,
-          hasPassword: backendUser.hasPassword,
         }
       : null,
   );
