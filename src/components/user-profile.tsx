@@ -68,14 +68,14 @@ export function UserProfile({ user, roles }: Props) {
             <button
               type='submit'
               disabled={isPending}
-              className='grow rounded border-2 border-white p-1'
+              className='w-full rounded border border-zinc-500 p-2'
             >
               {isPending ? 'Saving...' : 'Save'}
             </button>
             <button
               type='button'
               onClick={() => setIsEditing(false)}
-              className='w-9 rounded border-2 border-white font-bold'
+              className='w-10 shrink-0 rounded border border-zinc-500'
             >
               ⨉
             </button>
@@ -96,7 +96,7 @@ export function UserProfile({ user, roles }: Props) {
 
           <button
             onClick={() => setIsEditing(true)}
-            className='w-full rounded border-2 border-white p-1'
+            className='w-full rounded border border-zinc-500 p-2'
           >
             Edit Profile
           </button>
