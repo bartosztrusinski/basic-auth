@@ -2,8 +2,12 @@
 
 import { redirect } from 'next/navigation';
 import { db, type VerificationToken, type Session } from '@/db';
-// TODO move to auth
-import { addPasswordSchema, loginSchema, resendVerificationEmailSchema } from '@/schemas';
+import {
+  signupSchema,
+  loginSchema,
+  resendVerificationEmailSchema,
+  addPasswordSchema,
+} from '@/auth/schemas';
 import {
   auth,
   createUserSession,
@@ -25,10 +29,54 @@ type ActionState = {
   errors?: string[];
 };
 
-export async function logIn(
-  _: unknown,
-  formData: FormData,
-): Promise<ActionState & { session?: Session }> {
+async function signUp(_: unknown, formData: FormData): Promise<ActionState> {
+  const { data, error } = signupSchema.safeParse(Object.fromEntries(formData.entries()));
+
+  if (error) {
+    return {
+      isSuccess: false,
+      errors: error.errors.map((err) => err.message),
+    };
+  }
+
+  const { email, name, password } = data;
+
+  try {
+    const existingUser = await db.getUserByEmail(email);
+
+    if (existingUser?.emailVerified) {
+      await sendExistingUserLoginGuidanceEmail(existingUser.email, existingUser.name);
+
+      return {
+        isSuccess: true,
+      };
+    }
+
+    if (!existingUser) {
+      const salt = generateSalt();
+      const hashedPassword = await hashPassword(password, salt);
+      await db.createUser({ email, name, password: hashedPassword, salt });
+    }
+
+    const verificationToken = await createEmailVerificationToken(email);
+    await sendVerificationEmail(
+      verificationToken.email,
+      verificationToken.token,
+      existingUser?.name ?? name,
+    );
+
+    return {
+      isSuccess: true,
+    };
+  } catch {
+    return {
+      isSuccess: false,
+      errors: ['An error occurred while creating your account. Please try again.'],
+    };
+  }
+}
+
+async function logIn(_: unknown, formData: FormData): Promise<ActionState & { session?: Session }> {
   const { data, error } = loginSchema.safeParse(Object.fromEntries(formData.entries()));
 
   if (error) {
@@ -77,31 +125,11 @@ export async function logIn(
   }
 }
 
-export async function logOut(): Promise<ActionState> {
-  await deleteUserSession();
-  redirectToLogin({ authCode: null });
-}
-
-export async function logOutEverywhere(): Promise<ActionState> {
-  const { userId } = await auth();
-
-  if (!userId) {
-    return {
-      isSuccess: false,
-      errors: [getAuthMessage('unauthenticated').message],
-    };
-  }
-
-  await deleteAllUserSessions(userId);
-
-  redirectToLogin({ authCode: null });
-}
-
-export async function logInWithProvider(provider: OAuthProvider): Promise<ActionState> {
+async function logInWithProvider(provider: OAuthProvider): Promise<ActionState> {
   return initializeOAuth(provider, 'oauth-login-failed');
 }
 
-export async function linkAccount(provider: OAuthProvider): Promise<ActionState> {
+async function linkAccount(provider: OAuthProvider): Promise<ActionState> {
   return initializeOAuth(provider, 'oauth-link-failed');
 }
 
@@ -125,7 +153,7 @@ async function initializeOAuth(
   redirect(authorizationUrl.toString());
 }
 
-export async function unlinkAccount(provider: OAuthProvider): Promise<ActionState> {
+async function unlinkAccount(provider: OAuthProvider): Promise<ActionState> {
   const { userId } = await auth.protect();
 
   try {
@@ -144,7 +172,27 @@ export async function unlinkAccount(provider: OAuthProvider): Promise<ActionStat
   }
 }
 
-export async function verifyEmail(token: VerificationToken['token']): Promise<ActionState> {
+async function logOut(): Promise<ActionState> {
+  await deleteUserSession();
+  redirectToLogin({ authCode: null });
+}
+
+async function logOutEverywhere(): Promise<ActionState> {
+  const { userId } = await auth();
+
+  if (!userId) {
+    return {
+      isSuccess: false,
+      errors: [getAuthMessage('unauthenticated').message],
+    };
+  }
+
+  await deleteAllUserSessions(userId);
+
+  redirectToLogin({ authCode: null });
+}
+
+async function verifyEmail(token: VerificationToken['token']): Promise<ActionState> {
   try {
     const verificationToken = await db.getVerificationTokenByToken(token);
 
@@ -173,10 +221,7 @@ export async function verifyEmail(token: VerificationToken['token']): Promise<Ac
   redirectToLogin({ authCode: 'email-verified' });
 }
 
-export async function resendVerificationEmail(
-  _: unknown,
-  formData: FormData,
-): Promise<ActionState> {
+async function resendVerificationEmail(_: unknown, formData: FormData): Promise<ActionState> {
   const { data, error } = resendVerificationEmailSchema.safeParse(
     Object.fromEntries(formData.entries()),
   );
@@ -216,11 +261,7 @@ export async function resendVerificationEmail(
   }
 }
 
-export async function addPassword(
-  pathname: string,
-  _: unknown,
-  formData: FormData,
-): Promise<ActionState> {
+async function addPassword(pathname: string, _: unknown, formData: FormData): Promise<ActionState> {
   const user = await currentUser();
 
   if (!user) {
@@ -264,3 +305,16 @@ export async function addPassword(
 
   redirectAuth(pathname, { authCode: 'password-set' });
 }
+
+export {
+  signUp,
+  logIn,
+  logInWithProvider,
+  linkAccount,
+  unlinkAccount,
+  logOut,
+  logOutEverywhere,
+  verifyEmail,
+  resendVerificationEmail,
+  addPassword,
+};

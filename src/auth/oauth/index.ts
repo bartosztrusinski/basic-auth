@@ -132,7 +132,7 @@ async function fetchOAuthUser(
   return typedUserMapper(providerUser);
 }
 
-async function signUp(
+async function signUpWithProvider(
   provider: OAuthProvider,
   { id, email, ...oAuthData }: OAuthUser,
 ): Promise<Pick<User, 'id' | 'role'>> {
@@ -251,7 +251,7 @@ async function generateCodeChallenge(codeVerifier: string) {
 export {
   generateAuthorizationUrl,
   exchangeCodeForOAuthUser,
-  signUp,
+  signUpWithProvider,
   createProviderAccount,
   deleteProviderAccount,
   getProviderName,

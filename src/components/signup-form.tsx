@@ -1,7 +1,7 @@
 'use client';
 
 import { useActionState } from 'react';
-import { signUp } from '@/actions';
+import { signUp } from '@/auth/actions';
 import { Alert } from '@/components/alert';
 import { AuthAlert } from '@/components/auth-alert';
 

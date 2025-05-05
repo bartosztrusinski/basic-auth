@@ -5,7 +5,7 @@ import { auth, createUserSession, currentUser } from '@/auth/session';
 import { redirectAuth, redirectToLogin } from '@/auth/util';
 import { deleteSessionCookie } from '@/auth/cookie';
 import { AuthError } from '@/auth/message';
-import { signUp, exchangeCodeForOAuthUser, createProviderAccount } from '@/auth/oauth';
+import { signUpWithProvider, exchangeCodeForOAuthUser, createProviderAccount } from '@/auth/oauth';
 import config from '@/auth/config';
 
 export const handlers = { GET };
@@ -65,13 +65,13 @@ async function handleOAuthCallback(rawProvider: string | undefined, request: Nex
   const state = request.nextUrl.searchParams.get('state');
 
   if (userId) {
-    await linkProviderAccount(rawProvider, code, state);
+    await handleOAuthAccountLink(rawProvider, code, state);
   } else {
-    await signUpWithProvider(rawProvider, code, state);
+    await handleOAuthSignup(rawProvider, code, state);
   }
 }
 
-async function linkProviderAccount(
+async function handleOAuthAccountLink(
   rawProvider: string | undefined,
   code: string | null,
   state: string | null,
@@ -94,14 +94,14 @@ async function linkProviderAccount(
   redirectAuth(config.oAuthRedirectRoute, { authCode: 'oauth-link' });
 }
 
-async function signUpWithProvider(
+async function handleOAuthSignup(
   rawProvider: string | undefined,
   code: string | null,
   state: string | null,
 ): Promise<void> {
   try {
     const { provider, oAuthUser } = await exchangeCodeForOAuthUser(rawProvider, code, state);
-    const user = await signUp(provider, oAuthUser);
+    const user = await signUpWithProvider(provider, oAuthUser);
     await createUserSession({
       userId: user.id,
       userRole: user.role,
