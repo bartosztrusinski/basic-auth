@@ -28,11 +28,11 @@ async function getSessionById(id: Session['id']) {
 }
 
 async function createSession(newSession: Session) {
-  const sessions = await getSessions();
-  const now = Date.now();
-  const nonExpiredSessions = sessions.filter((session) => session.expirationTime > now);
-
-  await writeSessions([...nonExpiredSessions, newSession]);
+  await writeSessions((sessions) => {
+    const now = Date.now();
+    const nonExpiredSessions = sessions.filter((session) => session.expirationTime > now);
+    return [...nonExpiredSessions, newSession];
+  });
 
   return newSession;
 }
@@ -52,25 +52,19 @@ async function updateSession(
     ...updatedSessionData,
   };
 
-  const sessions = await getSessions();
-  const updatedSessions = sessions.map((session) =>
-    session.id === sessionId ? updatedSession : session,
+  await writeSessions((sessions) =>
+    sessions.map((session) => (session.id === sessionId ? updatedSession : session)),
   );
-  await writeSessions(updatedSessions);
 
   return updatedSession;
 }
 
 async function deleteSession(id: Session['id']) {
-  const sessions = await getSessions();
-  const updatedSessions = sessions.filter((session) => session.id !== id);
-  await writeSessions(updatedSessions);
+  await writeSessions((sessions) => sessions.filter((session) => session.id !== id));
 }
 
 async function deleteUserSessions(userId: User['id']) {
-  const sessions = await getSessions();
-  const updatedSessions = sessions.filter((session) => session.userId !== userId);
-  await writeSessions(updatedSessions);
+  await writeSessions((sessions) => sessions.filter((session) => session.userId !== userId));
 }
 
 export {

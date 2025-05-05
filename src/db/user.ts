@@ -43,10 +43,7 @@ async function getUserByProvider(
     return null;
   }
 
-  return {
-    ...user,
-    account,
-  };
+  return { ...user, account };
 }
 
 async function createUser(newUser: Omit<User, 'id' | 'role'>) {
@@ -62,8 +59,7 @@ async function createUser(newUser: Omit<User, 'id' | 'role'>) {
     ...newUser,
   };
 
-  const users = await getUsers();
-  await writeUsers([...users, user]);
+  await writeUsers((users) => [...users, user]);
 
   return user;
 }
@@ -80,9 +76,7 @@ async function updateUser(id: User['id'], updatedUserData: Partial<Omit<User, 'i
     ...updatedUserData,
   };
 
-  const users = await getUsers();
-  const updatedUsers = users.map((user) => (user.id === id ? updatedUser : user));
-  await writeUsers(updatedUsers);
+  await writeUsers((users) => users.map((user) => (user.id === id ? updatedUser : user)));
 
   return updatedUser;
 }

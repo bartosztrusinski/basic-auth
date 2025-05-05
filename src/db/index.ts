@@ -3,14 +3,12 @@ import * as session from '@/db/session';
 import * as account from '@/db/account';
 import * as verificationToken from '@/db/verification-token';
 
-const db = {
+export const db = {
   ...user,
   ...session,
   ...account,
   ...verificationToken,
 };
-
-export { db };
 export { UserRoles, type User } from '@/db/user';
 export type { Session } from '@/db/session';
 export type { Account } from '@/db/account';

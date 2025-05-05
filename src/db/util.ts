@@ -1,13 +1,15 @@
 import 'server-only';
 import fs from 'node:fs/promises';
 
+type Callback<T> = (data: T[]) => T[];
+
 const DATA_PATH = `${process.cwd()}/src/data`;
 
 export function createTable<T>(
   filename: string,
-): [() => Promise<T[]>, (data: T[]) => Promise<void>] {
-  const readTable = async () => readDb<T>(filename);
-  const writeTable = async (data: T[]) => writeToDb(filename, data);
+): [() => Promise<T[]>, (callback: Callback<T>) => Promise<void>] {
+  const readTable = () => readDb<T>(filename);
+  const writeTable = (callback: Callback<T>) => writeToDb(filename, callback);
 
   return [readTable, writeTable];
 }
@@ -21,6 +23,8 @@ async function readDb<T>(filename: string): Promise<T[]> {
   }
 }
 
-async function writeToDb(filename: string, data: unknown[]): Promise<void> {
-  await fs.writeFile(`${DATA_PATH}/${filename}`, JSON.stringify(data, null, 2));
+async function writeToDb<T>(filename: string, callback: Callback<T>): Promise<void> {
+  const data = await readDb<T>(filename);
+  const newData = callback(data);
+  await fs.writeFile(`${DATA_PATH}/${filename}`, JSON.stringify(newData, null, 2));
 }

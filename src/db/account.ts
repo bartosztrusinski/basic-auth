@@ -37,18 +37,15 @@ async function createAccount(newAccount: Account) {
     return null;
   }
 
-  await writeAccounts([...accounts, newAccount]);
+  await writeAccounts((accounts) => [...accounts, newAccount]);
 
   return newAccount;
 }
 
 async function deleteAccount(userId: User['id'], provider: Account['provider']) {
-  const accounts = await getAccounts();
-  const updatedAccounts = accounts.filter(
-    (account) => !(account.userId === userId && account.provider === provider),
+  await writeAccounts((accounts) =>
+    accounts.filter((account) => !(account.userId === userId && account.provider === provider)),
   );
-
-  await writeAccounts(updatedAccounts);
 }
 
 export { getAccounts, getUserAccounts, getAccountByProvider, createAccount, deleteAccount };

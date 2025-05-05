@@ -37,24 +37,21 @@ async function getVerificationTokenByToken(token: VerificationToken['token']) {
 }
 
 async function createVerificationToken(newToken: VerificationToken) {
-  const tokens = await getVerificationTokens();
+  await writeVerificationTokens((tokens) => {
+    const isExistingToken = tokens.some(({ token }) => token === newToken.token);
 
-  const isExistingToken = tokens.some(({ token }) => token === newToken.token);
+    if (isExistingToken) {
+      throw new Error('Token already exists');
+    }
 
-  if (isExistingToken) {
-    throw new Error('Token already exists');
-  }
-
-  await writeVerificationTokens([...tokens, newToken]);
+    return [...tokens, newToken];
+  });
 
   return newToken;
 }
 
 async function deleteVerificationToken(email: VerificationToken['email']) {
-  const tokens = await getVerificationTokens();
-  const updatedTokens = tokens.filter((token) => token.email !== email);
-
-  await writeVerificationTokens(updatedTokens);
+  await writeVerificationTokens((tokens) => tokens.filter((token) => token.email !== email));
 }
 
 export {
