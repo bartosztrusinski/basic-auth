@@ -6,7 +6,7 @@ export async function UsersList() {
 
   return (
     <Protect
-      role='admin'
+      when={(user) => user.role !== 'admin'}
       fallback={<p className='text-center'>You do not have permission to view this data.</p>}
     >
       <ul className='max-h-80 space-y-3 overflow-y-auto px-2'>
