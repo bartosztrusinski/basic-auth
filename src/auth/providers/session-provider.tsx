@@ -96,7 +96,6 @@ export function SessionProvider({ children, initialAuth = { isLoggedIn: false } 
 
       if (document.cookie.includes(`${config.syncAuthCookieKey}=true`)) {
         document.cookie = `${config.syncAuthCookieKey}=false; max-age=0; path=/`;
-        // TODO read auth from cookie
         await syncAuth(controller.signal);
       }
 
