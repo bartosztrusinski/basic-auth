@@ -17,8 +17,7 @@ import {
 } from '@/auth/session';
 import { comparePasswords, generateSalt, hashPassword } from '@/auth/password';
 import { redirectAuth, redirectToLogin } from '@/auth/util';
-import { generateAuthorizationUrl, deleteProviderAccount } from '@/auth/oauth';
-import { type OAuthProvider } from '@/auth/oauth/types';
+import { generateAuthorizationUrl, deleteProviderAccount, type OAuthProvider } from '@/auth/oauth';
 import { sendExistingUserLoginGuidanceEmail, sendVerificationEmail } from '@/auth/email';
 import { createEmailVerificationToken } from '@/auth/verification-token';
 import { type AuthCode, AuthError, getAuthMessage } from '@/auth/message';

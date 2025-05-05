@@ -11,10 +11,30 @@ import {
 } from '@/auth/cookie';
 import { fetcher } from '@/auth/util';
 import { AuthError } from '@/auth/message';
-import { oAuthTokenSchema } from '@/auth/oauth/schemas';
-import { type OAuthUser, type OAuthProvider } from '@/auth/oauth/types';
+import { oAuthTokenSchema } from '@/auth/schemas';
 import config from '@/auth/config';
-import providers, { OAuthProviderEnum } from '@/auth/oauth/providers';
+import providers, { OAuthProviderEnum } from '@/auth/config/providers';
+
+type OAuthProvider = z.infer<typeof OAuthProviderEnum>;
+
+type OAuthUser = {
+  id: string;
+} & Pick<User, 'email' | 'name'>;
+
+type OAuthProviderConfig<Schema extends z.ZodSchema = z.ZodSchema> = {
+  name: string;
+  clientId: string;
+  clientSecret: string;
+  authorizationUrl: URL;
+  tokenUrl: URL;
+  userUrl: URL;
+  scope: string[];
+} & OAuthProviderUser<Schema>;
+
+type OAuthProviderUser<Schema extends z.ZodSchema> = {
+  userSchema: Schema;
+  userMapper: (providerUser: z.infer<Schema>) => OAuthUser;
+};
 
 async function generateAuthorizationUrl(provider: OAuthProvider) {
   const { authorizationUrl, clientId, scope } = providers[provider];
@@ -248,6 +268,10 @@ async function generateCodeChallenge(codeVerifier: string) {
   return hash('sha256', codeVerifier, 'base64url');
 }
 
+function createProvider<Schema extends z.ZodSchema>(providerConfig: OAuthProviderConfig<Schema>) {
+  return providerConfig;
+}
+
 export {
   generateAuthorizationUrl,
   exchangeCodeForOAuthUser,
@@ -256,4 +280,6 @@ export {
   deleteProviderAccount,
   getProviderName,
   getRedirectUrl,
+  createProvider,
 };
+export type { OAuthUser, OAuthProvider, OAuthProviderConfig, OAuthProviderUser };

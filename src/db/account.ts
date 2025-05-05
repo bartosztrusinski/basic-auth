@@ -1,7 +1,7 @@
 import 'server-only';
 import { createTable } from '@/db/util';
 import { type User } from '@/db/user';
-import { type OAuthProvider } from '@/auth/oauth/types';
+import { type OAuthProvider } from '@/auth/oauth';
 
 type Account = {
   userId: User['id'];

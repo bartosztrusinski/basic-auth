@@ -1,5 +1,5 @@
 import { getProviderName } from '@/auth/oauth';
-import { OAuthProviderEnum } from '@/auth/oauth/providers';
+import { OAuthProviderEnum } from '@/auth/config/providers';
 import { ProviderButton } from '@/components/provider-button';
 
 export function ProviderButtons() {

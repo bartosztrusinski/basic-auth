@@ -1,7 +1,7 @@
 import { type Account } from '@/db';
 import { getProviderName } from '@/auth/oauth';
-import { OAuthProviderEnum } from '@/auth/oauth/providers';
-import { type OAuthProvider } from '@/auth/oauth/types';
+import { OAuthProviderEnum } from '@/auth/config/providers';
+import { type OAuthProvider } from '@/auth/oauth';
 import { currentUser } from '@/auth/session';
 import { AccountItem } from '@/components/account-item';
 
