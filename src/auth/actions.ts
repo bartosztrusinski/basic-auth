@@ -305,6 +305,21 @@ async function addPassword(pathname: string, _: unknown, formData: FormData): Pr
   redirectAuth(pathname, { authCode: 'password-set' });
 }
 
+async function deleteUser(): Promise<ActionState> {
+  const { userId } = await auth();
+
+  if (!userId) {
+    return {
+      isSuccess: false,
+      errors: [getAuthMessage('unauthenticated').message],
+    };
+  }
+
+  await db.deleteUser(userId);
+
+  redirectToLogin({ authCode: null });
+}
+
 export {
   signUp,
   logIn,
@@ -316,4 +331,5 @@ export {
   verifyEmail,
   resendVerificationEmail,
   addPassword,
+  deleteUser,
 };

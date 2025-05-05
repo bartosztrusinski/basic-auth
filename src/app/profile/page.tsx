@@ -8,6 +8,7 @@ import { Page } from '@/components/page';
 import { AuthAlert } from '@/components/auth-alert';
 import { AddPasswordForm } from '@/components/add-password-form';
 import { LogoutEverywhereButton } from '@/components/logout-everywhere-button';
+import { DeleteUserButton } from '@/components/delete-user-button';
 
 export default async function ProfilePage({
   searchParams,
@@ -53,6 +54,12 @@ export default async function ProfilePage({
       <section className='space-y-3 pt-4'>
         <LogoutEverywhereButton />
         <p className='text-sm text-zinc-400'>This will log you out from all devices and sessions</p>
+      </section>
+      <section className='space-y-3 pt-4'>
+        <DeleteUserButton />
+        <p className='text-sm text-zinc-400'>
+          This action is irreversible and will delete all your data.
+        </p>
       </section>
     </Page>
   );

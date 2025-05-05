@@ -1,7 +1,8 @@
 import 'server-only';
 import { randomUUID, type UUID } from 'node:crypto';
 import { createTable } from '@/db/util';
-import { getAccountByProvider, type Account } from '@/db/account';
+import { deleteUserAccounts, getAccountByProvider, type Account } from '@/db/account';
+import { deleteUserSessions } from '@/db/session';
 
 const UserRoles = ['user', 'admin'] as const;
 
@@ -81,6 +82,18 @@ async function updateUser(id: User['id'], updatedUserData: Partial<Omit<User, 'i
   return updatedUser;
 }
 
+async function deleteUser(id: User['id']) {
+  const user = await getUserById(id);
+
+  if (!user) {
+    throw new Error('User not found');
+  }
+
+  await deleteUserSessions(id);
+  await deleteUserAccounts(id);
+  await writeUsers((users) => users.filter((user) => user.id !== id));
+}
+
 export {
   UserRoles,
   getUsers,
@@ -89,5 +102,6 @@ export {
   getUserByProvider,
   createUser,
   updateUser,
+  deleteUser,
 };
 export type { User };

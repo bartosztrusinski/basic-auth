@@ -48,5 +48,16 @@ async function deleteAccount(userId: User['id'], provider: Account['provider']) 
   );
 }
 
-export { getAccounts, getUserAccounts, getAccountByProvider, createAccount, deleteAccount };
+async function deleteUserAccounts(userId: User['id']) {
+  await writeAccounts((accounts) => accounts.filter((account) => account.userId !== userId));
+}
+
+export {
+  getAccounts,
+  getUserAccounts,
+  getAccountByProvider,
+  createAccount,
+  deleteAccount,
+  deleteUserAccounts,
+};
 export type { Account };
