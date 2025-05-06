@@ -13,7 +13,7 @@ export const metadata: Metadata = {
 
 export default async function RootLayout({ children }: Readonly<{ children: ReactNode }>) {
   return (
-    <html lang='en' className={`${GeistSans.variable}`}>
+    <html lang='en' className={`${GeistSans.variable} [&:has(dialog[open])]:overflow-hidden`}>
       <body className='bg-zinc-900 text-zinc-50'>
         <AuthProvider>
           <Header />
