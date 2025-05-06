@@ -28,7 +28,7 @@ const returnBackUrlKey = 'return-back-url';
 const verificationTokenKey = 'token';
 const authCodeKey = 'auth-code';
 
-const logoFilename = 'basic-auth.png';
+const logoFilename = 'logo.png';
 
 export default Object.freeze({
   baseUrl,
