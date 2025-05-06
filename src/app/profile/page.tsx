@@ -37,30 +37,34 @@ export default async function ProfilePage({
         </Page.Description>
       </Protect>
       <AuthAlert authCode={authCode} />
-      <section className='space-y-3 pt-4'>
-        <UserProfile user={{ name, email, role }} roles={UserRoles} />
-        <p className='text-sm text-zinc-400'>View and update your profile information</p>
-      </section>
-      <Protect when={(user) => user.hasPassword}>
-        <section className='space-y-3 pt-4'>
-          <AddPasswordForm email={user.email} />
-          <p className='text-sm text-zinc-400'>Set a password for your account</p>
+      <article className='space-y-8 pb-4'>
+        <section>
+          <UserProfile user={{ name, email, role }} roles={UserRoles} />
+          <p className='pt-2 text-sm text-zinc-400'>View and update your profile information</p>
         </section>
-      </Protect>
-      <section className='space-y-3 pt-4'>
-        <AccountsManager accounts={accounts} />
-        <p className='text-sm text-zinc-400'>View and manage your connected accounts</p>
-      </section>
-      <section className='space-y-3 pt-4'>
-        <LogoutEverywhereButton />
-        <p className='text-sm text-zinc-400'>This will log you out from all devices and sessions</p>
-      </section>
-      <section className='space-y-3 pt-4'>
-        <DeleteUserButton />
-        <p className='text-sm text-zinc-400'>
-          This action is irreversible and will delete all your data.
-        </p>
-      </section>
+        <section className='space-y-3'>
+          <AccountsManager accounts={accounts} />
+          <p className='text-sm text-zinc-400'>View and manage your connected accounts</p>
+        </section>
+        <Protect when={(user) => user.hasPassword}>
+          <section>
+            <AddPasswordForm email={user.email} />
+            <p className='pt-2 text-sm text-zinc-400'>Set a password for your account</p>
+          </section>
+        </Protect>
+        <section>
+          <LogoutEverywhereButton />
+          <p className='pt-2 text-sm text-zinc-400'>
+            This will log you out from all devices and sessions
+          </p>
+        </section>
+        <section>
+          <DeleteUserButton />
+          <p className='pt-2 text-sm text-zinc-400'>
+            This action is irreversible and will delete all your data
+          </p>
+        </section>
+      </article>
     </Page>
   );
 }

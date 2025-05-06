@@ -25,11 +25,11 @@ export function AccountItem({ provider, name, isLinked, isUnlinkingEnabled }: Pr
           </div>
         )}
       </div>
-      <form action={action} className='basis-20'>
+      <form action={action} className='basis-24'>
         {!isLinked ? (
           <button
             disabled={isPending}
-            className='w-full rounded bg-green-600 p-1 font-bold shadow disabled:cursor-not-allowed disabled:opacity-50'
+            className='w-full rounded border border-zinc-400 p-1 px-2 font-bold shadow disabled:cursor-not-allowed disabled:opacity-50'
           >
             {isPending ? 'Linking...' : 'Link'}
           </button>
@@ -37,7 +37,7 @@ export function AccountItem({ provider, name, isLinked, isUnlinkingEnabled }: Pr
           isUnlinkingEnabled && (
             <button
               disabled={isPending}
-              className='w-full rounded bg-red-600 p-1 font-bold shadow disabled:cursor-not-allowed disabled:opacity-50'
+              className='w-full rounded bg-red-600 p-1 px-2 font-bold shadow disabled:cursor-not-allowed disabled:opacity-50'
             >
               {isPending ? 'Unlinking...' : 'Unlink'}
             </button>
