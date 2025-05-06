@@ -315,6 +315,7 @@ async function deleteUser(): Promise<ActionState> {
     };
   }
 
+  await deleteAllUserSessions(userId);
   await db.deleteUser(userId);
 
   redirectToLogin({ authCode: null });

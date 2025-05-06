@@ -2,7 +2,6 @@ import 'server-only';
 import { randomUUID, type UUID } from 'node:crypto';
 import { createTable } from '@/db/util';
 import { deleteUserAccounts, getAccountByProvider, type Account } from '@/db/account';
-import { deleteUserSessions } from '@/db/session';
 
 const UserRoles = ['user', 'admin'] as const;
 
@@ -89,7 +88,6 @@ async function deleteUser(id: User['id']) {
     throw new Error('User not found');
   }
 
-  await deleteUserSessions(id);
   await deleteUserAccounts(id);
   await writeUsers((users) => users.filter((user) => user.id !== id));
 }
