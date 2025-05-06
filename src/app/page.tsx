@@ -1,3 +1,4 @@
+import Image from 'next/image';
 import { currentUser } from '@/auth/session';
 import { Page } from '@/components/page';
 import { ClientComponent } from '@/components/client-component';
@@ -7,7 +8,10 @@ export default async function HomePage() {
 
   return (
     <Page>
-      <Page.Title>🔐 Basic Auth</Page.Title>
+      <Page.Title>
+        <Image src='/logo.png' alt='App logo' width={48} height={48} className='inline-block' />
+        <span className='align-middle'>Basic Auth</span>
+      </Page.Title>
       <Page.Description>
         Server-side: {user ? `Welcome back ${user.name}` : 'You are not logged in'}
         <ClientComponent />

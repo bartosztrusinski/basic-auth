@@ -1,6 +1,7 @@
 'use client';
 
 import Link from 'next/link';
+import Image from 'next/image';
 import { LoginLink, SignupLink } from '@/auth/components/auth-link';
 import { useAuth } from '@/auth/hooks/use-auth';
 import { LogoutButton } from '@/components/logout-button';
@@ -9,8 +10,13 @@ export function Header() {
   const { isLoggedIn } = useAuth();
 
   return (
-    <nav className='flex flex-wrap justify-between gap-x-8 gap-y-4 bg-zinc-800 p-4 text-zinc-50'>
-      <ul className='flex gap-8'>
+    <nav className='flex flex-wrap justify-between gap-x-6 gap-y-4 bg-zinc-800 p-4 text-zinc-50'>
+      <ul className='flex items-center gap-5'>
+        <li>
+          <Link href='/'>
+            <Image src='/logo.png' alt='App logo' width={32} height={32} />
+          </Link>
+        </li>
         <li>
           <Link href='/'>Home</Link>
         </li>
@@ -24,7 +30,7 @@ export function Header() {
           <Link href='/admin'>Admin</Link>
         </li>
       </ul>
-      <ul className='flex gap-8'>
+      <ul className='flex items-center gap-5'>
         {isLoggedIn ? (
           <>
             <li>
