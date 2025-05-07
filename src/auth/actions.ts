@@ -22,6 +22,7 @@ import { sendExistingUserLoginGuidanceEmail, sendVerificationEmail } from '@/aut
 import { createEmailVerificationToken } from '@/auth/verification-token';
 import { type AuthCode, AuthError, getAuthMessage } from '@/auth/message';
 import config from '@/auth/config';
+import serverConfig from '@/auth/config/server';
 
 type ActionState = {
   isSuccess: boolean;
@@ -321,6 +322,66 @@ async function deleteUser(): Promise<ActionState> {
   redirectToLogin({ authCode: null });
 }
 
+async function initiateTwoFactorAuth(): Promise<ActionState & { secret?: string }> {
+  const user = await currentUser();
+
+  if (!user) {
+    return {
+      isSuccess: false,
+      errors: [getAuthMessage('unauthenticated').message],
+    };
+  }
+
+  try {
+    if (user.isTwoFactorEnabled) {
+      throw new AuthError('two-factor-already-enabled');
+    }
+
+    await db.deleteTwoFactorSetup(user.id);
+
+    // TODO Replace with actual secret generation logic
+    const secret = Math.floor(Math.random() * 1000000)
+      .toString()
+      .padStart(6, '0');
+
+    const twoFactorSetup = await db.createTwoFactorSetup({
+      userId: user.id,
+      secret,
+      expirationTime: Date.now() + serverConfig.twoFactorSetupExpirationInSeconds * 1000,
+    });
+
+    return {
+      isSuccess: true,
+      secret: twoFactorSetup.secret,
+    };
+  } catch (error) {
+    return {
+      isSuccess: false,
+      errors: [
+        getAuthMessage(error instanceof AuthError ? error.authCode : 'two-factor-setup-failed')
+          .message,
+      ],
+    };
+  }
+}
+
+async function enableTwoFactorAuth(
+  pathname: string,
+  _: unknown,
+  formData: FormData,
+): Promise<ActionState> {
+  const { userId } = await auth.protect({
+    returnBackUrl: pathname,
+  });
+
+  await db.updateUser(userId, {
+    isTwoFactorEnabled: true,
+    twoFactorSecret: '123456', // TODO: Replace with actual secret
+  });
+
+  redirectAuth(pathname, { authCode: 'two-factor-enabled' });
+}
+
 export {
   signUp,
   logIn,
@@ -333,4 +394,6 @@ export {
   resendVerificationEmail,
   addPassword,
   deleteUser,
+  initiateTwoFactorAuth,
+  enableTwoFactorAuth,
 };
