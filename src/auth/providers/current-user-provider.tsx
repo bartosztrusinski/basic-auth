@@ -6,7 +6,7 @@ import { fetcher, isSameObject } from '@/auth/util';
 import { type BackendUser } from '@/auth/session';
 import config from '@/auth/config';
 
-type CurrentUser = Omit<BackendUser, 'role' | 'hasPassword'>;
+type CurrentUser = Pick<BackendUser, 'id' | 'email' | 'name'>;
 
 type UserData =
   | {
