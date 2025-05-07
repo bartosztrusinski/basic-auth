@@ -75,6 +75,18 @@ const authMessages = {
     type: 'success',
     message: 'Password set successfully!',
   },
+  'two-factor-enabled': {
+    type: 'success',
+    message: 'Two-factor authentication enabled successfully!',
+  },
+  'two-factor-setup-failed': {
+    type: 'error',
+    message: 'Failed to set up two-factor authentication. Please try again.',
+  },
+  'two-factor-already-enabled': {
+    type: 'error',
+    message: 'Two-factor authentication is already enabled.',
+  },
 } satisfies Record<string, AuthMessage>;
 
 export function getAuthMessage(code: AuthCode): AuthMessage {
