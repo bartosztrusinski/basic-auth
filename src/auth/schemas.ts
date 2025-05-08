@@ -43,6 +43,13 @@ const oAuthTokenSchema = z.object({
   refresh_token: z.string().optional(),
 });
 
+const totpSchema = z.object({
+  token: z
+    .string()
+    .min(1, 'Please enter a valid 6-digit code')
+    .regex(/^\d{6}$/, 'Please enter a valid 6-digit code'),
+});
+
 // Provider specific user schemas - add more properties as needed
 
 const discordUserSchema = z.object({
@@ -89,6 +96,7 @@ export {
   resendVerificationEmailSchema,
   addPasswordSchema,
   oAuthTokenSchema,
+  totpSchema,
   discordUserSchema,
   githubUserSchema,
   googleUserSchema,
