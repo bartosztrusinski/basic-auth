@@ -81,11 +81,19 @@ const authMessages = {
   },
   'two-factor-setup-failed': {
     type: 'error',
-    message: 'Failed to set up two-factor authentication. Please try again.',
+    message: 'Could not set up two-factor authentication. Please try again.',
   },
   'two-factor-already-enabled': {
     type: 'error',
     message: 'Two-factor authentication is already enabled.',
+  },
+  'two-factor-invalid-code': {
+    type: 'error',
+    message: 'Invalid two-factor authentication code. Please try again.',
+  },
+  'two-factor-expired': {
+    type: 'error',
+    message: 'Two-factor authentication code expired. Please try again.',
   },
 } satisfies Record<string, AuthMessage>;
 
