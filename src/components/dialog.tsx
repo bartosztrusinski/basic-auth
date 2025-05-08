@@ -1,13 +1,14 @@
 'use client';
 
-import { type ReactNode, useRef } from 'react';
+import { type ReactNode, useEffect, useRef } from 'react';
 
 type Props = {
   children: ReactNode | ((closeDialog: () => void, openDialog: () => void) => ReactNode);
   trigger: ReactNode;
+  onClose?: () => void;
 };
 
-export function Dialog({ children, trigger }: Props) {
+export function Dialog({ children, trigger, onClose }: Props) {
   const ref = useRef<HTMLDialogElement>(null);
 
   function openDialog() {
@@ -15,14 +16,22 @@ export function Dialog({ children, trigger }: Props) {
   }
 
   function closeDialog() {
+    onClose?.();
     ref.current?.close();
   }
+
+  useEffect(() => {
+    if (typeof trigger === 'boolean' && trigger) {
+      openDialog();
+    }
+  }, [trigger]);
 
   return (
     <>
       <span onClick={openDialog}>{trigger}</span>
       <dialog
         ref={ref}
+        onClose={closeDialog}
         onClick={(event) => {
           if (event.target === event.currentTarget) {
             closeDialog();
