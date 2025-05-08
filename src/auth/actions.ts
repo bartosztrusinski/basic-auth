@@ -1,5 +1,7 @@
 'use server';
 
+import * as OTPAuth from 'otpauth';
+import QRCode from 'qrcode';
 import { redirect } from 'next/navigation';
 import { db, type VerificationToken, type Session } from '@/db';
 import {
@@ -7,6 +9,7 @@ import {
   loginSchema,
   resendVerificationEmailSchema,
   addPasswordSchema,
+  totpSchema,
 } from '@/auth/schemas';
 import {
   auth,
@@ -322,14 +325,13 @@ async function deleteUser(): Promise<ActionState> {
   redirectToLogin({ authCode: null });
 }
 
-async function initiateTwoFactorAuth(): Promise<ActionState & { secret?: string }> {
+async function initiateTwoFactorAuth(): Promise<
+  ActionState & { secret?: string; qrCode?: string }
+> {
   const user = await currentUser();
 
   if (!user) {
-    return {
-      isSuccess: false,
-      errors: [getAuthMessage('unauthenticated').message],
-    };
+    redirectToLogin();
   }
 
   try {
@@ -337,12 +339,9 @@ async function initiateTwoFactorAuth(): Promise<ActionState & { secret?: string 
       throw new AuthError('two-factor-already-enabled');
     }
 
-    await db.deleteTwoFactorSetup(user.id);
+    const secret = new OTPAuth.Secret({ size: 20 }).base32;
 
-    // TODO Replace with actual secret generation logic
-    const secret = Math.floor(Math.random() * 1000000)
-      .toString()
-      .padStart(6, '0');
+    await db.deleteTwoFactorSetup(user.id);
 
     const twoFactorSetup = await db.createTwoFactorSetup({
       userId: user.id,
@@ -350,9 +349,19 @@ async function initiateTwoFactorAuth(): Promise<ActionState & { secret?: string 
       expirationTime: Date.now() + serverConfig.twoFactorSetupExpirationInSeconds * 1000,
     });
 
+    const totpHandler = new OTPAuth.TOTP({
+      issuer: config.appName,
+      label: user.email,
+      secret: twoFactorSetup.secret,
+    });
+
+    const url = totpHandler.toString();
+    const qrCode = await QRCode.toDataURL(url);
+
     return {
       isSuccess: true,
       secret: twoFactorSetup.secret,
+      qrCode,
     };
   } catch (error) {
     return {
@@ -370,14 +379,63 @@ async function enableTwoFactorAuth(
   _: unknown,
   formData: FormData,
 ): Promise<ActionState> {
-  const { userId } = await auth.protect({
-    returnBackUrl: pathname,
-  });
+  const { data, error } = totpSchema.safeParse(Object.fromEntries(formData.entries()));
 
-  await db.updateUser(userId, {
-    isTwoFactorEnabled: true,
-    twoFactorSecret: '123456', // TODO: Replace with actual secret
-  });
+  if (error) {
+    return {
+      isSuccess: false,
+      errors: error.errors.map((err) => err.message),
+    };
+  }
+
+  const { token } = data;
+  const user = await currentUser();
+
+  if (!user) {
+    redirectToLogin({ returnBackUrl: pathname });
+  }
+
+  try {
+    if (user.isTwoFactorEnabled) {
+      throw new AuthError('two-factor-already-enabled');
+    }
+
+    const twoFactorSetup = await db.getUserTwoFactorSetup(user.id);
+
+    if (!twoFactorSetup) {
+      throw new AuthError('two-factor-setup-failed');
+    }
+
+    if (twoFactorSetup.expirationTime < Date.now()) {
+      throw new AuthError('two-factor-expired');
+    }
+
+    const totpHandler = new OTPAuth.TOTP({
+      issuer: config.appName,
+      label: user.email,
+      secret: twoFactorSetup.secret,
+    });
+
+    const delta = totpHandler.validate({ token, window: 0 });
+
+    if (delta !== 0) {
+      throw new AuthError('two-factor-invalid-code');
+    }
+
+    await db.deleteTwoFactorSetup(user.id);
+    await db.updateUser(user.id, {
+      isTwoFactorEnabled: true,
+      twoFactorSecret: twoFactorSetup.secret,
+    });
+  } catch (error) {
+    return {
+      isSuccess: false,
+      errors: [
+        getAuthMessage(error instanceof AuthError ? error.authCode : 'two-factor-setup-failed')
+          .message,
+      ],
+    };
+  }
 
   redirectAuth(pathname, { authCode: 'two-factor-enabled' });
 }
