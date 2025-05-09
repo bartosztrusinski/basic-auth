@@ -20,8 +20,10 @@ export type BackendUser = Pick<User, 'id' | 'email' | 'name' | 'role' | 'isTwoFa
   hasPassword: boolean;
 };
 
+type NullBackendSession = Record<keyof BackendSession, null>;
+
 interface Auth {
-  (): Promise<Partial<BackendSession>>;
+  (): Promise<BackendSession | NullBackendSession>;
   protect: (options?: ProtectOptions) => Promise<Pick<BackendSession, 'userId'>>;
 }
 
@@ -37,23 +39,27 @@ export type RedirectToLoginOptions = Omit<RedirectOptions, 'type'> & {
 
 export const auth: Auth = Object.assign(cache(authFn), { protect });
 
-async function authFn(): Promise<Partial<BackendSession>> {
+async function authFn(): Promise<BackendSession | NullBackendSession> {
   const sessionId = await getSessionCookie();
+  const auth: NullBackendSession = {
+    userId: null,
+    userRole: null,
+    expirationTime: null,
+  };
 
   if (!sessionId) {
-    return {};
+    return auth;
   }
 
   const session = await db.getSessionById(sessionId);
 
   if (!session) {
-    return {};
+    return auth;
   }
 
   const { userId, userRole, expirationTime } = session;
 
   return {
-    ...auth,
     userId,
     userRole,
     expirationTime,
