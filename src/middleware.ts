@@ -5,11 +5,11 @@ export default authMiddleware(async (auth, request) => {
   const { isAuthenticated, redirectToLogin, redirectToDefault } = await auth();
 
   if (isAuthRoute(request) && isAuthenticated) {
-    return redirectToDefault({ requestAuthSync: true });
+    return redirectToDefault({ syncAuth: true });
   }
 
   if (isProtectedRoute(request) && !isAuthenticated) {
-    return redirectToLogin({ requestAuthSync: true });
+    return redirectToLogin({ syncAuth: true });
   }
 
   // Request auth sync on all public routes

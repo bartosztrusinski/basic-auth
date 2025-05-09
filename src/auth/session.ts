@@ -3,8 +3,8 @@ import { randomBytes } from 'node:crypto';
 import { cache } from 'react';
 import { RedirectType } from 'next/navigation';
 import { type NextRequest } from 'next/server';
-import { db, type User } from '@/db';
-import { redirectAuth, redirectToLogin } from '@/auth/util';
+import { db, type Session, type User } from '@/db';
+import { redirectAuth, type RedirectOptions } from '@/auth/util';
 import {
   getSessionCookie,
   setSessionCookie,
@@ -14,22 +14,16 @@ import {
 import config from '@/auth/config';
 import serverConfig from '@/auth/config/server';
 
-type SessionUser = {
-  userId: User['id'];
-  userRole: User['role'];
-  expirationTime?: number;
+type BackendSession = Pick<Session, 'userId' | 'userRole' | 'expirationTime'>;
+
+export type BackendUser = Pick<User, 'id' | 'email' | 'name' | 'role' | 'isTwoFactorEnabled'> & {
+  hasPassword: boolean;
 };
 
-export type Auth = Partial<SessionUser> & {
-  redirectToLogin: typeof redirectToLogin;
-};
-
-interface AuthFunction {
-  (): ReturnType<() => Promise<Auth>>;
-  protect: (options?: ProtectOptions) => Promise<{ userId: User['id'] }>;
+interface Auth {
+  (): Promise<Partial<BackendSession>>;
+  protect: (options?: ProtectOptions) => Promise<Pick<BackendSession, 'userId'>>;
 }
-
-type RedirectToLoginOptions = Parameters<typeof redirectToLogin>[0];
 
 type ProtectOptions = {
   role?: User['role'];
@@ -37,26 +31,23 @@ type ProtectOptions = {
   unauthenticatedUrl?: string;
 } & RedirectToLoginOptions;
 
-export type BackendUser = Pick<User, 'id' | 'email' | 'name' | 'role' | 'isTwoFactorEnabled'> & {
-  hasPassword: boolean;
+export type RedirectToLoginOptions = Omit<RedirectOptions, 'type'> & {
+  syncAuth?: boolean;
 };
 
-export const auth: AuthFunction = Object.assign(cache(authFn), { protect });
+export const auth: Auth = Object.assign(cache(authFn), { protect });
 
-async function authFn(): Promise<Auth> {
+async function authFn(): Promise<Partial<BackendSession>> {
   const sessionId = await getSessionCookie();
-  const auth: Auth = {
-    redirectToLogin,
-  };
 
   if (!sessionId) {
-    return auth;
+    return {};
   }
 
   const session = await db.getSessionById(sessionId);
 
   if (!session) {
-    return auth;
+    return {};
   }
 
   const { userId, userRole, expirationTime } = session;
@@ -66,7 +57,7 @@ async function authFn(): Promise<Auth> {
     userId,
     userRole,
     expirationTime,
-  } satisfies Auth;
+  };
 }
 
 async function protect({
@@ -77,11 +68,7 @@ async function protect({
 }: ProtectOptions = {}) {
   const { userId, userRole } = await auth();
 
-  try {
-    await setAuthSyncCookie();
-  } catch {
-    console.info('Protect called from server component, sync auth cookie not set');
-  }
+  setAuthSyncCookie().catch(() => null);
 
   if (!userId) {
     if (unauthenticatedUrl) {
@@ -91,7 +78,7 @@ async function protect({
       });
     }
 
-    redirectToLogin(redirectParams);
+    redirectToLogin({ ...redirectParams, syncAuth: false });
   }
 
   if (role && userRole !== role) {
@@ -102,6 +89,24 @@ async function protect({
   }
 
   return { userId };
+}
+
+export function redirectToLogin({
+  syncAuth = true,
+  authCode = 'unauthenticated',
+  returnBackUrl,
+}: RedirectToLoginOptions = {}): never {
+  if (syncAuth) {
+    setAuthSyncCookie().catch(() => null);
+  }
+
+  const redirectUrl = new URL(config.loginRoute, config.baseUrl);
+
+  if (returnBackUrl) {
+    redirectUrl.searchParams.set(config.returnBackUrlKey, returnBackUrl);
+  }
+
+  redirectAuth(redirectUrl.toString(), { type: RedirectType.replace, authCode });
 }
 
 export const currentUser = cache<() => Promise<BackendUser | null>>(async () => {
@@ -127,7 +132,10 @@ export const currentUser = cache<() => Promise<BackendUser | null>>(async () => 
   } satisfies BackendUser;
 });
 
-export async function createUserSession({ userId, userRole }: SessionUser) {
+export async function createUserSession({
+  userId,
+  userRole,
+}: Omit<BackendSession, 'expirationTime'>) {
   const sessionId = randomBytes(512).toString('hex');
 
   const session = await db.createSession({
@@ -161,7 +169,10 @@ export async function deleteAllUserSessions(userId: User['id']) {
   await setAuthSyncCookie();
 }
 
-export async function updateUserSession({ userId, userRole }: SessionUser) {
+export async function updateUserSession({
+  userId,
+  userRole,
+}: Omit<BackendSession, 'expirationTime'>) {
   const sessionId = await getSessionCookie();
 
   if (!sessionId) {

@@ -1,21 +1,17 @@
 import 'server-only';
 import { type NextRequest, NextResponse } from 'next/server';
 import { getSessionCookie, setAuthSyncCookie } from '@/auth/cookie';
-import { type redirectToLogin as redirectToLoginUtil } from '@/auth/util';
+import { type RedirectToLoginOptions } from '@/auth/session';
 import { type AuthCode } from '@/auth/message';
 import config from '@/auth/config';
 
 type MiddlewareAuth = {
   isAuthenticated: boolean;
   redirectToLogin: (options?: RedirectToLoginOptions) => NextResponse;
-  redirectToDefault: (options?: RedirectOptions) => NextResponse;
+  redirectToDefault: (options?: RedirectToDefaultOptions) => NextResponse;
 };
 
-type RedirectToLoginOptions = RedirectOptions & Parameters<typeof redirectToLoginUtil>[0];
-
-type RedirectOptions = {
-  requestAuthSync?: boolean;
-};
+type RedirectToDefaultOptions = Pick<RedirectToLoginOptions, 'syncAuth'>;
 
 type MiddlewareHandler = (
   auth: () => Promise<MiddlewareAuth>,
@@ -45,7 +41,7 @@ const authClosure = (request: NextRequest) => async () =>
 
 function redirectToLogin(
   request: NextRequest,
-  { requestAuthSync, returnBackUrl, authCode }: RedirectToLoginOptions = {},
+  { returnBackUrl, authCode, syncAuth }: RedirectToLoginOptions = {},
 ) {
   const { pathname } = request.nextUrl;
   const redirectUrl = new URL(config.loginRoute, request.url);
@@ -56,18 +52,18 @@ function redirectToLogin(
 
   const response = NextResponse.redirect(redirectUrl);
 
-  if (requestAuthSync) {
-    void setAuthSyncCookie(response);
+  if (syncAuth) {
+    setAuthSyncCookie().catch(() => null);
   }
 
   return response;
 }
 
-function redirectToDefault(request: NextRequest, { requestAuthSync }: RedirectOptions = {}) {
+function redirectToDefault(request: NextRequest, { syncAuth }: RedirectToDefaultOptions = {}) {
   const response = NextResponse.redirect(new URL(config.defaultRedirectRoute, request.url));
 
-  if (requestAuthSync) {
-    void setAuthSyncCookie(response);
+  if (syncAuth) {
+    setAuthSyncCookie().catch(() => null);
   }
 
   return response;

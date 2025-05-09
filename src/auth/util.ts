@@ -1,4 +1,4 @@
-import { redirect, RedirectType } from 'next/navigation';
+import { redirect, type RedirectType } from 'next/navigation';
 import { type NextRequest } from 'next/server';
 import { type AuthCode } from '@/auth/message';
 import config from '@/auth/config';
@@ -20,19 +20,6 @@ function redirectAuth(
   }
 
   redirect(redirectUrl.toString(), type);
-}
-
-function redirectToLogin({
-  authCode = 'unauthenticated',
-  returnBackUrl,
-}: Omit<RedirectOptions, 'type'> = {}): never {
-  const redirectUrl = new URL(config.loginRoute, config.baseUrl);
-
-  if (returnBackUrl) {
-    redirectUrl.searchParams.set(config.returnBackUrlKey, returnBackUrl);
-  }
-
-  redirectAuth(redirectUrl.toString(), { type: RedirectType.replace, authCode });
 }
 
 function isAuthRoute(request: NextRequest) {
@@ -89,7 +76,6 @@ async function getSearchParam<T extends string>(
 
 export {
   redirectAuth,
-  redirectToLogin,
   isAuthRoute,
   isProtectedRoute,
   isApiAuthRoute,
@@ -97,3 +83,4 @@ export {
   isSameObject,
   getSearchParam,
 };
+export type { RedirectOptions };
