@@ -1,8 +1,8 @@
 import 'server-only';
 import { NextResponse, type NextRequest } from 'next/server';
 import { redirect } from 'next/navigation';
-import { auth, createUserSession, currentUser } from '@/auth/session';
-import { redirectAuth, redirectToLogin } from '@/auth/util';
+import { auth, redirectToLogin, createUserSession, currentUser } from '@/auth/session';
+import { redirectAuth } from '@/auth/util';
 import { deleteSessionCookie } from '@/auth/cookie';
 import { AuthError } from '@/auth/message';
 import { signUpWithProvider, exchangeCodeForOAuthUser, createProviderAccount } from '@/auth/oauth';

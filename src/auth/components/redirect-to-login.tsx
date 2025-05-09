@@ -1,4 +1,5 @@
-import { getSearchParam, redirectToLogin } from '@/auth/util';
+import { getSearchParam } from '@/auth/util';
+import { redirectToLogin } from '@/auth/session';
 import config from '@/auth/config';
 
 type Props = {
