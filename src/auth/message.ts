@@ -11,7 +11,7 @@ export type AuthCode = keyof typeof authMessages;
 const authMessages = {
   unauthenticated: {
     type: 'error',
-    message: 'Please log in to continue',
+    message: 'Your session has expired or you are not logged in. Please log in again to proceed.',
   },
   unauthorized: {
     type: 'error',
@@ -74,6 +74,18 @@ const authMessages = {
   'password-set': {
     type: 'success',
     message: 'Password set successfully!',
+  },
+  'password-already-set': {
+    type: 'error',
+    message: 'Password is already set for this account.',
+  },
+  'account-deleted': {
+    type: 'success',
+    message: 'Account deleted successfully!',
+  },
+  'logout-everywhere': {
+    type: 'success',
+    message: 'Logged out from all devices successfully!',
   },
   'two-factor-enabled': {
     type: 'success',
