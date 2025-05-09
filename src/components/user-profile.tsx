@@ -18,6 +18,7 @@ export function UserProfile({ user, roles }: Props) {
 
   useEffect(() => {
     if (state.isSuccess) {
+      state.isSuccess = false;
       setIsEditing(false);
       void currentUser?.reload();
     }
