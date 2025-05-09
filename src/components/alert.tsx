@@ -14,7 +14,7 @@ type Props = {
 const variants: Record<Variant, { classes: string; accentChar: string }> = {
   default: { classes: 'border-zinc-600', accentChar: '🔐' },
   success: { classes: 'border-green-500 text-green-500', accentChar: '✅' },
-  error: { classes: 'border-red-500 text-red-500', accentChar: '❌' },
+  error: { classes: 'border-red-500 text-red-500', accentChar: '🛑' },
 };
 
 export function Alert({ message, variant = 'default', onClose, isClosable = false }: Props) {
@@ -31,9 +31,7 @@ export function Alert({ message, variant = 'default', onClose, isClosable = fals
   }
 
   return (
-    <div
-      className={`group flex items-start justify-between gap-2 rounded border p-2 text-sm ${classes}`}
-    >
+    <div className={`flex items-start justify-between gap-2 rounded border p-2 text-sm ${classes}`}>
       <div className='flex items-start gap-2'>
         <span>{accentChar}</span>
         <span className='font-light'>
@@ -47,7 +45,7 @@ export function Alert({ message, variant = 'default', onClose, isClosable = fals
       {isClosable && (
         <button
           onClick={handleClose}
-          className='size-5 shrink-0 rounded bg-red-500 bg-opacity-0 text-red-500 opacity-0 transition-all duration-100 hover:bg-opacity-20 group-hover:opacity-100'
+          className='size-5 shrink-0 rounded bg-red-500 bg-opacity-0 text-red-500 transition-opacity duration-100 hover:bg-opacity-20'
         >
           ⨉
         </button>
