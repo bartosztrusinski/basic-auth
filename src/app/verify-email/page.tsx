@@ -1,4 +1,3 @@
-import config from '@/auth/config';
 import { redirectAuth } from '@/auth/util';
 import { Page } from '@/components/page';
 import { VerifyEmailForm } from '@/components/verify-email-form';
@@ -12,7 +11,7 @@ export default async function VerifyEmailPage({
   const { token } = params;
 
   if (!token) {
-    redirectAuth(config.resendVerificationEmailRoute, {
+    redirectAuth('/resend-email', {
       authCode: 'email-verification-failed',
     });
   }

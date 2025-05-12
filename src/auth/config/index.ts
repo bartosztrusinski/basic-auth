@@ -7,7 +7,6 @@ const defaultRedirectRoute = '/';
 const oAuthRedirectRoute = '/profile';
 const loginRoute = '/log-in';
 const signupRoute = '/sign-up';
-const resendVerificationEmailRoute = '/resend-email';
 const emailVerificationRoute = '/verify-email';
 
 const apiBaseRoute = env.NEXT_PUBLIC_API_BASE_ROUTE ?? '/api/auth';
@@ -16,12 +15,7 @@ const apiUserEndpoint = 'user';
 const apiOAuthEndpoint = 'callback';
 
 const protectedRoutes = ['/private', '/profile', '/admin'] as const;
-const authRoutes = [
-  loginRoute,
-  signupRoute,
-  resendVerificationEmailRoute,
-  emailVerificationRoute,
-] as const;
+const authRoutes = [loginRoute, signupRoute, emailVerificationRoute, '/resend-email'] as const;
 
 const syncAuthCookieKey = 'sync-auth';
 const returnBackUrlKey = 'return-back-url';
@@ -37,7 +31,6 @@ export default Object.freeze({
   oAuthRedirectRoute,
   loginRoute,
   signupRoute,
-  resendVerificationEmailRoute,
   emailVerificationRoute,
   apiBaseRoute,
   apiSessionEndpoint,
