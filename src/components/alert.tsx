@@ -1,6 +1,8 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, type ReactNode } from 'react';
+import { ErrorIcon } from '@/components/error-icon';
+import { SuccessIcon } from '@/components/success-icon';
 
 type Variant = 'default' | 'success' | 'error';
 
@@ -11,17 +13,23 @@ type Props = {
   onClose?: () => void;
 };
 
-const variants: Record<Variant, { classes: string; accentChar: string }> = {
-  default: { classes: 'border-zinc-600', accentChar: '🔐' },
-  success: { classes: 'border-green-500 text-green-500', accentChar: '✅' },
-  error: { classes: 'border-red-500 text-red-500', accentChar: '🛑' },
+const variants: Record<Variant, { classes: string; accentChar: ReactNode }> = {
+  default: { classes: 'border-zinc-700', accentChar: '🔐' },
+  success: {
+    classes: 'bg-green-950 text-green-500 border-green-900',
+    accentChar: <SuccessIcon />,
+  },
+  error: {
+    classes: 'bg-red-950 border-red-900 text-red-400',
+    accentChar: <ErrorIcon />,
+  },
 };
 
 export function Alert({ message, variant = 'default', onClose, isClosable = false }: Props) {
   const [isVisible, setIsVisible] = useState(true);
   const { classes, accentChar } = variants[variant];
 
-  if (!isVisible) {
+  if (!isVisible || message.length === 0) {
     return null;
   }
 
@@ -32,7 +40,7 @@ export function Alert({ message, variant = 'default', onClose, isClosable = fals
 
   return (
     <div className={`flex items-start justify-between gap-2 rounded border p-2 text-sm ${classes}`}>
-      <div className='flex items-start gap-2'>
+      <div className='flex items-center gap-2'>
         <span>{accentChar}</span>
         <span className='font-light'>
           {Array.isArray(message) ? (
