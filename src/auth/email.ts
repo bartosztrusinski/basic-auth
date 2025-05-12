@@ -44,9 +44,7 @@ export async function sendVerificationEmail(
     if (error) {
       throw new Error(error.message, { cause: error });
     }
-  } catch (error) {
-    console.error('Error sending email: ', error instanceof Error ? error.cause : error);
-
+  } catch {
     throw new AuthError('verification-email-not-sent');
   }
 }
@@ -71,9 +69,7 @@ export async function sendExistingUserLoginGuidanceEmail(
     if (error) {
       throw new Error(error.message, { cause: error });
     }
-  } catch (error) {
-    console.error('Error sending email: ', error instanceof Error ? error.cause : error);
-
+  } catch {
     throw new AuthError('verification-email-not-sent');
   }
 }
