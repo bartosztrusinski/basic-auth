@@ -17,6 +17,18 @@ const authMessages = {
     type: 'error',
     message: 'You do not have permissions to access this page',
   },
+  'signup-failed': {
+    type: 'error',
+    message: 'Could not create an account. Please try again.',
+  },
+  'login-failed': {
+    type: 'error',
+    message: 'Could not log in. Please try again.',
+  },
+  'logout-failed': {
+    type: 'error',
+    message: 'Could not log out. Please try again.',
+  },
   'invalid-credentials': {
     type: 'error',
     message: 'Invalid email or password',
@@ -39,7 +51,7 @@ const authMessages = {
   },
   'verification-email-not-sent': {
     type: 'error',
-    message: 'Failed to send verification email. Please try again.',
+    message: 'Could not send verification email. Please try again.',
   },
   'oauth-login-failed': {
     type: 'error',
@@ -75,6 +87,10 @@ const authMessages = {
     type: 'success',
     message: 'Password set successfully!',
   },
+  'password-set-failed': {
+    type: 'error',
+    message: 'Could not set password. Please try again.',
+  },
   'password-already-set': {
     type: 'error',
     message: 'Password is already set for this account.',
@@ -83,9 +99,17 @@ const authMessages = {
     type: 'success',
     message: 'Account deleted successfully!',
   },
+  'account-deletion-failed': {
+    type: 'error',
+    message: 'Could not delete account. Please try again.',
+  },
   'logout-everywhere': {
     type: 'success',
     message: 'Logged out from all devices successfully!',
+  },
+  'logout-everywhere-failed': {
+    type: 'error',
+    message: 'Could not log out from all devices. Please try again.',
   },
   'two-factor-enabled': {
     type: 'success',
