@@ -32,7 +32,7 @@ export function Dialog({ children, trigger, onClose }: Props) {
       <dialog
         ref={ref}
         onClose={closeDialog}
-        onClick={(event) => {
+        onMouseDown={(event) => {
           if (event.target === event.currentTarget) {
             closeDialog();
           }
