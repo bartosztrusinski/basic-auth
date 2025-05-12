@@ -1,11 +1,11 @@
 'use client';
 
 import { useActionState } from 'react';
-import { deleteUser } from '@/auth/actions';
+import { deleteCurrentUser } from '@/actions';
 import { Dialog } from '@/components/dialog';
 
 export function DeleteUserButton() {
-  const [, action, isPending] = useActionState(deleteUser, null);
+  const [, action, isPending] = useActionState(deleteCurrentUser, null);
 
   return (
     <Dialog

@@ -1,7 +1,7 @@
 'use client';
 
 import { useActionState } from 'react';
-import { logOutEverywhere } from '@/auth/actions';
+import { logOutEverywhere } from '@/actions';
 import { Dialog } from '@/components/dialog';
 
 export function LogoutEverywhereButton() {

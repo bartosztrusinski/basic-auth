@@ -2,7 +2,7 @@
 
 import { useActionState } from 'react';
 import { type VerificationToken } from '@/db';
-import { verifyEmail } from '@/auth/actions';
+import { verifyEmail } from '@/actions';
 
 type Props = {
   token: VerificationToken['token'];
