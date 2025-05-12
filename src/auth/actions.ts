@@ -19,7 +19,6 @@ import {
   deleteUserSession,
 } from '@/auth/session';
 import { comparePasswords, generateSalt, hashPassword } from '@/auth/password';
-import { redirectAuth, redirectToLogin } from '@/auth/util';
 import { generateAuthorizationUrl, deleteProviderAccount, type OAuthProvider } from '@/auth/oauth';
 import { sendExistingUserLoginGuidanceEmail, sendVerificationEmail } from '@/auth/email';
 import { createEmailVerificationToken } from '@/auth/verification-token';
@@ -29,7 +28,8 @@ import serverConfig from '@/auth/config/server';
 
 type ActionState = {
   isSuccess: boolean;
-  errors?: string[];
+  authCode?: AuthCode;
+  errors?: string | string[];
 };
 
 async function signUp(_: unknown, formData: FormData): Promise<ActionState> {
@@ -71,11 +71,8 @@ async function signUp(_: unknown, formData: FormData): Promise<ActionState> {
     return {
       isSuccess: true,
     };
-  } catch {
-    return {
-      isSuccess: false,
-      errors: ['An error occurred while creating your account. Please try again.'],
-    };
+  } catch (error) {
+    return handleError(error, 'signup-failed');
   }
 }
 
@@ -95,19 +92,13 @@ async function logIn(_: unknown, formData: FormData): Promise<ActionState & { se
     const user = await db.getUserByEmail(email);
 
     if (!user?.password || !user?.salt) {
-      return {
-        isSuccess: false,
-        errors: [getAuthMessage('invalid-credentials').message],
-      };
+      throw new AuthError('invalid-credentials');
     }
 
     const isCorrectPassword = await comparePasswords(password, user.password, user.salt);
 
     if (!isCorrectPassword || !user.emailVerified) {
-      return {
-        isSuccess: false,
-        errors: [getAuthMessage('invalid-credentials').message],
-      };
+      throw new AuthError('invalid-credentials');
     }
 
     const session = await createUserSession({ userId: user.id, userRole: user.role });
@@ -117,82 +108,85 @@ async function logIn(_: unknown, formData: FormData): Promise<ActionState & { se
       session,
     };
   } catch (error) {
-    return {
-      isSuccess: false,
-      errors: [
-        error instanceof Error
-          ? error.message
-          : 'An error occurred while logging in. Please try again.',
-      ],
-    };
+    return handleError(error, 'login-failed');
   }
 }
 
 async function logInWithProvider(provider: OAuthProvider): Promise<ActionState> {
-  return initializeOAuth(provider, 'oauth-login-failed');
-}
-
-async function linkAccount(provider: OAuthProvider): Promise<ActionState> {
-  return initializeOAuth(provider, 'oauth-link-failed');
-}
-
-async function initializeOAuth(
-  provider: OAuthProvider,
-  defaultAuthCode: AuthCode,
-): Promise<ActionState> {
   let authorizationUrl: URL;
 
   try {
     authorizationUrl = await generateAuthorizationUrl(provider);
   } catch (error) {
-    return {
-      isSuccess: false,
-      errors: [
-        getAuthMessage(error instanceof AuthError ? error.authCode : defaultAuthCode).message,
-      ],
-    };
+    return handleError(error, 'oauth-login-failed');
+  }
+
+  redirect(authorizationUrl.toString());
+}
+
+async function linkAccount(provider: OAuthProvider): Promise<ActionState> {
+  let authorizationUrl: URL;
+  const { userId } = await auth();
+
+  try {
+    if (!userId) {
+      throw new AuthError('unauthenticated');
+    }
+
+    authorizationUrl = await generateAuthorizationUrl(provider);
+  } catch (error) {
+    return handleError(error, 'oauth-link-failed');
   }
 
   redirect(authorizationUrl.toString());
 }
 
 async function unlinkAccount(provider: OAuthProvider): Promise<ActionState> {
-  const { userId } = await auth.protect();
+  const { userId } = await auth();
 
   try {
+    if (!userId) {
+      throw new AuthError('unauthenticated');
+    }
+
     await deleteProviderAccount(provider, userId);
 
     return {
       isSuccess: true,
     };
   } catch (error) {
-    return {
-      isSuccess: false,
-      errors: [
-        getAuthMessage(error instanceof AuthError ? error.authCode : 'oauth-unlink-failed').message,
-      ],
-    };
+    return handleError(error, 'oauth-unlink-failed');
   }
 }
 
 async function logOut(): Promise<ActionState> {
-  await deleteUserSession();
-  redirectToLogin({ authCode: null });
+  try {
+    await deleteUserSession();
+
+    return {
+      isSuccess: true,
+    };
+  } catch (error) {
+    return handleError(error, 'logout-failed');
+  }
 }
 
 async function logOutEverywhere(): Promise<ActionState> {
   const { userId } = await auth();
 
-  if (!userId) {
+  try {
+    if (!userId) {
+      throw new AuthError('unauthenticated');
+    }
+
+    await deleteAllUserSessions(userId);
+
     return {
-      isSuccess: false,
-      errors: [getAuthMessage('unauthenticated').message],
+      isSuccess: true,
     };
+  } catch (error) {
+    return handleError(error, 'logout-everywhere-failed');
   }
-
-  await deleteAllUserSessions(userId);
-
-  redirectToLogin({ authCode: null });
 }
 
 async function verifyEmail(token: VerificationToken['token']): Promise<ActionState> {
@@ -215,13 +209,13 @@ async function verifyEmail(token: VerificationToken['token']): Promise<ActionSta
     }
 
     await db.deleteVerificationToken(verificationToken.email);
-  } catch (error) {
-    redirectAuth(config.resendVerificationEmailRoute, {
-      authCode: error instanceof AuthError ? error.authCode : 'email-verification-failed',
-    });
-  }
 
-  redirectToLogin({ authCode: 'email-verified' });
+    return {
+      isSuccess: true,
+    };
+  } catch (error) {
+    return handleError(error, 'email-verification-failed');
+  }
 }
 
 async function resendVerificationEmail(_: unknown, formData: FormData): Promise<ActionState> {
@@ -254,75 +248,66 @@ async function resendVerificationEmail(_: unknown, formData: FormData): Promise<
       isSuccess: true,
     };
   } catch (error) {
-    return {
-      isSuccess: false,
-      errors: [
-        getAuthMessage(error instanceof AuthError ? error.authCode : 'verification-email-not-sent')
-          .message,
-      ],
-    };
+    return handleError(error, 'verification-email-not-sent');
   }
 }
 
-async function addPassword(pathname: string, _: unknown, formData: FormData): Promise<ActionState> {
+async function addPassword(_: unknown, formData: FormData): Promise<ActionState> {
   const user = await currentUser();
 
-  if (!user) {
-    return {
-      isSuccess: false,
-      errors: [getAuthMessage('unauthenticated').message],
-    };
-  }
-
-  if (user.hasPassword) {
-    return {
-      isSuccess: false,
-      errors: ['You already have a password.'],
-    };
-  }
-
-  const { data, error } = addPasswordSchema.safeParse(Object.fromEntries(formData.entries()));
-
-  if (error) {
-    return {
-      isSuccess: false,
-      errors: error.errors.map((err) => err.message),
-    };
-  }
-
-  const { password } = data;
-
   try {
+    if (!user) {
+      throw new AuthError('unauthenticated');
+    }
+
+    if (user.hasPassword) {
+      throw new AuthError('password-already-set');
+    }
+
+    const { data, error } = addPasswordSchema.safeParse(Object.fromEntries(formData.entries()));
+
+    if (error) {
+      return {
+        isSuccess: false,
+        errors: error.errors.map((err) => err.message),
+      };
+    }
+
+    const { password } = data;
+
     const salt = generateSalt();
     const hashedPassword = await hashPassword(password, salt);
+
     await db.updateUser(user.id, {
       password: hashedPassword,
       salt,
     });
-  } catch {
-    return {
-      isSuccess: false,
-      errors: ['An error occurred while adding your password. Please try again.'],
-    };
-  }
 
-  redirectAuth(pathname, { authCode: 'password-set' });
+    return {
+      isSuccess: true,
+    };
+  } catch (error) {
+    return handleError(error, 'password-set-failed');
+  }
 }
 
-async function deleteUser(): Promise<ActionState> {
+async function deleteCurrentUser(): Promise<ActionState> {
   const { userId } = await auth();
 
-  if (!userId) {
+  try {
+    if (!userId) {
+      throw new AuthError('unauthenticated');
+    }
+
+    await deleteAllUserSessions(userId);
+    await db.deleteUser(userId);
+
     return {
-      isSuccess: false,
-      errors: [getAuthMessage('unauthenticated').message],
+      isSuccess: true,
     };
+  } catch (error) {
+    return handleError(error, 'account-deletion-failed');
   }
-
-  await deleteAllUserSessions(userId);
-  await db.deleteUser(userId);
-
-  redirectToLogin({ authCode: null });
 }
 
 async function initiateTwoFactorAuth(): Promise<
@@ -330,11 +315,11 @@ async function initiateTwoFactorAuth(): Promise<
 > {
   const user = await currentUser();
 
-  if (!user) {
-    redirectToLogin();
-  }
-
   try {
+    if (!user) {
+      throw new AuthError('unauthenticated');
+    }
+
     if (user.isTwoFactorEnabled) {
       throw new AuthError('two-factor-already-enabled');
     }
@@ -364,38 +349,29 @@ async function initiateTwoFactorAuth(): Promise<
       qrCode,
     };
   } catch (error) {
-    return {
-      isSuccess: false,
-      errors: [
-        getAuthMessage(error instanceof AuthError ? error.authCode : 'two-factor-setup-failed')
-          .message,
-      ],
-    };
+    return handleError(error, 'two-factor-setup-failed');
   }
 }
 
-async function enableTwoFactorAuth(
-  pathname: string,
-  _: unknown,
-  formData: FormData,
-): Promise<ActionState> {
-  const { data, error } = totpSchema.safeParse(Object.fromEntries(formData.entries()));
-
-  if (error) {
-    return {
-      isSuccess: false,
-      errors: error.errors.map((err) => err.message),
-    };
-  }
-
-  const { token } = data;
+async function enableTwoFactorAuth(_: unknown, formData: FormData): Promise<ActionState> {
   const user = await currentUser();
 
-  if (!user) {
-    redirectToLogin({ returnBackUrl: pathname });
-  }
-
   try {
+    if (!user) {
+      throw new AuthError('unauthenticated');
+    }
+
+    const { data, error } = totpSchema.safeParse(Object.fromEntries(formData.entries()));
+
+    if (error) {
+      return {
+        isSuccess: false,
+        errors: error.errors.map((err) => err.message),
+      };
+    }
+
+    const { token } = data;
+
     if (user.isTwoFactorEnabled) {
       throw new AuthError('two-factor-already-enabled');
     }
@@ -427,17 +403,21 @@ async function enableTwoFactorAuth(
       isTwoFactorEnabled: true,
       twoFactorSecret: twoFactorSetup.secret,
     });
-  } catch (error) {
-    return {
-      isSuccess: false,
-      errors: [
-        getAuthMessage(error instanceof AuthError ? error.authCode : 'two-factor-setup-failed')
-          .message,
-      ],
-    };
-  }
 
-  redirectAuth(pathname, { authCode: 'two-factor-enabled' });
+    return {
+      isSuccess: true,
+    };
+  } catch (error) {
+    return handleError(error, 'two-factor-setup-failed');
+  }
+}
+
+function handleError(error: unknown, defaultAuthCode: AuthCode): ActionState {
+  return {
+    isSuccess: false,
+    authCode: error instanceof AuthError ? error.authCode : undefined,
+    errors: getAuthMessage(error instanceof AuthError ? error.authCode : defaultAuthCode).message,
+  };
 }
 
 export {
@@ -451,7 +431,7 @@ export {
   verifyEmail,
   resendVerificationEmail,
   addPassword,
-  deleteUser,
+  deleteCurrentUser,
   initiateTwoFactorAuth,
   enableTwoFactorAuth,
 };
