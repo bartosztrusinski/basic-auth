@@ -1,8 +1,10 @@
 'use client';
 
-import { useActionState } from 'react';
-import { unlinkAccount, linkAccount } from '@/auth/actions';
+import { type FormEvent, useTransition } from 'react';
+import { toast } from 'sonner';
 import { type OAuthProvider } from '@/auth/oauth';
+import { unlinkAccount, linkAccount } from '@/actions';
+import { getAuthMessage } from '@/auth/message';
 
 type Props = {
   provider: OAuthProvider;
@@ -13,7 +15,24 @@ type Props = {
 
 export function AccountItem({ provider, name, isLinked, isUnlinkingEnabled }: Props) {
   const accountAction = isLinked ? unlinkAccount : linkAccount;
-  const [, action, isPending] = useActionState(accountAction.bind(null, provider), null);
+  const [isPending, startTransition] = useTransition();
+
+  function handleSubmit(event: FormEvent<HTMLFormElement>) {
+    event.preventDefault();
+
+    startTransition(async () => {
+      const { isSuccess, errors } = await accountAction(provider);
+
+      if (errors && errors.length > 0) {
+        toast.error(errors);
+      }
+
+      if (isSuccess) {
+        const { message } = getAuthMessage('oauth-unlink');
+        toast.success(message);
+      }
+    });
+  }
 
   return (
     <div className='flex min-h-14 justify-between rounded-lg bg-zinc-800 p-3'>
@@ -25,7 +44,7 @@ export function AccountItem({ provider, name, isLinked, isUnlinkingEnabled }: Pr
           </div>
         )}
       </div>
-      <form action={action} className='basis-24'>
+      <form onSubmit={handleSubmit} className='basis-24'>
         {!isLinked ? (
           <button
             disabled={isPending}
