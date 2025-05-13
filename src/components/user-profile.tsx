@@ -1,6 +1,6 @@
 'use client';
 
-import { type FormEvent, useState, useTransition } from 'react';
+import { type FormEvent, useActionState, useState, useTransition } from 'react';
 import { toast } from 'sonner';
 import { type User } from '@/db';
 import { useCurrentUser } from '@/auth/hooks/use-current-user';
@@ -16,6 +16,7 @@ export function UserProfile({ user, roles }: Props) {
   const [isEditing, setIsEditing] = useState(false);
   const [errors, setErrors] = useState<string | string[] | null>(null);
   const [isPending, startTransition] = useTransition();
+  const [state, action, isActionPending] = useActionState(editProfile, { isSuccess: false });
   const { currentUser } = useCurrentUser();
 
   function openForm() {
@@ -53,8 +54,8 @@ export function UserProfile({ user, roles }: Props) {
       <p>
         <strong>Email:</strong> {user.email}
       </p>
-      {isEditing || isPending ? (
-        <form onSubmit={handleSubmit} className='space-y-4'>
+      {isEditing || isPending || isActionPending ? (
+        <form action={action} onSubmit={handleSubmit} className='space-y-4'>
           <div className='flex items-center gap-2'>
             <label htmlFor='name'>
               <strong>Name:</strong>
@@ -88,14 +89,19 @@ export function UserProfile({ user, roles }: Props) {
           </div>
 
           {errors && <Alert variant='error' message={errors} />}
+          {state.errors && (
+            <noscript className='rounded border border-red-900 bg-red-950 p-2 text-sm text-red-400'>
+              {state.errors}
+            </noscript>
+          )}
 
           <div className='flex gap-2'>
             <button
               type='submit'
-              disabled={isPending}
+              disabled={isPending || isActionPending}
               className='w-full rounded border border-zinc-500 p-2'
             >
-              {isPending ? 'Saving...' : 'Save'}
+              {isPending || isActionPending ? 'Saving...' : 'Save'}
             </button>
             <button
               type='button'

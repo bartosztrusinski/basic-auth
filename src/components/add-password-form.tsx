@@ -1,6 +1,6 @@
 'use client';
 
-import { type FormEvent, useState, useTransition } from 'react';
+import { type FormEvent, useActionState, useState, useTransition } from 'react';
 import { toast } from 'sonner';
 import { type User } from '@/db';
 import { addPassword } from '@/actions';
@@ -14,8 +14,9 @@ type Props = {
 // TODO dialog
 export function AddPasswordForm({ email }: Props) {
   const [isFormVisible, setIsFormVisible] = useState(false);
-  const [isPending, startTransition] = useTransition();
   const [errors, setErrors] = useState<string | string[] | null>(null);
+  const [isPending, startTransition] = useTransition();
+  const [state, action, isActionPending] = useActionState(addPassword, { isSuccess: false });
 
   function openForm() {
     setIsFormVisible(true);
@@ -33,7 +34,7 @@ export function AddPasswordForm({ email }: Props) {
     setErrors(null);
 
     startTransition(async () => {
-      const { isSuccess, errors } = await addPassword(formData);
+      const { isSuccess, errors } = await addPassword(null, formData);
 
       if (isSuccess) {
         const { message } = getAuthMessage('password-set');
@@ -55,7 +56,7 @@ export function AddPasswordForm({ email }: Props) {
   }
 
   return (
-    <form onSubmit={handleSubmit} className='flex flex-col gap-3'>
+    <form action={action} onSubmit={handleSubmit} className='flex flex-col gap-3'>
       <input
         type='email'
         id='email'
@@ -86,14 +87,19 @@ export function AddPasswordForm({ email }: Props) {
       />
 
       {errors && <Alert variant='error' message={errors} />}
+      {state.errors && (
+        <noscript className='rounded border border-red-900 bg-red-950 p-2 text-sm text-red-400'>
+          {state.errors}
+        </noscript>
+      )}
 
       <div className='flex gap-2'>
         <button
           type='submit'
-          disabled={isPending}
+          disabled={isPending || isActionPending}
           className='w-full rounded border border-zinc-500 p-2'
         >
-          {isPending ? 'Submitting...' : 'Set Password'}
+          {isPending || isActionPending ? 'Submitting...' : 'Set Password'}
         </button>
         <button
           type='button'

@@ -1,6 +1,6 @@
 'use client';
 
-import { type FormEvent, useTransition } from 'react';
+import { type FormEvent, useActionState, useTransition } from 'react';
 import { toast } from 'sonner';
 import { type OAuthProvider } from '@/auth/oauth';
 import { unlinkAccount, linkAccount } from '@/actions';
@@ -16,6 +16,9 @@ type Props = {
 export function AccountItem({ provider, name, isLinked, isUnlinkingEnabled }: Props) {
   const accountAction = isLinked ? unlinkAccount : linkAccount;
   const [isPending, startTransition] = useTransition();
+  const [, action, isActionPending] = useActionState(accountAction.bind(null, provider), {
+    isSuccess: false,
+  });
 
   function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
@@ -44,21 +47,21 @@ export function AccountItem({ provider, name, isLinked, isUnlinkingEnabled }: Pr
           </div>
         )}
       </div>
-      <form onSubmit={handleSubmit} className='basis-24'>
+      <form action={action} onSubmit={handleSubmit} className='basis-24'>
         {!isLinked ? (
           <button
-            disabled={isPending}
+            disabled={isPending || isActionPending}
             className='w-full rounded border border-zinc-400 p-1 px-2 font-bold shadow disabled:cursor-not-allowed disabled:opacity-50'
           >
-            {isPending ? 'Linking...' : 'Link'}
+            {isPending || isActionPending ? 'Linking...' : 'Link'}
           </button>
         ) : (
           isUnlinkingEnabled && (
             <button
-              disabled={isPending}
+              disabled={isPending || isActionPending}
               className='w-full rounded bg-red-600 p-1 px-2 font-bold shadow disabled:cursor-not-allowed disabled:opacity-50'
             >
-              {isPending ? 'Unlinking...' : 'Unlink'}
+              {isPending || isActionPending ? 'Unlinking...' : 'Unlink'}
             </button>
           )
         )}
