@@ -9,7 +9,7 @@ type Session = {
   expirationTime: number;
 };
 
-const [getSessions, writeSessions] = createTable<Session>('session.json');
+const [getSessions, writeSessions] = createTable<Session>('sessions.json');
 
 async function getSessionById(id: Session['id']) {
   const sessions = await getSessions();
