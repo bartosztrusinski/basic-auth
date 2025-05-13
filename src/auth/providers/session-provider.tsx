@@ -2,16 +2,17 @@
 
 import { createContext, useEffect, useState, useCallback, type ReactNode } from 'react';
 import { useRouter } from 'next/navigation';
-import { type User } from '@/db';
-import { fetcher } from '@/auth/util';
+import { fetcher, type Null } from '@/auth/util';
+import { type BackendSession } from '@/auth/session';
 import config from '@/auth/config';
 
-type Auth = {
-  isLoggedIn: boolean;
-  userId?: User['id'];
-  userRole?: User['role'];
-  expirationTime?: number;
-};
+type Auth =
+  | ({
+      isLoggedIn: true;
+    } & BackendSession)
+  | ({
+      isLoggedIn: false;
+    } & Null<BackendSession>);
 
 type SessionContext = Auth & {
   syncAuth: (signal?: AbortSignal) => Promise<void>;
@@ -22,12 +23,19 @@ type Props = {
   initialAuth?: Auth;
 };
 
-export const SessionContext = createContext<SessionContext>({
+const defaultAuth: Auth = {
   isLoggedIn: false,
+  userId: null,
+  userRole: null,
+  expirationTime: null,
+};
+
+export const SessionContext = createContext<SessionContext>({
+  ...defaultAuth,
   syncAuth: async () => undefined,
 });
 
-export function SessionProvider({ children, initialAuth = { isLoggedIn: false } }: Props) {
+export function SessionProvider({ children, initialAuth = defaultAuth }: Props) {
   const [auth, setAuth] = useState<Auth>(initialAuth);
   const router = useRouter();
 

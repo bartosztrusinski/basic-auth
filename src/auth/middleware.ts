@@ -11,7 +11,7 @@ type MiddlewareAuth = {
   redirectToDefault: (options?: RedirectToDefaultOptions) => NextResponse;
 };
 
-type RedirectToDefaultOptions = Pick<RedirectToLoginOptions, 'syncAuth'>;
+type RedirectToDefaultOptions = Omit<RedirectToLoginOptions, 'returnBackUrl'>;
 
 type MiddlewareHandler = (
   auth: () => Promise<MiddlewareAuth>,
@@ -53,17 +53,26 @@ function redirectToLogin(
   const response = NextResponse.redirect(redirectUrl);
 
   if (syncAuth) {
-    setAuthSyncCookie().catch(() => null);
+    setAuthSyncCookie(response).catch(() => null);
   }
 
   return response;
 }
 
-function redirectToDefault(request: NextRequest, { syncAuth }: RedirectToDefaultOptions = {}) {
-  const response = NextResponse.redirect(new URL(config.defaultRedirectRoute, request.url));
+function redirectToDefault(
+  request: NextRequest,
+  { syncAuth, authCode }: RedirectToDefaultOptions = {},
+) {
+  const redirectUrl = new URL(config.defaultRedirectRoute, request.url);
+
+  if (authCode) {
+    redirectUrl.searchParams.set(config.authCodeKey, authCode);
+  }
+
+  const response = NextResponse.redirect(redirectUrl);
 
   if (syncAuth) {
-    setAuthSyncCookie().catch(() => null);
+    setAuthSyncCookie(response).catch(() => null);
   }
 
   return response;

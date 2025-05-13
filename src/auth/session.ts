@@ -4,7 +4,7 @@ import { cache } from 'react';
 import { RedirectType } from 'next/navigation';
 import { type NextRequest } from 'next/server';
 import { db, type Session, type User } from '@/db';
-import { redirectAuth, type RedirectOptions } from '@/auth/util';
+import { redirectAuth, type FullOrNull, type Null, type RedirectOptions } from '@/auth/util';
 import {
   getSessionCookie,
   setSessionCookie,
@@ -14,16 +14,14 @@ import {
 import config from '@/auth/config';
 import serverConfig from '@/auth/config/server';
 
-type BackendSession = Pick<Session, 'userId' | 'userRole' | 'expirationTime'>;
+export type BackendSession = Pick<Session, 'userId' | 'userRole' | 'expirationTime'>;
 
 export type BackendUser = Pick<User, 'id' | 'email' | 'name' | 'role' | 'isTwoFactorEnabled'> & {
   hasPassword: boolean;
 };
 
-type NullBackendSession = Record<keyof BackendSession, null>;
-
 interface Auth {
-  (): Promise<BackendSession | NullBackendSession>;
+  (): Promise<FullOrNull<BackendSession>>;
   protect: (options?: ProtectOptions) => Promise<Pick<BackendSession, 'userId'>>;
 }
 
@@ -31,7 +29,7 @@ type ProtectOptions = {
   role?: User['role'];
   unauthorizedUrl?: string;
   unauthenticatedUrl?: string;
-} & RedirectToLoginOptions;
+} & Omit<RedirectOptions, 'type'>;
 
 export type RedirectToLoginOptions = Omit<RedirectOptions, 'type'> & {
   syncAuth?: boolean;
@@ -39,9 +37,9 @@ export type RedirectToLoginOptions = Omit<RedirectOptions, 'type'> & {
 
 export const auth: Auth = Object.assign(cache(authFn), { protect });
 
-async function authFn(): Promise<BackendSession | NullBackendSession> {
+async function authFn(): Promise<FullOrNull<BackendSession>> {
   const sessionId = await getSessionCookie();
-  const auth: NullBackendSession = {
+  const auth: Null<BackendSession> = {
     userId: null,
     userRole: null,
     expirationTime: null,
@@ -74,9 +72,9 @@ async function protect({
 }: ProtectOptions = {}) {
   const { userId, userRole } = await auth();
 
-  setAuthSyncCookie().catch(() => null);
-
   if (!userId) {
+    setAuthSyncCookie().catch(() => null);
+
     if (unauthenticatedUrl) {
       redirectAuth(unauthenticatedUrl, {
         type: RedirectType.replace,
@@ -84,10 +82,12 @@ async function protect({
       });
     }
 
-    redirectToLogin({ ...redirectParams, syncAuth: false });
+    redirectToLogin(redirectParams);
   }
 
   if (role && userRole !== role) {
+    setAuthSyncCookie().catch(() => null);
+
     redirectAuth(unauthorizedUrl ?? config.defaultRedirectRoute, {
       type: RedirectType.replace,
       authCode: 'unauthorized',
@@ -98,8 +98,8 @@ async function protect({
 }
 
 export function redirectToLogin({
-  syncAuth = true,
   authCode = 'unauthenticated',
+  syncAuth = false,
   returnBackUrl,
 }: RedirectToLoginOptions = {}): never {
   if (syncAuth) {
@@ -208,9 +208,7 @@ export async function refreshUserSession(request?: NextRequest) {
     });
 
     await setSessionCookie(sessionId, request);
-  } catch (error) {
-    console.error('Error refreshing user session:', error);
-  }
+  } catch {}
 }
 
 function createSessionExpirationTime() {

@@ -1,26 +1,18 @@
 import { db, UserRoles } from '@/db';
-import { auth, currentUser } from '@/auth/session';
-import { getAuthCode } from '@/auth/message';
+import { redirectToLogin, currentUser } from '@/auth/session';
 import { Protect } from '@/auth/components/protect';
 import { AccountsManager } from '@/components/accounts-manager';
 import { UserProfile } from '@/components/user-profile';
 import { Page } from '@/components/page';
-import { AuthAlert } from '@/components/auth-alert';
 import { AddPasswordForm } from '@/components/add-password-form';
 import { LogoutEverywhereButton } from '@/components/logout-everywhere-button';
 import { DeleteUserButton } from '@/components/delete-user-button';
 
-export default async function ProfilePage({
-  searchParams,
-}: {
-  searchParams: Promise<Record<string, string | undefined>>;
-}) {
-  const { redirectToLogin } = await auth();
+export default async function ProfilePage() {
   const user = await currentUser();
-  const authCode = await getAuthCode(searchParams);
 
   if (!user) {
-    return redirectToLogin({ returnBackUrl: '/profile' });
+    redirectToLogin({ returnBackUrl: '/profile' });
   }
 
   const accounts = await db.getUserAccounts(user.id);
@@ -36,7 +28,6 @@ export default async function ProfilePage({
           </span>
         </Page.Description>
       </Protect>
-      <AuthAlert authCode={authCode} />
       <article className='space-y-8 pb-4'>
         <section>
           <UserProfile user={{ name, email, role }} roles={UserRoles} />
