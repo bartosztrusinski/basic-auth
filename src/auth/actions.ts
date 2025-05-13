@@ -287,7 +287,7 @@ async function addPassword(_: unknown, formData: FormData): Promise<ActionState>
       isSuccess: true,
     };
   } catch (error) {
-    return handleError(error, 'password-set-failed');
+    return handleError(error, 'password-not-set');
   }
 }
 

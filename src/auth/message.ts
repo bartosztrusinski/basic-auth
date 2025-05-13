@@ -25,13 +25,21 @@ const authMessages = {
     type: 'error',
     message: 'Could not log in. Please try again.',
   },
+  'invalid-credentials': {
+    type: 'error',
+    message: 'Invalid email or password',
+  },
   'logout-failed': {
     type: 'error',
     message: 'Could not log out. Please try again.',
   },
-  'invalid-credentials': {
+  'logout-everywhere': {
+    type: 'success',
+    message: 'Logged out from all devices successfully!',
+  },
+  'logout-everywhere-failed': {
     type: 'error',
-    message: 'Invalid email or password',
+    message: 'Could not log out from all devices. Please try again.',
   },
   'email-verified': {
     type: 'success',
@@ -74,6 +82,10 @@ const authMessages = {
     type: 'error',
     message: 'This account is already linked to another user.',
   },
+  'oauth-unlink': {
+    type: 'success',
+    message: 'Account unlinked successfully!',
+  },
   'oauth-unlink-failed': {
     type: 'error',
     message: 'Could not unlink provider. Please try again.',
@@ -87,7 +99,7 @@ const authMessages = {
     type: 'success',
     message: 'Password set successfully!',
   },
-  'password-set-failed': {
+  'password-not-set': {
     type: 'error',
     message: 'Could not set password. Please try again.',
   },
@@ -102,14 +114,6 @@ const authMessages = {
   'account-deletion-failed': {
     type: 'error',
     message: 'Could not delete account. Please try again.',
-  },
-  'logout-everywhere': {
-    type: 'success',
-    message: 'Logged out from all devices successfully!',
-  },
-  'logout-everywhere-failed': {
-    type: 'error',
-    message: 'Could not log out from all devices. Please try again.',
   },
   'two-factor-enabled': {
     type: 'success',
