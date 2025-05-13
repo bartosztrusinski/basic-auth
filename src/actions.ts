@@ -8,8 +8,16 @@ import { redirectAuth } from '@/auth/util';
 import { type OAuthProvider } from '@/auth/oauth';
 import * as actions from '@/auth/actions';
 
-type ActionState = {
-  isSuccess: boolean;
+// eslint-disable-next-line @typescript-eslint/no-empty-object-type
+type ActionState<T extends Record<string, unknown> = {}> = ActionSuccess<T> | ActionFailure;
+
+type ActionSuccess<T extends Record<string, unknown>> = {
+  isSuccess: true;
+  errors?: null;
+} & T;
+
+type ActionFailure = {
+  isSuccess: false;
   errors?: string | string[];
 };
 
@@ -57,10 +65,7 @@ export async function linkAccount(provider: OAuthProvider): Promise<ActionState>
 
   await auth.protect({ returnBackUrl: '/profile', authCode });
 
-  return {
-    isSuccess,
-    errors,
-  };
+  return isSuccess ? { isSuccess } : { isSuccess, errors };
 }
 
 export async function logOut(): Promise<ActionState> {
@@ -91,19 +96,21 @@ export async function logOutEverywhere(): Promise<ActionState> {
   };
 }
 
-export async function addPassword(formData: FormData): Promise<ActionState> {
+export async function addPassword(_: unknown, formData: FormData): Promise<ActionState> {
   const { isSuccess, errors, authCode } = await actions.addPassword(null, formData);
 
   await auth.protect({ returnBackUrl: '/profile', authCode });
 
-  if (isSuccess) {
-    revalidatePath('/profile');
+  if (!isSuccess) {
+    return {
+      isSuccess,
+      errors,
+    };
   }
 
-  return {
-    isSuccess,
-    errors,
-  };
+  revalidatePath('/profile');
+
+  return { isSuccess };
 }
 
 export async function deleteCurrentUser(): Promise<ActionState> {
@@ -126,25 +133,36 @@ export async function unlinkAccount(provider: OAuthProvider): Promise<ActionStat
 
   await auth.protect({ returnBackUrl: '/profile', authCode });
 
-  if (isSuccess) {
-    revalidatePath('/profile');
+  if (!isSuccess) {
+    return {
+      isSuccess,
+      errors,
+    };
   }
 
-  return {
-    isSuccess,
-    errors,
-  };
+  revalidatePath('/profile');
+
+  return { isSuccess };
 }
 
-export async function initiateTwoFactorAuth(): ReturnType<typeof actions.initiateTwoFactorAuth> {
-  const { isSuccess, errors, authCode, qrCode, secret } = await actions.initiateTwoFactorAuth();
+export async function initiateTwoFactorAuth(): Promise<
+  ActionState<{ qrCode: string; secret: string }>
+> {
+  const { isSuccess, errors, authCode, data } = await actions.initiateTwoFactorAuth();
 
   await auth.protect({ returnBackUrl: '/profile', authCode });
 
+  if (!isSuccess) {
+    return {
+      isSuccess,
+      errors,
+    };
+  }
+
+  const { qrCode, secret } = data;
+
   return {
     isSuccess,
-    errors,
-    authCode,
     qrCode,
     secret,
   };
@@ -155,12 +173,14 @@ export async function enableTwoFactorAuth(formData: FormData): Promise<ActionSta
 
   await auth.protect({ returnBackUrl: '/profile', authCode });
 
-  if (isSuccess) {
-    revalidatePath('/profile');
+  if (!isSuccess) {
+    return {
+      isSuccess,
+      errors,
+    };
   }
 
-  return {
-    isSuccess,
-    errors,
-  };
+  revalidatePath('/profile');
+
+  return { isSuccess };
 }

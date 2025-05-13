@@ -26,10 +26,23 @@ import { type AuthCode, AuthError, getAuthMessage } from '@/auth/message';
 import config from '@/auth/config';
 import serverConfig from '@/auth/config/server';
 
-type ActionState = {
-  isSuccess: boolean;
+type ActionState = ActionSuccess | ActionFailure;
+
+type ActionDataState<T extends Record<string, unknown>> =
+  | (ActionSuccess & { data: T })
+  | ActionFailure;
+
+type ActionSuccess = {
+  isSuccess: true;
+  authCode?: undefined;
+  errors?: undefined;
+};
+
+type ActionFailure = {
+  isSuccess: false;
   authCode?: AuthCode;
-  errors?: string | string[];
+  errors: string | string[];
+  data?: undefined;
 };
 
 async function signUp(_: unknown, formData: FormData): Promise<ActionState> {
@@ -76,7 +89,10 @@ async function signUp(_: unknown, formData: FormData): Promise<ActionState> {
   }
 }
 
-async function logIn(_: unknown, formData: FormData): Promise<ActionState & { session?: Session }> {
+async function logIn(
+  _: unknown,
+  formData: FormData,
+): Promise<ActionDataState<{ session: Session }>> {
   const { data, error } = loginSchema.safeParse(Object.fromEntries(formData.entries()));
 
   if (error) {
@@ -105,7 +121,9 @@ async function logIn(_: unknown, formData: FormData): Promise<ActionState & { se
 
     return {
       isSuccess: true,
-      session,
+      data: {
+        session,
+      },
     };
   } catch (error) {
     return handleError(error, 'login-failed');
@@ -311,7 +329,7 @@ async function deleteCurrentUser(): Promise<ActionState> {
 }
 
 async function initiateTwoFactorAuth(): Promise<
-  ActionState & { secret?: string; qrCode?: string }
+  ActionDataState<{ secret: string; qrCode: string }>
 > {
   const user = await currentUser();
 
@@ -345,8 +363,10 @@ async function initiateTwoFactorAuth(): Promise<
 
     return {
       isSuccess: true,
-      secret: twoFactorSetup.secret,
-      qrCode,
+      data: {
+        secret: twoFactorSetup.secret,
+        qrCode,
+      },
     };
   } catch (error) {
     return handleError(error, 'two-factor-setup-failed');
@@ -412,7 +432,7 @@ async function enableTwoFactorAuth(_: unknown, formData: FormData): Promise<Acti
   }
 }
 
-function handleError(error: unknown, defaultAuthCode: AuthCode): ActionState {
+function handleError(error: unknown, defaultAuthCode: AuthCode): ActionFailure {
   return {
     isSuccess: false,
     authCode: error instanceof AuthError ? error.authCode : undefined,
