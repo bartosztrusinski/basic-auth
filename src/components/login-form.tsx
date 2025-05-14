@@ -5,7 +5,10 @@ import { logIn } from '@/auth/actions';
 import { Alert } from '@/components/alert';
 
 export function LoginForm() {
-  const [state, action, isPending] = useActionState(logIn, { isSuccess: false });
+  const [state, action, isPending] = useActionState(logIn, {
+    isSuccess: false,
+    errors: '',
+  });
 
   return (
     <form action={action} className='flex flex-col gap-5'>

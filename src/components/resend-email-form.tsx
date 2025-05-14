@@ -8,6 +8,7 @@ import { AuthAlert } from '@/components/auth-alert';
 export function ResendEmailForm() {
   const [state, action, isPending] = useActionState(resendVerificationEmail, {
     isSuccess: false,
+    errors: '',
   });
 
   return (

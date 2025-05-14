@@ -6,7 +6,10 @@ import { Alert } from '@/components/alert';
 import { AuthAlert } from '@/components/auth-alert';
 
 export function SignupForm() {
-  const [state, action, isPending] = useActionState(signUp, { isSuccess: false });
+  const [state, action, isPending] = useActionState(signUp, {
+    isSuccess: false,
+    errors: '',
+  });
 
   return (
     <form action={action} className='flex flex-col gap-5'>
