@@ -1,6 +1,6 @@
 'use client';
 
-import { type FormEvent, useState, useTransition } from 'react';
+import { type FormEvent, useActionState, useState, useTransition } from 'react';
 import Image from 'next/image';
 import { toast } from 'sonner';
 import { type TwoFactorSetup } from '@/db';
@@ -16,6 +16,9 @@ type Props = {
 export function EnableTwoFactorForm({ secret, qrCode }: Props) {
   const [errors, setErrors] = useState<string | string[] | null>(null);
   const [isPending, startTransition] = useTransition();
+  const [state, action, isActionPending] = useActionState(enableTwoFactorAuth, {
+    isSuccess: false,
+  });
 
   function handleSubmit(event: FormEvent<HTMLFormElement>) {
     const formData = new FormData(event.currentTarget);
@@ -24,7 +27,7 @@ export function EnableTwoFactorForm({ secret, qrCode }: Props) {
     setErrors(null);
 
     startTransition(async () => {
-      const { isSuccess, errors } = await enableTwoFactorAuth(formData);
+      const { isSuccess, errors } = await enableTwoFactorAuth(null, formData);
 
       if (errors) {
         setErrors(errors);
@@ -47,7 +50,7 @@ export function EnableTwoFactorForm({ secret, qrCode }: Props) {
         height={256}
         className='rounded'
       />
-      <form onSubmit={handleSubmit} className='flex flex-col gap-3 self-stretch'>
+      <form action={action} onSubmit={handleSubmit} className='flex flex-col gap-3 self-stretch'>
         {/* TODO OTP input */}
         <input
           id='token'
@@ -59,12 +62,19 @@ export function EnableTwoFactorForm({ secret, qrCode }: Props) {
         />
 
         {errors && <Alert variant='error' message={errors} />}
+        {state.errors && (
+          <noscript>
+            <p className='rounded border border-red-900 bg-red-950 p-2 text-sm text-red-400'>
+              {state.errors}
+            </p>
+          </noscript>
+        )}
 
         <button
-          disabled={isPending}
+          disabled={isPending || isActionPending}
           className='rounded border border-zinc-700 p-2 text-sm shadow disabled:cursor-not-allowed disabled:opacity-50'
         >
-          {isPending ? 'Confirming...' : 'Confirm'}
+          {isPending || isActionPending ? 'Confirming...' : 'Confirm'}
         </button>
       </form>
     </div>

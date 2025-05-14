@@ -168,7 +168,7 @@ export async function initiateTwoFactorAuth(): Promise<
   };
 }
 
-export async function enableTwoFactorAuth(formData: FormData): Promise<ActionState> {
+export async function enableTwoFactorAuth(_: unknown, formData: FormData): Promise<ActionState> {
   const { isSuccess, errors, authCode } = await actions.enableTwoFactorAuth(null, formData);
 
   await auth.protect({ returnBackUrl: '/profile', authCode });
