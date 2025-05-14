@@ -7,6 +7,7 @@ import { Page } from '@/components/page';
 import { AddPasswordForm } from '@/components/add-password-form';
 import { LogoutEverywhereButton } from '@/components/logout-everywhere-button';
 import { DeleteUserButton } from '@/components/delete-user-button';
+import { TwoFactorManager } from '@/components/two-factor-manager';
 
 export default async function ProfilePage() {
   const user = await currentUser();
@@ -41,6 +42,14 @@ export default async function ProfilePage() {
           <section>
             <AddPasswordForm email={user.email} />
             <p className='pt-2 text-sm text-zinc-400'>Set a password for your account</p>
+          </section>
+        </Protect>
+        <Protect when={(user) => user.isTwoFactorEnabled || !user.hasPassword}>
+          <section>
+            <TwoFactorManager />
+            <p className='pt-2 text-sm text-zinc-400'>
+              Enable or disable two-factor authentication for your account
+            </p>
           </section>
         </Protect>
         <section>
