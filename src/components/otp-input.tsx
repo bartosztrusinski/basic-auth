@@ -15,30 +15,39 @@ type Props = Override<
 >;
 
 export function OtpInput({
+  value: externalValue,
   maxLength = 6,
   defaultValue = '',
-  className,
-  onComplete,
   placeholder,
+  className = '',
+  onChange,
+  onFocus,
+  onBlur,
+  onSelect,
+  onComplete,
   ...props
 }: Props) {
-  const [value, setValue] = useState(defaultValue);
+  const [internalValue, setInternalValue] = useState(defaultValue);
   const [isFocused, setIsFocused] = useState(false);
   const [selectionStart, setSelectionStart] = useState<number | null>(null);
   const [selectionEnd, setSelectionEnd] = useState<number | null>(null);
+  const value = externalValue ?? internalValue;
   const isComplete = value.length === maxLength;
   const isNoSlotSelected = selectionStart === maxLength;
   const isPlaceholderVisible = !isFocused && value.length === 0;
 
   useEffect(() => {
-    if (isComplete) {
-      onComplete?.(value);
+    if (externalValue && !onChange) {
+      console.error(
+        'You provided a `value` prop to an OTP Input without an `onChange` handler. This will render a read-only field. If the field should be mutable use `defaultValue`',
+      );
     }
-  }, [isComplete, onComplete, value]);
+  }, [externalValue, onChange]);
 
   return (
-    <div className={`relative flex w-min items-center justify-between gap-1 p-0.5 ${className}`}>
+    <div className={`relative ${className}`}>
       <input
+        {...props}
         type='text'
         autoComplete='one-time-code'
         inputMode='numeric'
@@ -48,22 +57,34 @@ export function OtpInput({
         aria-placeholder={placeholder}
         onChange={(event) => {
           const newValue = event.target.value.replace(/\D/g, '');
-          setValue(newValue);
+          event.target.value = newValue;
+
+          onChange?.(event);
+
+          if (!externalValue) {
+            setInternalValue(newValue);
+          }
+
+          if (newValue.length === maxLength) {
+            onComplete?.(newValue);
+          }
         }}
         onSelect={(event) => {
           const { selectionStart, selectionEnd } = event.currentTarget;
           setSelectionStart(selectionStart);
           setSelectionEnd(selectionEnd);
+          onSelect?.(event);
         }}
-        onFocus={() => {
+        onFocus={(event) => {
           setIsFocused(true);
+          onFocus?.(event);
         }}
-        onBlur={() => {
+        onBlur={(event) => {
           setIsFocused(false);
           setSelectionStart(null);
           setSelectionEnd(null);
+          onBlur?.(event);
         }}
-        {...props}
       />
 
       {Array.from({ length: maxLength }, (_, slotIndex) => {
@@ -87,7 +108,7 @@ export function OtpInput({
             {hasValue ? (
               value[slotIndex]
             ) : isActive && isCaretSlot ? (
-              <div className='pointer-events-none h-[1.5ch] w-[0.2ch] animate-caret-blink bg-current'></div>
+              <span className='pointer-events-none h-[1.5ch] w-[0.2ch] animate-caret-blink bg-current'></span>
             ) : (
               slotPlaceholder && (
                 <span className='pointer-events-none text-zinc-500'>{slotPlaceholder}</span>
