@@ -5,7 +5,7 @@ import { useEffect, useState, type InputHTMLAttributes } from 'react';
 type Override<T, U> = Omit<T, keyof U> & U;
 
 type Props = Override<
-  InputHTMLAttributes<HTMLInputElement>,
+  Omit<InputHTMLAttributes<HTMLInputElement>, 'type' | 'autoComplete' | 'inputMode'>,
   {
     value?: string;
     defaultValue?: string;
@@ -15,82 +15,83 @@ type Props = Override<
 >;
 
 export function OtpInput({
-  autoComplete = 'one-time-code',
   maxLength = 6,
-  className,
-  placeholder,
-  onComplete,
   defaultValue = '',
+  className,
+  onComplete,
+  placeholder,
   ...props
 }: Props) {
   const [value, setValue] = useState(defaultValue);
   const [isFocused, setIsFocused] = useState(false);
-  const [positionStart, setPositionStart] = useState<number | null>(null);
-  const [positionEnd, setPositionEnd] = useState<number | null>(null);
-  const isMultipleSlotsSelected =
-    positionStart !== null && positionEnd !== null && positionStart !== positionEnd;
+  const [selectionStart, setSelectionStart] = useState<number | null>(null);
+  const [selectionEnd, setSelectionEnd] = useState<number | null>(null);
+  const isComplete = value.length === maxLength;
+  const isNoSlotSelected = selectionStart === maxLength;
+  const isPlaceholderVisible = !isFocused && value.length === 0;
 
   useEffect(() => {
-    if (value.length === maxLength) {
+    if (isComplete) {
       onComplete?.(value);
     }
-  }, [maxLength, onComplete, value]);
+  }, [isComplete, onComplete, value]);
 
   return (
-    <div
-      className={`relative flex w-min items-center justify-between gap-1 rounded p-0.5 ${className} ${isFocused && value.length === maxLength ? 'ring-2 ring-pink-500' : ''}`}
-    >
+    <div className={`relative flex w-min items-center justify-between gap-1 p-0.5 ${className}`}>
       <input
         type='text'
-        className='peer absolute inset-0 z-10 appearance-none border-none bg-transparent text-transparent outline-none selection:bg-inherit selection:text-inherit'
-        autoComplete={autoComplete}
+        autoComplete='one-time-code'
+        inputMode='numeric'
+        className={`peer absolute inset-0 z-10 appearance-none rounded border-none bg-transparent -tracking-[1rem] text-transparent outline-none selection:bg-inherit selection:text-inherit placeholder:text-inherit ${isFocused && isComplete && isNoSlotSelected ? 'outline-2 outline-zinc-400' : ''}`}
         maxLength={maxLength}
         value={value}
+        aria-placeholder={placeholder}
         onChange={(event) => {
-          const newValue = event.target.value.replace(/[^0-9]/g, '');
-          if (newValue.length <= maxLength) {
-            setValue(newValue);
-          }
+          const newValue = event.target.value.replace(/\D/g, '');
+          setValue(newValue);
         }}
-        {...props}
         onSelect={(event) => {
           const { selectionStart, selectionEnd } = event.currentTarget;
-          setPositionStart(selectionStart);
-          setPositionEnd(selectionEnd);
+          setSelectionStart(selectionStart);
+          setSelectionEnd(selectionEnd);
         }}
         onFocus={() => {
           setIsFocused(true);
         }}
         onBlur={() => {
           setIsFocused(false);
-          setPositionStart(null);
-          setPositionEnd(null);
+          setSelectionStart(null);
+          setSelectionEnd(null);
         }}
+        {...props}
       />
 
-      {Array.from({ length: maxLength }, (_, index) => {
-        const hasValue = Boolean(value[index]);
-        const isFirstEmptySlot = index === value.length;
-        const isCurrentPosition = index === positionStart;
-        const isSelected = isMultipleSlotsSelected
-          ? positionStart <= index && index <= positionEnd && !isFirstEmptySlot
-          : isCurrentPosition;
-        const isActive = isFocused && (isSelected || (isFirstEmptySlot && isCurrentPosition));
-        const shouldShowCaret = isFocused && isCurrentPosition && isFirstEmptySlot;
+      {Array.from({ length: maxLength }, (_, slotIndex) => {
+        const hasValue = slotIndex < value.length;
+        const isCaretSlot = slotIndex === value.length;
+        const isCurrentPosition = selectionStart === selectionEnd && slotIndex === selectionStart;
+        const isSelected =
+          selectionStart !== null &&
+          selectionEnd !== null &&
+          slotIndex >= selectionStart &&
+          slotIndex <= selectionEnd;
+        const isActive =
+          isFocused && ((hasValue && isSelected) || (isCaretSlot && isCurrentPosition));
+        const slotPlaceholder = isPlaceholderVisible ? placeholder?.[slotIndex] : null;
 
         return (
           <div
-            key={index}
-            className={`size-8 cursor-text rounded-sm bg-white p-1 text-center text-black ${isActive ? 'peer-focus:ring-2 peer-focus:ring-pink-500' : ''}`}
+            key={slotIndex}
+            className={`flex size-8 place-content-center place-items-center rounded-sm bg-zinc-800 text-center text-zinc-50 outline-2 outline-zinc-400 ${isActive ? 'peer-focus:outline' : ''}`}
           >
             {hasValue ? (
-              value[index]
-            ) : shouldShowCaret ? (
-              <div className='pointer-events-none flex size-full animate-caret-blink items-center justify-center'>
-                <div className='h-3/4 w-0.5 bg-black' />
-              </div>
+              value[slotIndex]
+            ) : isActive && isCaretSlot ? (
+              <div className='pointer-events-none h-[1.5ch] w-[0.2ch] animate-caret-blink bg-current'></div>
             ) : (
-              placeholder?.[index] && <span className='text-zinc-400'>{placeholder[index]}</span>
+              slotPlaceholder && (
+                <span className='pointer-events-none text-zinc-500'>{slotPlaceholder}</span>
+              )
             )}
           </div>
         );
