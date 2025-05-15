@@ -25,9 +25,10 @@ export function OtpInput({
 }: Props) {
   const [value, setValue] = useState(defaultValue);
   const [isFocused, setIsFocused] = useState(false);
-  const [positionStart, setPositionStart] = useState<number>(0);
-  const [positionEnd, setPositionEnd] = useState<number>(0);
-  const isMultipleSelected = positionStart !== positionEnd;
+  const [positionStart, setPositionStart] = useState<number | null>(null);
+  const [positionEnd, setPositionEnd] = useState<number | null>(null);
+  const isMultipleSlotsSelected =
+    positionStart !== null && positionEnd !== null && positionStart !== positionEnd;
 
   useEffect(() => {
     if (value.length === maxLength) {
@@ -36,10 +37,14 @@ export function OtpInput({
   }, [maxLength, onComplete, value]);
 
   return (
-    <div className={`relative flex w-min items-center justify-between gap-1 ${className}`}>
+    <div
+      className={`relative flex w-min items-center justify-between gap-1 rounded p-0.5 ${className} ${isFocused && value.length === maxLength ? 'ring-2 ring-pink-500' : ''}`}
+    >
       <input
         type='text'
+        className='peer absolute inset-0 z-10 appearance-none border-none bg-transparent text-transparent outline-none selection:bg-inherit selection:text-inherit'
         autoComplete={autoComplete}
+        maxLength={maxLength}
         value={value}
         onChange={(event) => {
           const newValue = event.target.value.replace(/[^0-9]/g, '');
@@ -48,39 +53,30 @@ export function OtpInput({
           }
         }}
         {...props}
-        maxLength={maxLength}
-        className='peer absolute inset-0 z-10 appearance-none border-none bg-transparent text-transparent outline-none selection:bg-inherit selection:text-inherit'
         onSelect={(event) => {
-          const input = event.currentTarget;
-          const { selectionStart, selectionEnd } = input;
-
-          console.log({
-            selectionStart,
-            selectionEnd,
-          });
-
-          setPositionStart(selectionStart ?? 0);
-          setPositionEnd(selectionEnd ?? 0);
+          const { selectionStart, selectionEnd } = event.currentTarget;
+          setPositionStart(selectionStart);
+          setPositionEnd(selectionEnd);
         }}
         onFocus={() => {
           setIsFocused(true);
         }}
         onBlur={() => {
           setIsFocused(false);
-          setPositionStart(0);
-          setPositionEnd(0);
+          setPositionStart(null);
+          setPositionEnd(null);
         }}
       />
 
       {Array.from({ length: maxLength }, (_, index) => {
         const hasValue = Boolean(value[index]);
-        const isCurrentInput = index === value.length;
+        const isFirstEmptySlot = index === value.length;
         const isCurrentPosition = index === positionStart;
-        const isSelected = isMultipleSelected
-          ? positionStart <= index && index <= positionEnd && !isCurrentInput
+        const isSelected = isMultipleSlotsSelected
+          ? positionStart <= index && index <= positionEnd && !isFirstEmptySlot
           : isCurrentPosition;
-        const isActive = isFocused && (isSelected || (isCurrentInput && isCurrentPosition));
-        const shouldShowCaret = isFocused && isCurrentPosition && isCurrentInput;
+        const isActive = isFocused && (isSelected || (isFirstEmptySlot && isCurrentPosition));
+        const shouldShowCaret = isFocused && isCurrentPosition && isFirstEmptySlot;
 
         return (
           <div
