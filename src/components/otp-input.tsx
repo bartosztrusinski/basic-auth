@@ -86,7 +86,7 @@ export function OtpInput({
         type='text'
         autoComplete='one-time-code'
         inputMode='numeric'
-        className={`absolute inset-0 appearance-none border-none bg-transparent -tracking-[1rem] text-transparent outline-none selection:bg-inherit selection:text-inherit placeholder:text-inherit ${isFocused && isComplete && isNoSlotSelected ? focusClassName : ''} ${className}`}
+        className={`absolute inset-0 flex h-full w-full appearance-none border-none bg-transparent leading-none -tracking-[0.5em] text-transparent caret-transparent opacity-100 shadow-none outline-none selection:bg-inherit selection:text-inherit placeholder:text-inherit ${isFocused && isComplete && isNoSlotSelected ? focusClassName : ''} ${className}`}
         maxLength={maxLength}
         value={value}
         aria-placeholder={placeholder}
