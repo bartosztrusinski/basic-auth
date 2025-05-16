@@ -18,6 +18,7 @@ type Props = Override<
     maxLength?: number;
     children: (slots: SlotProps[]) => ReactNode;
     onComplete?: (value: string) => void;
+    focusClassName?: string;
   }
 >;
 
@@ -27,12 +28,13 @@ export function OtpInput({
   defaultValue = '',
   placeholder,
   className = '',
+  focusClassName = '',
+  children,
+  onComplete,
   onChange,
   onFocus,
   onBlur,
   onSelect,
-  onComplete,
-  children,
   ...props
 }: Props) {
   const [internalValue, setInternalValue] = useState(defaultValue);
@@ -82,7 +84,7 @@ export function OtpInput({
         type='text'
         autoComplete='one-time-code'
         inputMode='numeric'
-        className={`peer absolute inset-0 z-10 appearance-none rounded border-none bg-transparent -tracking-[1rem] text-transparent outline-none selection:bg-inherit selection:text-inherit placeholder:text-inherit ${isFocused && isComplete && isNoSlotSelected ? 'outline-2 outline-zinc-400' : ''}`}
+        className={`peer absolute inset-0 z-10 appearance-none rounded border-none bg-transparent -tracking-[1rem] text-transparent outline-none selection:bg-inherit selection:text-inherit placeholder:text-inherit ${isFocused && isComplete && isNoSlotSelected ? focusClassName : ''}`}
         maxLength={maxLength}
         value={value}
         aria-placeholder={placeholder}
