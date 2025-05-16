@@ -1,15 +1,22 @@
 'use client';
 
-import { type ReactNode, useEffect, useRef } from 'react';
+import { type MouseEvent, type ReactElement, type ReactNode, useEffect, useRef } from 'react';
 
-type Props = {
+export type DialogProps = {
   children: ReactNode | ((closeDialog: () => void, openDialog: () => void) => ReactNode);
-  trigger: ReactNode;
+  trigger: boolean | ReactElement;
   onClose?: () => void;
+  shouldCloseOnBackdropClick?: boolean;
 };
 
-export function Dialog({ children, trigger, onClose }: Props) {
+export function Dialog({
+  children,
+  trigger,
+  onClose,
+  shouldCloseOnBackdropClick = true,
+}: DialogProps) {
   const ref = useRef<HTMLDialogElement>(null);
+  const isTriggerBoolean = typeof trigger === 'boolean';
 
   function openDialog() {
     ref.current?.showModal();
@@ -20,23 +27,25 @@ export function Dialog({ children, trigger, onClose }: Props) {
     ref.current?.close();
   }
 
+  function handleBackdropClick(event: MouseEvent<HTMLDialogElement>) {
+    if (shouldCloseOnBackdropClick && event.target === event.currentTarget) {
+      closeDialog();
+    }
+  }
+
   useEffect(() => {
-    if (typeof trigger === 'boolean' && trigger) {
+    if (isTriggerBoolean && trigger) {
       openDialog();
     }
-  }, [trigger]);
+  }, [isTriggerBoolean, trigger]);
 
   return (
     <>
-      <span onClick={openDialog}>{trigger}</span>
+      {!isTriggerBoolean && <span onClick={openDialog}>{trigger}</span>}
       <dialog
         ref={ref}
         onClose={closeDialog}
-        onMouseDown={(event) => {
-          if (event.target === event.currentTarget) {
-            closeDialog();
-          }
-        }}
+        onMouseDown={handleBackdropClick}
         className='bg-transparent shadow-lg shadow-zinc-950 backdrop:bg-zinc-950/50 backdrop:backdrop-blur-sm'
       >
         {typeof children === 'function' ? children(closeDialog, openDialog) : children}
