@@ -49,74 +49,72 @@ export function AddPasswordForm({ email }: Props) {
       trigger={<button className='w-full rounded border border-zinc-500 p-2'>Add Password</button>}
       onClose={handleClose}
     >
-      {(closeDialog) => {
-        return (
-          <div className='flex max-w-sm flex-col gap-2 rounded-md border border-zinc-700 bg-zinc-900 p-4 text-zinc-50'>
+      {(closeDialog) => (
+        <div className='flex max-w-sm flex-col gap-2 rounded-md border border-zinc-700 bg-zinc-900 p-4 text-zinc-50'>
+          <button
+            onClick={closeDialog}
+            className='absolute right-3 top-3 size-7 rounded bg-red-500 bg-opacity-0 text-red-500 transition-opacity duration-100 hover:bg-opacity-20'
+          >
+            ⨉
+          </button>
+          <h2 className='font-medium'>Set Password</h2>
+          <p className='pb-1 text-sm text-zinc-400'>
+            After setting a password, you will be able to log in with your email and password.
+          </p>
+          <form
+            ref={formRef}
+            action={action}
+            onSubmit={handleSubmit}
+            className='flex flex-col gap-3'
+          >
+            <input
+              type='email'
+              id='email'
+              name='email'
+              required
+              placeholder='Email'
+              autoComplete='email'
+              className='hidden'
+              defaultValue={email}
+            />
+            <input
+              type='password'
+              id='password'
+              name='password'
+              required
+              placeholder='Password'
+              autoComplete='new-password'
+              className='rounded bg-white px-2 py-1 text-base text-black'
+            />
+            <input
+              type='password'
+              id='confirmPassword'
+              name='confirmPassword'
+              required
+              placeholder='Confirm Password'
+              autoComplete='new-password'
+              className='rounded bg-white px-2 py-1 text-base text-black'
+            />
+
+            {errors && <Alert variant='error' message={errors} />}
+            {state.errors && (
+              <noscript>
+                <p className='rounded border border-red-900 bg-red-950 p-2 text-sm text-red-400'>
+                  {state.errors}
+                </p>
+              </noscript>
+            )}
+
             <button
-              onClick={closeDialog}
-              className='absolute right-3 top-3 size-7 rounded bg-red-500 bg-opacity-0 text-red-500 transition-opacity duration-100 hover:bg-opacity-20'
+              type='submit'
+              disabled={isPending || isActionPending}
+              className='rounded border border-zinc-500 p-2'
             >
-              ⨉
+              {isPending || isActionPending ? 'Submitting...' : 'Set Password'}
             </button>
-            <h2 className='font-medium'>Set Password</h2>
-            <p className='pb-1 text-sm text-zinc-400'>
-              After setting a password, you will be able to log in with your email and password.
-            </p>
-            <form
-              ref={formRef}
-              action={action}
-              onSubmit={handleSubmit}
-              className='flex flex-col gap-3'
-            >
-              <input
-                type='email'
-                id='email'
-                name='email'
-                required
-                placeholder='Email'
-                autoComplete='email'
-                className='hidden'
-                defaultValue={email}
-              />
-              <input
-                type='password'
-                id='password'
-                name='password'
-                required
-                placeholder='Password'
-                autoComplete='new-password'
-                className='rounded bg-white px-2 py-1 text-base text-black'
-              />
-              <input
-                type='password'
-                id='confirmPassword'
-                name='confirmPassword'
-                required
-                placeholder='Confirm Password'
-                autoComplete='new-password'
-                className='rounded bg-white px-2 py-1 text-base text-black'
-              />
-
-              {errors && <Alert variant='error' message={errors} />}
-              {state.errors && (
-                <noscript>
-                  <p className='rounded border border-red-900 bg-red-950 p-2 text-sm text-red-400'>
-                    {state.errors}
-                  </p>
-                </noscript>
-              )}
-
-              <button
-                type='submit'
-                disabled={isPending || isActionPending}
-                className='rounded border border-zinc-500 p-2'
-              >
-                {isPending || isActionPending ? 'Submitting...' : 'Set Password'}
-              </button>
-            </form>
-          </div>
-        );
-      }}
+          </form>
+        </div>
+      )}
     </Dialog>
   );
 }
