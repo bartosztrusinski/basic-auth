@@ -65,18 +65,18 @@ export function EnableTwoFactorForm({ secret, qrCode }: Props) {
           autoFocus
           className='peer rounded'
           focusClassName='outline-2 outline-zinc-400'
-          containerClassName='mx-auto flex w-min items-center justify-between gap-1 p-0.5'
+          containerClassName='w-full mx-auto max-w-64 flex gap-1 p-0.5 text-lg'
           onComplete={() => formRef.current?.requestSubmit()}
         >
           {(slots) =>
             slots.map((slot, slotIndex) => (
               <div
                 key={slotIndex}
-                className={`flex size-10 place-content-center place-items-center rounded-sm bg-zinc-800 text-center text-lg text-zinc-50 outline-2 outline-zinc-400 ${slot.isActive ? 'peer-focus:outline' : ''}`}
+                className={`flex aspect-square min-h-8 w-full min-w-8 place-content-center place-items-center rounded-sm bg-zinc-800 text-zinc-50 outline-2 outline-zinc-400 ${slot.isActive ? 'peer-focus:outline' : ''}`}
               >
                 {slot.value}
                 {slot.hasCaret && (
-                  <span className='pointer-events-none h-[1.5ch] w-[0.2ch] animate-caret-blink bg-current'></span>
+                  <div className='pointer-events-none h-[1em] w-[0.1em] animate-caret-blink bg-current'></div>
                 )}
                 {slot.placeholder && (
                   <span className='pointer-events-none text-zinc-500'>{slot.placeholder}</span>
