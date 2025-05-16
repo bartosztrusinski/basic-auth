@@ -1,29 +1,18 @@
 'use client';
 
-import { useRemoveAuthCode } from '@/auth/hooks/use-remove-auth-code';
 import { getAuthMessage, type AuthCode } from '@/auth/message';
 import { Alert } from '@/components/alert';
 
 type Props = {
   authCode: AuthCode | null;
-  isClosable?: boolean;
 };
 
-export function AuthAlert({ authCode, isClosable = true }: Props) {
-  const removeAuthCode = useRemoveAuthCode();
-
+export function AuthAlert({ authCode }: Props) {
   if (!authCode) {
     return null;
   }
 
-  const authMessage = getAuthMessage(authCode);
+  const { type, message } = getAuthMessage(authCode);
 
-  return (
-    <Alert
-      variant={authMessage.type}
-      message={authMessage.message}
-      onClose={removeAuthCode}
-      isClosable={isClosable}
-    />
-  );
+  return <Alert variant={type} message={message} />;
 }
