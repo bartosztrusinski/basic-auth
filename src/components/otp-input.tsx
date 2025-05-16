@@ -45,22 +45,22 @@ export function OtpInput({
   const [selectionEnd, setSelectionEnd] = useState<number | null>(null);
 
   const value = externalValue ?? internalValue;
+  const isEmpty = value.length === 0;
   const isComplete = value.length === maxLength;
   const isNoSlotSelected = selectionStart === maxLength;
-  const isPlaceholderVisible = !isFocused && value.length === 0;
+  const isPlaceholderVisible = !isFocused && isEmpty;
 
   const slots: SlotProps[] = Array.from({ length: maxLength }, (_, slotIndex) => {
     const slotValue = value[slotIndex];
     const isCaretSlot = slotIndex === value.length;
-    const isCurrentPosition = selectionStart === selectionEnd && slotIndex === selectionStart;
     const isSelected =
       selectionStart !== null &&
       selectionEnd !== null &&
       slotIndex >= selectionStart &&
       slotIndex <= selectionEnd;
+    const isOnlySelection = isSelected && selectionStart === selectionEnd;
     const slotPlaceholder = isPlaceholderVisible ? placeholder?.[slotIndex] : undefined;
-    const isActive =
-      isFocused && ((Boolean(slotValue) && isSelected) || (isCaretSlot && isCurrentPosition));
+    const isActive = isFocused && (Boolean(slotValue) ? isSelected : isOnlySelection);
     const hasCaret = isActive && isCaretSlot;
 
     return {
@@ -106,16 +106,25 @@ export function OtpInput({
         }}
         onSelect={(event) => {
           onSelect?.(event);
+
           const { selectionStart, selectionEnd } = event.currentTarget;
           setSelectionStart(selectionStart);
           setSelectionEnd(selectionEnd);
         }}
         onFocus={(event) => {
           onFocus?.(event);
+
           setIsFocused(true);
+
+          if (isEmpty) {
+            const { selectionStart, selectionEnd } = event.currentTarget;
+            setSelectionStart(selectionStart);
+            setSelectionEnd(selectionEnd);
+          }
         }}
         onBlur={(event) => {
           onBlur?.(event);
+
           setIsFocused(false);
           setSelectionStart(null);
           setSelectionEnd(null);
