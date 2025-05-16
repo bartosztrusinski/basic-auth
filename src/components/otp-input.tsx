@@ -1,8 +1,14 @@
 'use client';
 
-import { useEffect, useState, type InputHTMLAttributes } from 'react';
+import { useEffect, useState, type ReactNode, type InputHTMLAttributes } from 'react';
+import { type Override } from '@/auth/util';
 
-type Override<T, U> = Omit<T, keyof U> & U;
+export type SlotProps = {
+  value: string | null;
+  placeholder: string | null;
+  hasCaret: boolean;
+  isActive: boolean;
+};
 
 type Props = Override<
   Omit<InputHTMLAttributes<HTMLInputElement>, 'type' | 'autoComplete' | 'inputMode'>,
@@ -10,6 +16,7 @@ type Props = Override<
     value?: string;
     defaultValue?: string;
     maxLength?: number;
+    children: (slots: SlotProps[]) => ReactNode;
     onComplete?: (value: string) => void;
   }
 >;
@@ -25,16 +32,40 @@ export function OtpInput({
   onBlur,
   onSelect,
   onComplete,
+  children,
   ...props
 }: Props) {
   const [internalValue, setInternalValue] = useState(defaultValue);
   const [isFocused, setIsFocused] = useState(false);
   const [selectionStart, setSelectionStart] = useState<number | null>(null);
   const [selectionEnd, setSelectionEnd] = useState<number | null>(null);
+
   const value = externalValue ?? internalValue;
   const isComplete = value.length === maxLength;
   const isNoSlotSelected = selectionStart === maxLength;
   const isPlaceholderVisible = !isFocused && value.length === 0;
+
+  const slots: SlotProps[] = Array.from({ length: maxLength }, (_, slotIndex) => {
+    const slotValue = value[slotIndex];
+    const isCaretSlot = slotIndex === value.length;
+    const isCurrentPosition = selectionStart === selectionEnd && slotIndex === selectionStart;
+    const isSelected =
+      selectionStart !== null &&
+      selectionEnd !== null &&
+      slotIndex >= selectionStart &&
+      slotIndex <= selectionEnd;
+    const slotPlaceholder = isPlaceholderVisible ? placeholder?.[slotIndex] : undefined;
+    const isActive =
+      isFocused && ((Boolean(slotValue) && isSelected) || (isCaretSlot && isCurrentPosition));
+    const hasCaret = isActive && isCaretSlot;
+
+    return {
+      value: slotValue ?? null,
+      placeholder: slotPlaceholder ?? null,
+      isActive,
+      hasCaret,
+    };
+  });
 
   useEffect(() => {
     if (externalValue && !onChange) {
@@ -70,53 +101,24 @@ export function OtpInput({
           }
         }}
         onSelect={(event) => {
+          onSelect?.(event);
           const { selectionStart, selectionEnd } = event.currentTarget;
           setSelectionStart(selectionStart);
           setSelectionEnd(selectionEnd);
-          onSelect?.(event);
         }}
         onFocus={(event) => {
-          setIsFocused(true);
           onFocus?.(event);
+          setIsFocused(true);
         }}
         onBlur={(event) => {
+          onBlur?.(event);
           setIsFocused(false);
           setSelectionStart(null);
           setSelectionEnd(null);
-          onBlur?.(event);
         }}
       />
 
-      {Array.from({ length: maxLength }, (_, slotIndex) => {
-        const hasValue = slotIndex < value.length;
-        const isCaretSlot = slotIndex === value.length;
-        const isCurrentPosition = selectionStart === selectionEnd && slotIndex === selectionStart;
-        const isSelected =
-          selectionStart !== null &&
-          selectionEnd !== null &&
-          slotIndex >= selectionStart &&
-          slotIndex <= selectionEnd;
-        const isActive =
-          isFocused && ((hasValue && isSelected) || (isCaretSlot && isCurrentPosition));
-        const slotPlaceholder = isPlaceholderVisible ? placeholder?.[slotIndex] : null;
-
-        return (
-          <div
-            key={slotIndex}
-            className={`flex size-8 place-content-center place-items-center rounded-sm bg-zinc-800 text-center text-zinc-50 outline-2 outline-zinc-400 ${isActive ? 'peer-focus:outline' : ''}`}
-          >
-            {hasValue ? (
-              value[slotIndex]
-            ) : isActive && isCaretSlot ? (
-              <span className='pointer-events-none h-[1.5ch] w-[0.2ch] animate-caret-blink bg-current'></span>
-            ) : (
-              slotPlaceholder && (
-                <span className='pointer-events-none text-zinc-500'>{slotPlaceholder}</span>
-              )
-            )}
-          </div>
-        );
-      })}
+      {children(slots)}
     </div>
   );
 }
