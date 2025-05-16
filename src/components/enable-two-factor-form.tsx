@@ -86,14 +86,7 @@ export function EnableTwoFactorForm({ secret, qrCode }: Props) {
           }
         </OtpInput>
 
-        {errors && <Alert variant='error' message={errors} />}
-        {state.errors && (
-          <noscript>
-            <p className='rounded border border-red-900 bg-red-950 p-2 text-sm text-red-400'>
-              {state.errors}
-            </p>
-          </noscript>
-        )}
+        <Alert variant='error' message={errors ?? state.errors ?? []} />
 
         <button
           disabled={isPending || isActionPending}
