@@ -4,7 +4,7 @@ import * as OTPAuth from 'otpauth';
 import QRCode from 'qrcode';
 import { type ZodSchema, type ZodType, type z } from 'zod';
 import { redirect } from 'next/navigation';
-import { db, type VerificationToken, type Session } from '@/db';
+import { db, type VerificationToken, type Session, type TwoFactorAttempt } from '@/db';
 import { env } from '@/env';
 import {
   signupSchema,
@@ -26,6 +26,7 @@ import { sendExistingUserLoginGuidanceEmail, sendVerificationEmail } from '@/aut
 import { createEmailVerificationToken } from '@/auth/verification-token';
 import { type AuthCode, AuthError, getAuthMessage } from '@/auth/message';
 import { decrypt, encrypt } from '@/auth/crypto';
+import { createTwoFactorAttempt } from '@/auth/two-factor-attempt';
 import config from '@/auth/config';
 import serverConfig from '@/auth/config/server';
 
@@ -125,13 +126,22 @@ async function logIn(
       throw new AuthError('invalid-credentials');
     }
 
+    if (user.twoFactorSecret) {
+      const { token } = await createTwoFactorAttempt(user.id);
+
+      return {
+        isSuccess: true,
+        data: {
+          twoFactorToken: token,
+        },
+      };
+    }
+
     const session = await createUserSession({ userId: user.id, userRole: user.role });
 
     return {
       isSuccess: true,
-      data: {
-        session,
-      },
+      data: { session },
     };
   } catch (error) {
     return handleError(error, 'login-failed', { email });
@@ -452,6 +462,81 @@ async function enableTwoFactorAuth(_: unknown, formData: FormData): Promise<Acti
   }
 }
 
+async function verifyTwoFactorCode(
+  token: TwoFactorAttempt['token'],
+  _: unknown,
+  formData: FormData,
+): Promise<ActionDataState<{ session: Session }, typeof totpSchema>> {
+  const { data, error } = totpSchema.safeParse(Object.fromEntries(formData.entries()));
+
+  if (error) {
+    return {
+      isSuccess: false,
+      errors: error.errors.map((err) => err.message),
+      fields: {
+        code: formData.get('code') as string,
+      },
+    };
+  }
+
+  const { code } = data;
+
+  try {
+    const twoFactorAttempt = await db.getTwoFactorAttemptByToken(token);
+
+    if (!twoFactorAttempt) {
+      throw new AuthError('two-factor-invalid-code');
+    }
+
+    if (twoFactorAttempt.expirationTime < Date.now()) {
+      throw new AuthError('two-factor-expired');
+    }
+
+    const user = await db.getUserById(twoFactorAttempt.userId);
+
+    if (!user) {
+      throw new AuthError('two-factor-invalid-code');
+    }
+
+    if (!user.twoFactorSecret) {
+      throw new AuthError('two-factor-not-enabled');
+    }
+
+    const decryptedSecret = decrypt(
+      user.twoFactorSecret,
+      Buffer.from(env.ENCRYPTION_KEY, 'base64'),
+    );
+
+    const totp = new OTPAuth.TOTP({
+      issuer: config.appName,
+      label: user.email,
+      secret: decryptedSecret,
+    });
+
+    const delta = totp.validate({ token: code, window: 0 });
+
+    if (delta !== 0) {
+      throw new AuthError('two-factor-invalid-code');
+    }
+
+    await db.deleteTwoFactorAttempt(token);
+
+    const session = await createUserSession({
+      userId: user.id,
+      userRole: user.role,
+    });
+
+    return {
+      isSuccess: true,
+      data: {
+        session,
+      },
+    };
+  } catch (error) {
+    return handleError(error, 'two-factor-setup-failed', { code });
+  }
+}
+
 function handleError(
   error: unknown,
   defaultAuthCode: AuthCode,
@@ -479,4 +564,5 @@ export {
   deleteCurrentUser,
   initiateTwoFactorAuth,
   enableTwoFactorAuth,
+  verifyTwoFactorCode,
 };
