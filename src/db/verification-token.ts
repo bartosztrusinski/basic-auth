@@ -14,26 +14,12 @@ const [getVerificationTokens, writeVerificationTokens] = createTable<Verificatio
 
 async function getVerificationTokenByEmail(email: VerificationToken['email']) {
   const verificationTokens = await getVerificationTokens();
-  const verificationToken = verificationTokens.find((token) => token.email === email);
-
-  if (!verificationToken) {
-    return null;
-  }
-
-  return verificationToken;
+  return verificationTokens.find((token) => token.email === email);
 }
 
 async function getVerificationTokenByToken(token: VerificationToken['token']) {
   const verificationTokens = await getVerificationTokens();
-  const verificationToken = verificationTokens.find(
-    (verificationToken) => verificationToken.token === token,
-  );
-
-  if (!verificationToken) {
-    return null;
-  }
-
-  return verificationToken;
+  return verificationTokens.find((verificationToken) => verificationToken.token === token);
 }
 
 async function createVerificationToken(newToken: VerificationToken) {

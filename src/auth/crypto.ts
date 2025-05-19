@@ -1,6 +1,13 @@
-import { type CipherKey, createCipheriv, createDecipheriv, randomBytes } from 'node:crypto';
+import 'server-only';
+import {
+  createCipheriv,
+  createDecipheriv,
+  randomBytes,
+  type CipherGCMTypes,
+  type CipherKey,
+} from 'node:crypto';
 
-const ALGORITHM = 'aes-256-gcm';
+const ALGORITHM: CipherGCMTypes = 'aes-256-gcm';
 const IV_LENGTH = 12;
 const SEPARATOR = ':';
 

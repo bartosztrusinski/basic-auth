@@ -9,27 +9,27 @@ type TwoFactorSetup = {
 };
 
 const [getTwoFactorSetups, writeTwoFactorSetups] =
-  createTable<TwoFactorSetup>('two-factory-setups.json');
+  createTable<TwoFactorSetup>('two-factor-setups.json');
 
 async function getUserTwoFactorSetup(userId: TwoFactorSetup['userId']) {
-  const twoFactorySetups = await getTwoFactorSetups();
-  const twoFactorySetup = twoFactorySetups.find((token) => token.userId === userId);
-
-  if (!twoFactorySetup) {
-    return null;
-  }
-
-  return twoFactorySetup;
+  const twoFactorSetups = await getTwoFactorSetups();
+  return twoFactorSetups.find((token) => token.userId === userId);
 }
 
 async function createTwoFactorSetup(newTwoFactorSetup: TwoFactorSetup) {
   const twoFactorSetups = await getTwoFactorSetups();
-  const existingTwoFactorSetup = twoFactorSetups.find(
+  const existingUserSetup = twoFactorSetups.find(
     ({ userId }) => userId === newTwoFactorSetup.userId,
   );
 
-  if (existingTwoFactorSetup) {
+  if (existingUserSetup) {
     throw new Error('Two-factor setup already exists for this user');
+  }
+
+  const existingSecret = twoFactorSetups.find(({ secret }) => secret === newTwoFactorSetup.secret);
+
+  if (existingSecret) {
+    throw new Error('Two-factor setup already exists with this secret');
   }
 
   await writeTwoFactorSetups((setups) => [...setups, newTwoFactorSetup]);
