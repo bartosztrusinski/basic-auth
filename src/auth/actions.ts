@@ -2,8 +2,10 @@
 
 import * as OTPAuth from 'otpauth';
 import QRCode from 'qrcode';
+import { type ZodSchema, type ZodType, type z } from 'zod';
 import { redirect } from 'next/navigation';
 import { db, type VerificationToken, type Session } from '@/db';
+import { env } from '@/env';
 import {
   signupSchema,
   loginSchema,
@@ -23,14 +25,16 @@ import { generateAuthorizationUrl, deleteProviderAccount, type OAuthProvider } f
 import { sendExistingUserLoginGuidanceEmail, sendVerificationEmail } from '@/auth/email';
 import { createEmailVerificationToken } from '@/auth/verification-token';
 import { type AuthCode, AuthError, getAuthMessage } from '@/auth/message';
+import { decrypt, encrypt } from '@/auth/crypto';
 import config from '@/auth/config';
 import serverConfig from '@/auth/config/server';
 
-type ActionState = ActionSuccess | ActionFailure;
+// TODO add fields to actions
+type ActionState<T extends ZodSchema = z.ZodAny> = ActionSuccess | ActionFailure<T>;
 
-type ActionDataState<T extends Record<string, unknown>> =
+type ActionDataState<T extends Record<string, unknown>, U extends ZodSchema = z.ZodAny> =
   | (ActionSuccess & { data: T })
-  | ActionFailure;
+  | ActionFailure<U>;
 
 type ActionSuccess = {
   isSuccess: true;
@@ -38,14 +42,15 @@ type ActionSuccess = {
   errors?: undefined;
 };
 
-type ActionFailure = {
+type ActionFailure<T extends ZodType = z.ZodAny> = {
   isSuccess: false;
   authCode?: AuthCode;
   errors: string | string[];
   data?: undefined;
+  fields?: Partial<z.infer<T>>;
 };
 
-async function signUp(_: unknown, formData: FormData): Promise<ActionState> {
+async function signUp(_: unknown, formData: FormData): Promise<ActionState<typeof signupSchema>> {
   const { data, error } = signupSchema.safeParse(Object.fromEntries(formData.entries()));
 
   if (error) {
@@ -92,13 +97,16 @@ async function signUp(_: unknown, formData: FormData): Promise<ActionState> {
 async function logIn(
   _: unknown,
   formData: FormData,
-): Promise<ActionDataState<{ session: Session }>> {
+): Promise<ActionDataState<{ session?: Session; twoFactorToken?: string }, typeof loginSchema>> {
   const { data, error } = loginSchema.safeParse(Object.fromEntries(formData.entries()));
 
   if (error) {
     return {
       isSuccess: false,
       errors: error.errors.map((err) => err.message),
+      fields: {
+        email: formData.get('email') as string,
+      },
     };
   }
 
@@ -126,7 +134,7 @@ async function logIn(
       },
     };
   } catch (error) {
-    return handleError(error, 'login-failed');
+    return handleError(error, 'login-failed', { email });
   }
 }
 
@@ -338,33 +346,37 @@ async function initiateTwoFactorAuth(): Promise<
       throw new AuthError('unauthenticated');
     }
 
+    if (!user.hasPassword) {
+      throw new AuthError('two-factor-password-required');
+    }
+
     if (user.isTwoFactorEnabled) {
       throw new AuthError('two-factor-already-enabled');
     }
 
     const secret = new OTPAuth.Secret({ size: 20 }).base32;
+    const encryptedSecret = encrypt(secret, Buffer.from(env.ENCRYPTION_KEY, 'base64'));
 
     await db.deleteTwoFactorSetup(user.id);
-
-    const twoFactorSetup = await db.createTwoFactorSetup({
+    await db.createTwoFactorSetup({
       userId: user.id,
-      secret,
+      secret: encryptedSecret,
       expirationTime: Date.now() + serverConfig.twoFactorSetupExpirationInSeconds * 1000,
     });
 
-    const totpHandler = new OTPAuth.TOTP({
+    const totp = new OTPAuth.TOTP({
       issuer: config.appName,
       label: user.email,
-      secret: twoFactorSetup.secret,
+      secret,
     });
 
-    const url = totpHandler.toString();
+    const url = totp.toString();
     const qrCode = await QRCode.toDataURL(url);
 
     return {
       isSuccess: true,
       data: {
-        secret: twoFactorSetup.secret,
+        secret,
         qrCode,
       },
     };
@@ -381,6 +393,14 @@ async function enableTwoFactorAuth(_: unknown, formData: FormData): Promise<Acti
       throw new AuthError('unauthenticated');
     }
 
+    if (!user.hasPassword) {
+      throw new AuthError('two-factor-password-required');
+    }
+
+    if (user.isTwoFactorEnabled) {
+      throw new AuthError('two-factor-already-enabled');
+    }
+
     const { data, error } = totpSchema.safeParse(Object.fromEntries(formData.entries()));
 
     if (error) {
@@ -390,11 +410,7 @@ async function enableTwoFactorAuth(_: unknown, formData: FormData): Promise<Acti
       };
     }
 
-    const { token } = data;
-
-    if (user.isTwoFactorEnabled) {
-      throw new AuthError('two-factor-already-enabled');
-    }
+    const { code } = data;
 
     const twoFactorSetup = await db.getUserTwoFactorSetup(user.id);
 
@@ -406,13 +422,18 @@ async function enableTwoFactorAuth(_: unknown, formData: FormData): Promise<Acti
       throw new AuthError('two-factor-expired');
     }
 
-    const totpHandler = new OTPAuth.TOTP({
+    const decryptedSecret = decrypt(
+      twoFactorSetup.secret,
+      Buffer.from(env.ENCRYPTION_KEY, 'base64'),
+    );
+
+    const totp = new OTPAuth.TOTP({
       issuer: config.appName,
       label: user.email,
-      secret: twoFactorSetup.secret,
+      secret: decryptedSecret,
     });
 
-    const delta = totpHandler.validate({ token, window: 0 });
+    const delta = totp.validate({ token: code, window: 0 });
 
     if (delta !== 0) {
       throw new AuthError('two-factor-invalid-code');
@@ -420,7 +441,6 @@ async function enableTwoFactorAuth(_: unknown, formData: FormData): Promise<Acti
 
     await db.deleteTwoFactorSetup(user.id);
     await db.updateUser(user.id, {
-      isTwoFactorEnabled: true,
       twoFactorSecret: twoFactorSetup.secret,
     });
 
@@ -432,11 +452,16 @@ async function enableTwoFactorAuth(_: unknown, formData: FormData): Promise<Acti
   }
 }
 
-function handleError(error: unknown, defaultAuthCode: AuthCode): ActionFailure {
+function handleError(
+  error: unknown,
+  defaultAuthCode: AuthCode,
+  fields?: ActionFailure['fields'],
+): ActionFailure {
   return {
     isSuccess: false,
     authCode: error instanceof AuthError ? error.authCode : undefined,
     errors: getAuthMessage(error instanceof AuthError ? error.authCode : defaultAuthCode).message,
+    fields,
   };
 }
 
