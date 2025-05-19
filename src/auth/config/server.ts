@@ -35,6 +35,7 @@ const codeVerifierCookieAttributes = {
 
 const verificationTokenExpirationInSeconds = 60 * 60 * 12;
 const twoFactorSetupExpirationInSeconds = 60 * 5;
+const twoFactorAttemptExpirationInSeconds = 60 * 5;
 const fromEmailAddress = env.FROM_EMAIL_ADDRESS ?? 'onboarding@resend.dev';
 
 export default Object.freeze({
@@ -49,5 +50,6 @@ export default Object.freeze({
   codeVerifierCookieAttributes,
   verificationTokenExpirationInSeconds,
   twoFactorSetupExpirationInSeconds,
+  twoFactorAttemptExpirationInSeconds,
   fromEmailAddress,
 });
