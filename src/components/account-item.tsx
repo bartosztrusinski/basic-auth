@@ -3,8 +3,8 @@
 import { type FormEvent, useActionState, useTransition } from 'react';
 import { toast } from 'sonner';
 import { type OAuthProvider } from '@/auth/oauth';
-import { unlinkAccount, linkAccount } from '@/actions';
 import { getAuthMessage } from '@/auth/message';
+import { unlinkAccount, linkAccount } from '@/actions';
 
 type Props = {
   provider: OAuthProvider;

@@ -5,7 +5,7 @@ import { initiateTwoFactorAuth } from '@/actions';
 import { ClassyDialog } from '@/components/classy-dialog';
 import { EnableTwoFactorForm } from '@/components/enable-two-factor-form';
 
-export function TwoFactorManager() {
+export function EnableTwoFactorButton() {
   const [state, action, isPending] = useActionState(initiateTwoFactorAuth, {
     isSuccess: false,
   });

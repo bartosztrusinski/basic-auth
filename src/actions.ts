@@ -184,3 +184,20 @@ export async function enableTwoFactorAuth(_: unknown, formData: FormData): Promi
 
   return { isSuccess };
 }
+
+export async function disableTwoFactorAuth(): Promise<ActionState> {
+  const { isSuccess, errors, authCode } = await actions.disableTwoFactorAuth();
+
+  await auth.protect({ returnBackUrl: '/profile', authCode });
+
+  if (!isSuccess) {
+    return {
+      isSuccess,
+      errors,
+    };
+  }
+
+  revalidatePath('/profile');
+
+  return { isSuccess };
+}

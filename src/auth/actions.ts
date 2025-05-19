@@ -537,6 +537,30 @@ async function verifyTwoFactorCode(
   }
 }
 
+async function disableTwoFactorAuth(): Promise<ActionState> {
+  const user = await currentUser();
+
+  try {
+    if (!user) {
+      throw new AuthError('unauthenticated');
+    }
+
+    if (!user.isTwoFactorEnabled) {
+      throw new AuthError('two-factor-not-enabled');
+    }
+
+    await db.updateUser(user.id, {
+      twoFactorSecret: undefined,
+    });
+
+    return {
+      isSuccess: true,
+    };
+  } catch (error) {
+    return handleError(error, 'two-factor-disable-failed');
+  }
+}
+
 function handleError(
   error: unknown,
   defaultAuthCode: AuthCode,
@@ -565,4 +589,5 @@ export {
   initiateTwoFactorAuth,
   enableTwoFactorAuth,
   verifyTwoFactorCode,
+  disableTwoFactorAuth,
 };

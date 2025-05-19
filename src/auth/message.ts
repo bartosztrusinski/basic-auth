@@ -143,6 +143,14 @@ const authMessages = {
     type: 'error',
     message: 'Two-factor authentication is not enabled for this account.',
   },
+  'two-factor-disabled': {
+    type: 'success',
+    message: 'Two-factor authentication disabled successfully!',
+  },
+  'two-factor-disable-failed': {
+    type: 'error',
+    message: 'Could not disable two-factor authentication. Please try again.',
+  },
 } satisfies Record<string, AuthMessage>;
 
 export function getAuthMessage(code: AuthCode): AuthMessage {
