@@ -13,7 +13,6 @@ type User = {
   role: (typeof UserRoles)[number];
   password?: string;
   salt?: string;
-  isTwoFactorEnabled: boolean;
   twoFactorSecret?: string;
 };
 
@@ -48,7 +47,7 @@ async function getUserByProvider(
   return { ...user, account };
 }
 
-async function createUser(newUser: Omit<User, 'id' | 'role' | 'isTwoFactorEnabled'>) {
+async function createUser(newUser: Omit<User, 'id' | 'role' | 'twoFactorSecret'>) {
   const existingUser = await getUserByEmail(newUser.email);
 
   if (existingUser) {
@@ -59,7 +58,6 @@ async function createUser(newUser: Omit<User, 'id' | 'role' | 'isTwoFactorEnable
     id: randomUUID(),
     role: 'user',
     ...newUser,
-    isTwoFactorEnabled: false,
   };
 
   await writeUsers((users) => [...users, user]);

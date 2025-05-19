@@ -16,8 +16,9 @@ import serverConfig from '@/auth/config/server';
 
 export type BackendSession = Pick<Session, 'userId' | 'userRole' | 'expirationTime'>;
 
-export type BackendUser = Pick<User, 'id' | 'email' | 'name' | 'role' | 'isTwoFactorEnabled'> & {
+export type BackendUser = Pick<User, 'id' | 'email' | 'name' | 'role'> & {
   hasPassword: boolean;
+  isTwoFactorEnabled: boolean;
 };
 
 interface Auth {
@@ -134,7 +135,7 @@ export const currentUser = cache<() => Promise<BackendUser | null>>(async () => 
     name: user.name,
     role: user.role,
     hasPassword: Boolean(user.password),
-    isTwoFactorEnabled: user.isTwoFactorEnabled,
+    isTwoFactorEnabled: Boolean(user.twoFactorSecret),
   } satisfies BackendUser;
 });
 
