@@ -12,35 +12,39 @@ export function SignupForm() {
   });
 
   return (
-    <form action={action} className='flex flex-col gap-5'>
+    <form action={action} className='flex flex-col gap-4'>
       <input
         type='email'
         name='email'
         required
+        autoFocus
         placeholder='Email'
         autoComplete='email'
-        className='rounded bg-white px-2 py-1 text-base text-black'
+        className='rounded-sm bg-white px-2 py-1 text-base text-black'
       />
       <input
         name='name'
         required
         placeholder='Name'
         autoComplete='name'
-        className='rounded bg-white px-2 py-1 text-base text-black'
+        className='rounded-sm bg-white px-2 py-1 text-base text-black'
       />
       <input
         type='password'
         name='password'
         required
-        placeholder='********'
+        placeholder='Password'
         autoComplete='new-password'
-        className='rounded bg-white px-2 py-1 text-base text-black'
+        className='rounded-sm bg-white px-2 py-1 text-base text-black'
       />
 
       {state.errors && <Alert variant='error' message={state.errors} />}
       {state.isSuccess && <AuthAlert authCode='verification-email-sent' />}
 
-      <button disabled={isPending} className='rounded border-2 border-white p-1'>
+      <button
+        disabled={isPending}
+        className='mt-2 rounded bg-zinc-800 p-2 font-bold shadow outline-current focus-visible:outline-2'
+      >
         {isPending ? 'Submitting...' : 'Sign Up'}
       </button>
     </form>
