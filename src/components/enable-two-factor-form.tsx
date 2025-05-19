@@ -59,8 +59,7 @@ export function EnableTwoFactorForm({ secret, qrCode }: Props) {
         className='flex flex-col gap-3 self-stretch'
       >
         <OtpInput
-          id='token'
-          name='token'
+          name='code'
           required
           autoFocus
           className='peer rounded'

@@ -1,23 +1,29 @@
 import { z } from 'zod';
 
-const email = z.string().email('Please enter a correct email address').min(1, 'Email is required');
-const name = z.string().min(1, 'Please enter your name');
+const email = z
+  .string({ message: 'Email is required' })
+  .email('Please enter a correct email address')
+  .min(1, 'Email is required');
+
 const password = z
-  .string()
+  .string({ message: 'Password is required' })
   .min(8, 'Password must be at least 8 characters long')
   .regex(/[a-zA-Z]/, 'Password must contain a letter')
-  .regex(/[0-9]/, 'Password must contain a number')
-  .regex(/[@$!%*?&]/, 'Password must contain a special character');
+  .regex(/\d/, 'Password must contain a number')
+  .regex(/[#?!@$%^&*-]/, 'Password must contain a special character');
 
 const signupSchema = z.object({
   email,
-  name,
+  name: z
+    .string({ message: 'Name is required' })
+    .min(2, 'Name must be at least 2 characters long')
+    .max(50, 'Name must be at most 16 characters long'),
   password,
 });
 
 const loginSchema = z.object({
   email,
-  password: z.string().min(1, 'Password is required'),
+  password: z.string({ message: 'Password is required' }).min(1, 'Password is required'),
 });
 
 const resendVerificationEmailSchema = z.object({
@@ -28,12 +34,21 @@ const addPasswordSchema = z
   .object({
     email,
     password,
-    confirmPassword: z.string().min(1, 'Please confirm your password'),
+    confirmPassword: z
+      .string({ message: 'Password confirmation is required' })
+      .min(1, 'Please confirm your password'),
   })
   .refine((data) => data.password === data.confirmPassword, {
     message: 'Passwords do not match',
     path: ['confirmPassword'],
   });
+
+const totpSchema = z.object({
+  code: z
+    .string({ message: 'Code is required' })
+    .min(1, 'Please enter a valid 6-digit code')
+    .regex(/^\d{6}$/, 'Please enter a valid 6-digit code'),
+});
 
 const oAuthTokenSchema = z.object({
   token_type: z.string(),
@@ -41,13 +56,6 @@ const oAuthTokenSchema = z.object({
   scope: z.string(),
   expires_in: z.number().optional(),
   refresh_token: z.string().optional(),
-});
-
-const totpSchema = z.object({
-  token: z
-    .string()
-    .min(1, 'Please enter a valid 6-digit code')
-    .regex(/^\d{6}$/, 'Please enter a valid 6-digit code'),
 });
 
 // Provider specific user schemas - add more properties as needed
@@ -95,8 +103,8 @@ export {
   loginSchema,
   resendVerificationEmailSchema,
   addPasswordSchema,
-  oAuthTokenSchema,
   totpSchema,
+  oAuthTokenSchema,
   discordUserSchema,
   githubUserSchema,
   googleUserSchema,
