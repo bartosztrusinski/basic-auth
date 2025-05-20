@@ -20,12 +20,11 @@ import {
   deleteAllUserSessions,
   deleteUserSession,
 } from '@/auth/session';
-import { comparePasswords, generateSalt, hashPassword } from '@/auth/password';
 import { generateAuthorizationUrl, deleteProviderAccount, type OAuthProvider } from '@/auth/oauth';
 import { sendExistingUserLoginGuidanceEmail, sendVerificationEmail } from '@/auth/email';
 import { createEmailVerificationToken } from '@/auth/verification-token';
 import { type AuthCode, AuthError, getAuthMessage } from '@/auth/message';
-import { decrypt, encrypt } from '@/auth/crypto';
+import { compareHash, decrypt, encrypt, hash } from '@/auth/crypto';
 import { createTwoFactorAttempt } from '@/auth/two-factor-attempt';
 import config from '@/auth/config';
 import serverConfig from '@/auth/config/server';
@@ -75,9 +74,8 @@ async function signUp(_: unknown, formData: FormData): Promise<ActionState<typeo
     }
 
     if (!existingUser) {
-      const salt = generateSalt();
-      const hashedPassword = await hashPassword(password, salt);
-      await db.createUser({ email, name, password: hashedPassword, salt });
+      const hashedPassword = await hash(password);
+      await db.createUser({ email, name, password: hashedPassword });
     }
 
     const verificationToken = await createEmailVerificationToken(email);
@@ -116,11 +114,11 @@ async function logIn(
   try {
     const user = await db.getUserByEmail(email);
 
-    if (!user?.password || !user?.salt) {
+    if (!user?.password) {
       throw new AuthError('invalid-credentials');
     }
 
-    const isCorrectPassword = await comparePasswords(password, user.password, user.salt);
+    const isCorrectPassword = await compareHash(password, user.password);
 
     if (!isCorrectPassword || !user.emailVerified) {
       throw new AuthError('invalid-credentials');
@@ -311,12 +309,10 @@ async function addPassword(_: unknown, formData: FormData): Promise<ActionState>
 
     const { password } = data;
 
-    const salt = generateSalt();
-    const hashedPassword = await hashPassword(password, salt);
+    const hashedPassword = await hash(password);
 
     await db.updateUser(user.id, {
       password: hashedPassword,
-      salt,
     });
 
     return {

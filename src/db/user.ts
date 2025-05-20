@@ -12,7 +12,6 @@ type User = {
   name: string;
   role: (typeof UserRoles)[number];
   password?: string;
-  salt?: string;
   twoFactorSecret?: string;
 };
 

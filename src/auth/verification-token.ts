@@ -1,10 +1,10 @@
 import 'server-only';
-import { randomBytes } from 'crypto';
 import { db, type VerificationToken } from '@/db';
+import { generateRandomValue } from '@/auth/crypto';
 import serverConfig from '@/auth/config/server';
 
 export async function createEmailVerificationToken(email: VerificationToken['email']) {
-  const token = randomBytes(64).toString('hex');
+  const token = generateRandomValue(64);
   const expirationTime = Date.now() + serverConfig.verificationTokenExpirationInSeconds * 1000;
 
   await db.deleteVerificationToken(email);
