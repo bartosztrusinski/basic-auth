@@ -1,7 +1,7 @@
 'use server';
 
 import { revalidatePath } from 'next/cache';
-import { db, type VerificationToken } from '@/db';
+import { db, type RecoveryCode, type TwoFactorSetup, type VerificationToken } from '@/db';
 import { editProfileSchema } from '@/schemas';
 import { auth, redirectToLogin, updateUserSession } from '@/auth/session';
 import { redirectAuth } from '@/auth/util';
@@ -146,7 +146,7 @@ export async function unlinkAccount(provider: OAuthProvider): Promise<ActionStat
 }
 
 export async function initiateTwoFactorAuth(): Promise<
-  ActionState<{ qrCode: string; secret: string }>
+  ActionState<{ qrCode: string; secret: TwoFactorSetup['secret'] }>
 > {
   const { isSuccess, errors, authCode, data } = await actions.initiateTwoFactorAuth();
 
@@ -168,8 +168,11 @@ export async function initiateTwoFactorAuth(): Promise<
   };
 }
 
-export async function enableTwoFactorAuth(_: unknown, formData: FormData): Promise<ActionState> {
-  const { isSuccess, errors, authCode } = await actions.enableTwoFactorAuth(null, formData);
+export async function enableTwoFactorAuth(
+  _: unknown,
+  formData: FormData,
+): Promise<ActionState<{ recoveryCodes: RecoveryCode['code'][] }>> {
+  const { isSuccess, errors, authCode, data } = await actions.enableTwoFactorAuth(null, formData);
 
   await auth.protect({ returnBackUrl: '/profile', authCode });
 
@@ -180,9 +183,9 @@ export async function enableTwoFactorAuth(_: unknown, formData: FormData): Promi
     };
   }
 
-  revalidatePath('/profile');
+  const { recoveryCodes } = data;
 
-  return { isSuccess };
+  return { isSuccess, recoveryCodes };
 }
 
 export async function disableTwoFactorAuth(): Promise<ActionState> {

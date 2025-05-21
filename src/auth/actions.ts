@@ -4,7 +4,14 @@ import * as OTPAuth from 'otpauth';
 import QRCode from 'qrcode';
 import { type ZodSchema, type ZodType, type z } from 'zod';
 import { redirect } from 'next/navigation';
-import { db, type VerificationToken, type Session, type TwoFactorAttempt } from '@/db';
+import {
+  db,
+  type VerificationToken,
+  type Session,
+  type TwoFactorAttempt,
+  type RecoveryCode,
+  type TwoFactorSetup,
+} from '@/db';
 import { env } from '@/env';
 import {
   signupSchema,
@@ -26,6 +33,7 @@ import { createEmailVerificationToken } from '@/auth/verification-token';
 import { type AuthCode, AuthError, getAuthMessage } from '@/auth/message';
 import { compareHash, decrypt, encrypt, hash } from '@/auth/crypto';
 import { createTwoFactorAttempt } from '@/auth/two-factor-attempt';
+import { createRecoveryCodes } from '@/auth/recovery-code';
 import config from '@/auth/config';
 import serverConfig from '@/auth/config/server';
 
@@ -96,7 +104,12 @@ async function signUp(_: unknown, formData: FormData): Promise<ActionState<typeo
 async function logIn(
   _: unknown,
   formData: FormData,
-): Promise<ActionDataState<{ session?: Session; twoFactorToken?: string }, typeof loginSchema>> {
+): Promise<
+  ActionDataState<
+    { session?: Session; twoFactorToken?: TwoFactorAttempt['token'] },
+    typeof loginSchema
+  >
+> {
   const { data, error } = loginSchema.safeParse(Object.fromEntries(formData.entries()));
 
   if (error) {
@@ -343,7 +356,7 @@ async function deleteCurrentUser(): Promise<ActionState> {
 }
 
 async function initiateTwoFactorAuth(): Promise<
-  ActionDataState<{ secret: string; qrCode: string }>
+  ActionDataState<{ secret: TwoFactorSetup['secret']; qrCode: string }>
 > {
   const user = await currentUser();
 
@@ -391,7 +404,10 @@ async function initiateTwoFactorAuth(): Promise<
   }
 }
 
-async function enableTwoFactorAuth(_: unknown, formData: FormData): Promise<ActionState> {
+async function enableTwoFactorAuth(
+  _: unknown,
+  formData: FormData,
+): Promise<ActionDataState<{ recoveryCodes: RecoveryCode['code'][] }>> {
   const user = await currentUser();
 
   try {
@@ -450,8 +466,13 @@ async function enableTwoFactorAuth(_: unknown, formData: FormData): Promise<Acti
       twoFactorSecret: twoFactorSetup.secret,
     });
 
+    const recoveryCodes = await createRecoveryCodes(user.id);
+
     return {
       isSuccess: true,
+      data: {
+        recoveryCodes,
+      },
     };
   } catch (error) {
     return handleError(error, 'two-factor-setup-failed');
@@ -548,6 +569,7 @@ async function disableTwoFactorAuth(): Promise<ActionState> {
     await db.updateUser(user.id, {
       twoFactorSecret: undefined,
     });
+    await db.deleteUserRecoveryCodes(user.id);
 
     return {
       isSuccess: true,
