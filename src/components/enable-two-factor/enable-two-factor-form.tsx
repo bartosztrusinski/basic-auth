@@ -1,44 +1,30 @@
 'use client';
 
-import { type FormEvent, useActionState, useRef, useState, useTransition } from 'react';
+import { useActionState, useEffect, useRef } from 'react';
 import Image from 'next/image';
-import { type TwoFactorSetup } from '@/db';
 import { enableTwoFactorAuth } from '@/actions';
 import { Alert } from '@/components/alert';
 import { OtpInput } from '@/components/otp-input';
+import { type TwoFactorData } from '@/components/enable-two-factor';
 
 type Props = {
-  secret: TwoFactorSetup['secret'];
-  qrCode: string;
-  onSuccess?: (data: { recoveryCodes: string[] }) => void;
+  secret: TwoFactorData['secret'];
+  qrCode: TwoFactorData['qrCode'];
+  onSuccess?: (data: Partial<TwoFactorData>) => void;
 };
 
 export function EnableTwoFactorForm({ secret, qrCode, onSuccess }: Props) {
-  const [errors, setErrors] = useState<string | string[] | null>(null);
-  const [isPending, startTransition] = useTransition();
-  const [state, action, isActionPending] = useActionState(enableTwoFactorAuth, {
+  const formRef = useRef<HTMLFormElement>(null);
+  const [state, action, isPending] = useActionState(enableTwoFactorAuth, {
     isSuccess: false,
   });
-  const formRef = useRef<HTMLFormElement>(null);
 
-  function handleSubmit(event: FormEvent<HTMLFormElement>) {
-    const formData = new FormData(event.currentTarget);
-
-    event.preventDefault();
-    setErrors(null);
-
-    startTransition(async () => {
-      const state = await enableTwoFactorAuth(null, formData);
-
-      if (state.errors) {
-        setErrors(state.errors);
-      }
-
-      if (state.isSuccess) {
-        onSuccess?.({ recoveryCodes: state.recoveryCodes });
-      }
-    });
-  }
+  useEffect(() => {
+    if (state.isSuccess) {
+      const { recoveryCodes } = state;
+      onSuccess?.({ recoveryCodes });
+    }
+  }, [state, onSuccess]);
 
   return (
     <div className='flex flex-col items-center gap-4'>
@@ -50,12 +36,7 @@ export function EnableTwoFactorForm({ secret, qrCode, onSuccess }: Props) {
         height={256}
         className='rounded'
       />
-      <form
-        ref={formRef}
-        action={action}
-        onSubmit={handleSubmit}
-        className='flex flex-col gap-3 self-stretch'
-      >
+      <form ref={formRef} action={action} className='flex flex-col gap-3 self-stretch'>
         <OtpInput
           name='code'
           required
@@ -83,13 +64,13 @@ export function EnableTwoFactorForm({ secret, qrCode, onSuccess }: Props) {
           }
         </OtpInput>
 
-        <Alert variant='error' message={errors ?? state.errors ?? []} />
+        {state.errors && <Alert variant='error' message={state.errors} />}
 
         <button
-          disabled={isPending || isActionPending}
+          disabled={isPending}
           className='rounded border border-zinc-700 p-2 text-sm shadow disabled:cursor-not-allowed disabled:opacity-50'
         >
-          {isPending || isActionPending ? 'Confirming...' : 'Confirm'}
+          {isPending ? 'Confirming...' : 'Confirm'}
         </button>
       </form>
     </div>

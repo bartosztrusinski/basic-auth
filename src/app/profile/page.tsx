@@ -7,7 +7,7 @@ import { Page } from '@/components/page';
 import { AddPasswordForm } from '@/components/add-password-form';
 import { LogoutEverywhereButton } from '@/components/logout-everywhere-button';
 import { DeleteUserButton } from '@/components/delete-user-button';
-import { EnableTwoFactorButton } from '@/components/enable-two-factor-button';
+import { EnableTwoFactorButton } from '@/components/enable-two-factor';
 import { DisableTwoFactorButton } from '@/components/disable-two-factor-button';
 
 export default async function ProfilePage() {
