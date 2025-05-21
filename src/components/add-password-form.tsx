@@ -27,10 +27,11 @@ export function AddPasswordForm({ email }: Props) {
     startTransition(async () => {
       const { isSuccess, errors } = await addPassword(null, formData);
 
+      formRef.current?.reset();
+
       if (isSuccess) {
         const { message } = getAuthMessage('password-set');
         toast.success(message);
-        formRef.current?.reset();
       }
 
       if (errors) {
