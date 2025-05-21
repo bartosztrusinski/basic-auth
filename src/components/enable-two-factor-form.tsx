@@ -2,19 +2,18 @@
 
 import { type FormEvent, useActionState, useRef, useState, useTransition } from 'react';
 import Image from 'next/image';
-import { toast } from 'sonner';
 import { type TwoFactorSetup } from '@/db';
 import { enableTwoFactorAuth } from '@/actions';
 import { Alert } from '@/components/alert';
 import { OtpInput } from '@/components/otp-input';
-import { getAuthMessage } from '@/auth/message';
 
 type Props = {
   secret: TwoFactorSetup['secret'];
   qrCode: string;
+  onSuccess?: (data: { recoveryCodes: string[] }) => void;
 };
 
-export function EnableTwoFactorForm({ secret, qrCode }: Props) {
+export function EnableTwoFactorForm({ secret, qrCode, onSuccess }: Props) {
   const [errors, setErrors] = useState<string | string[] | null>(null);
   const [isPending, startTransition] = useTransition();
   const [state, action, isActionPending] = useActionState(enableTwoFactorAuth, {
@@ -29,15 +28,14 @@ export function EnableTwoFactorForm({ secret, qrCode }: Props) {
     setErrors(null);
 
     startTransition(async () => {
-      const { isSuccess, errors } = await enableTwoFactorAuth(null, formData);
+      const state = await enableTwoFactorAuth(null, formData);
 
-      if (errors) {
-        setErrors(errors);
+      if (state.errors) {
+        setErrors(state.errors);
       }
 
-      if (isSuccess) {
-        const { message } = getAuthMessage('two-factor-enabled');
-        toast.success(message);
+      if (state.isSuccess) {
+        onSuccess?.({ recoveryCodes: state.recoveryCodes });
       }
     });
   }
