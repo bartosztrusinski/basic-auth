@@ -3,10 +3,8 @@
 import { createContext, useEffect, useState, useCallback, type ReactNode } from 'react';
 import { useAuth } from '@/auth/hooks/use-auth';
 import { fetcher, isSameObject } from '@/auth/util';
-import { type BackendUser } from '@/auth/session';
+import { type CurrentUser } from '@/auth/session';
 import config from '@/auth/config';
-
-type CurrentUser = Pick<BackendUser, 'id' | 'email' | 'name'>;
 
 type UserData =
   | {

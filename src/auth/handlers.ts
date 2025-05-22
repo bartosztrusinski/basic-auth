@@ -1,7 +1,14 @@
 import 'server-only';
 import { NextResponse, type NextRequest } from 'next/server';
 import { redirect } from 'next/navigation';
-import { auth, redirectToLogin, createUserSession, currentUser } from '@/auth/session';
+import {
+  auth,
+  redirectToLogin,
+  createUserSession,
+  currentUser,
+  type CurrentUser,
+  type Auth,
+} from '@/auth/session';
 import { redirectAuth } from '@/auth/util';
 import { deleteSessionCookie } from '@/auth/cookie';
 import { AuthError } from '@/auth/message';
@@ -31,24 +38,22 @@ async function GET(request: NextRequest, { params }: { params: Promise<{ endpoin
 
 async function getSession(): Promise<NextResponse> {
   const { userId, userRole, expirationTime } = await auth();
-  const isLoggedIn = Boolean(userId);
 
-  if (!isLoggedIn) {
+  if (!userId) {
     await deleteSessionCookie();
   }
 
-  return NextResponse.json({
-    isLoggedIn,
-    userId,
-    userRole,
-    expirationTime,
-  });
+  return NextResponse.json<Auth>(
+    userId
+      ? { isLoggedIn: true, userId, userRole, expirationTime }
+      : { isLoggedIn: false, userId: null, userRole: null, expirationTime: null },
+  );
 }
 
 async function getCurrentUser(): Promise<NextResponse> {
   const backendUser = await currentUser();
 
-  return NextResponse.json(
+  return NextResponse.json<CurrentUser | null>(
     backendUser
       ? {
           id: backendUser.id,

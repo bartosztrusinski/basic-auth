@@ -16,12 +16,21 @@ import serverConfig from '@/auth/config/server';
 
 export type BackendSession = Pick<Session, 'userId' | 'userRole' | 'expirationTime'>;
 
+export type Auth =
+  | ({
+      isLoggedIn: true;
+    } & BackendSession)
+  | ({
+      isLoggedIn: false;
+    } & Null<BackendSession>);
+
 export type BackendUser = Pick<User, 'id' | 'email' | 'name' | 'role'> & {
   hasPassword: boolean;
   isTwoFactorEnabled: boolean;
 };
+export type CurrentUser = Pick<BackendUser, 'id' | 'email' | 'name'>;
 
-interface Auth {
+interface AuthUtil {
   (): Promise<FullOrNull<BackendSession>>;
   protect: (options?: ProtectOptions) => Promise<Pick<BackendSession, 'userId'>>;
 }
@@ -36,7 +45,7 @@ export type RedirectToLoginOptions = Omit<RedirectOptions, 'type'> & {
   syncAuth?: boolean;
 };
 
-export const auth: Auth = Object.assign(cache(authFn), { protect });
+export const auth: AuthUtil = Object.assign(cache(authFn), { protect });
 
 async function authFn(): Promise<FullOrNull<BackendSession>> {
   const sessionId = await getSessionCookie();

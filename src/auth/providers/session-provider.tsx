@@ -2,20 +2,12 @@
 
 import { createContext, useEffect, useState, useCallback, type ReactNode } from 'react';
 import { useRouter } from 'next/navigation';
-import { fetcher, type Null } from '@/auth/util';
-import { type BackendSession } from '@/auth/session';
+import { fetcher, isSameObject } from '@/auth/util';
+import { type Auth } from '@/auth/session';
 import config from '@/auth/config';
 
-type Auth =
-  | ({
-      isLoggedIn: true;
-    } & BackendSession)
-  | ({
-      isLoggedIn: false;
-    } & Null<BackendSession>);
-
 type SessionContext = Auth & {
-  syncAuth: (signal?: AbortSignal) => Promise<void>;
+  syncAuth: (signal?: AbortSignal) => Promise<{ isUpdated: boolean }>;
 };
 
 type Props = {
@@ -32,29 +24,40 @@ const defaultAuth: Auth = {
 
 export const SessionContext = createContext<SessionContext>({
   ...defaultAuth,
-  syncAuth: async () => undefined,
+  syncAuth: async () => ({ isUpdated: false }),
 });
 
 export function SessionProvider({ children, initialAuth = defaultAuth }: Props) {
   const [auth, setAuth] = useState<Auth>(initialAuth);
   const router = useRouter();
 
-  const syncAuth = useCallback(async (signal?: AbortSignal) => {
-    try {
-      const auth = await fetcher<Auth>(`${config.apiBaseRoute}/${config.apiSessionEndpoint}`, {
-        cache: 'no-store',
-        signal,
-      });
+  const syncAuth = useCallback(
+    async (signal?: AbortSignal) => {
+      try {
+        const newAuth = await fetcher<Auth>(`${config.apiBaseRoute}/${config.apiSessionEndpoint}`, {
+          cache: 'no-store',
+          signal,
+        });
 
-      setAuth(auth);
-    } catch (error) {
-      if (signal?.aborted) {
-        console.info('Auth sync aborted');
-      } else {
-        console.error('Auth sync failed:', error);
+        const isUpdated = !isSameObject(auth, newAuth);
+
+        if (isUpdated) {
+          setAuth(newAuth);
+        }
+
+        return { isUpdated };
+      } catch (error) {
+        if (signal?.aborted) {
+          console.info('Auth sync aborted');
+        } else {
+          console.error('Auth sync failed:', error);
+        }
+
+        return { isUpdated: false };
       }
-    }
-  }, []);
+    },
+    [auth],
+  );
 
   // This effect is for syncing auth when it expires
   useEffect(() => {
@@ -63,8 +66,11 @@ export function SessionProvider({ children, initialAuth = defaultAuth }: Props) 
     }
 
     const timeout = setTimeout(() => {
-      void syncAuth();
-      router.refresh();
+      void syncAuth().then(({ isUpdated }) => {
+        if (isUpdated) {
+          router.refresh();
+        }
+      });
     }, auth.expirationTime - Date.now());
 
     return () => {
@@ -80,8 +86,11 @@ export function SessionProvider({ children, initialAuth = defaultAuth }: Props) 
       'visibilitychange',
       () => {
         if (!document.hidden && auth.isLoggedIn) {
-          void syncAuth(controller.signal);
-          router.refresh();
+          void syncAuth(controller.signal).then(({ isUpdated }) => {
+            if (isUpdated) {
+              router.refresh();
+            }
+          });
         }
       },
       { signal: controller.signal },
