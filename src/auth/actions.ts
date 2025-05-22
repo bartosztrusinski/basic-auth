@@ -18,7 +18,8 @@ import {
   loginSchema,
   resendVerificationEmailSchema,
   addPasswordSchema,
-  totpSchema,
+  twoFactorCodeSchema,
+  recoveryCodeSchema,
 } from '@/auth/schemas';
 import {
   auth,
@@ -423,7 +424,7 @@ async function enableTwoFactorAuth(
       throw new AuthError('two-factor-already-enabled');
     }
 
-    const { data, error } = totpSchema.safeParse(Object.fromEntries(formData.entries()));
+    const { data, error } = twoFactorCodeSchema.safeParse(Object.fromEntries(formData.entries()));
 
     if (error) {
       return {
@@ -479,20 +480,112 @@ async function enableTwoFactorAuth(
   }
 }
 
-async function verifyTwoFactorCode(
+async function disableTwoFactorAuth(): Promise<ActionState> {
+  const user = await currentUser();
+
+  try {
+    if (!user) {
+      throw new AuthError('unauthenticated');
+    }
+
+    if (!user.isTwoFactorEnabled) {
+      throw new AuthError('two-factor-not-enabled');
+    }
+
+    await db.updateUser(user.id, { twoFactorSecret: undefined });
+    await db.deleteUserRecoveryCodes(user.id);
+
+    return {
+      isSuccess: true,
+    };
+  } catch (error) {
+    return handleError(error, 'two-factor-disable-failed');
+  }
+}
+
+async function useRecoveryCode(
   token: TwoFactorAttempt['token'],
   _: unknown,
   formData: FormData,
-): Promise<ActionDataState<{ session: Session }, typeof totpSchema>> {
-  const { data, error } = totpSchema.safeParse(Object.fromEntries(formData.entries()));
+): Promise<ActionDataState<{ session: Session }>> {
+  const { data, error } = recoveryCodeSchema.safeParse(Object.fromEntries(formData.entries()));
 
   if (error) {
     return {
       isSuccess: false,
       errors: error.errors.map((err) => err.message),
-      fields: {
-        code: formData.get('code') as string,
+    };
+  }
+
+  const { code } = data;
+
+  try {
+    const twoFactorAttempt = await db.getTwoFactorAttemptByToken(token);
+
+    if (!twoFactorAttempt) {
+      throw new AuthError('two-factor-invalid-code');
+    }
+
+    if (twoFactorAttempt.expirationTime < Date.now()) {
+      throw new AuthError('two-factor-expired');
+    }
+
+    const user = await db.getUserById(twoFactorAttempt.userId);
+
+    if (!user) {
+      throw new AuthError('two-factor-invalid-code');
+    }
+
+    if (!user.twoFactorSecret) {
+      throw new AuthError('two-factor-not-enabled');
+    }
+
+    const activeRecoveryCodes = await db.getActiveRecoveryCodes(user.id);
+
+    let correctCode: RecoveryCode | null = null;
+    for (const recoveryCode of activeRecoveryCodes) {
+      const isMatch = await compareHash(code, recoveryCode.code);
+
+      if (isMatch) {
+        correctCode = recoveryCode;
+        break;
+      }
+    }
+
+    if (!correctCode) {
+      throw new AuthError('recovery-code-invalid');
+    }
+
+    await db.useRecoveryCode(correctCode);
+    await db.deleteTwoFactorAttempt(token);
+
+    const session = await createUserSession({
+      userId: user.id,
+      userRole: user.role,
+    });
+
+    return {
+      isSuccess: true,
+      data: {
+        session,
       },
+    };
+  } catch (error) {
+    return handleError(error, 'recovery-code-failed');
+  }
+}
+
+async function verifyTwoFactorCode(
+  token: TwoFactorAttempt['token'],
+  _: unknown,
+  formData: FormData,
+): Promise<ActionDataState<{ session: Session }>> {
+  const { data, error } = twoFactorCodeSchema.safeParse(Object.fromEntries(formData.entries()));
+
+  if (error) {
+    return {
+      isSuccess: false,
+      errors: error.errors.map((err) => err.message),
     };
   }
 
@@ -550,32 +643,7 @@ async function verifyTwoFactorCode(
       },
     };
   } catch (error) {
-    return handleError(error, 'two-factor-setup-failed', { code });
-  }
-}
-
-async function disableTwoFactorAuth(): Promise<ActionState> {
-  const user = await currentUser();
-
-  try {
-    if (!user) {
-      throw new AuthError('unauthenticated');
-    }
-
-    if (!user.isTwoFactorEnabled) {
-      throw new AuthError('two-factor-not-enabled');
-    }
-
-    await db.updateUser(user.id, {
-      twoFactorSecret: undefined,
-    });
-    await db.deleteUserRecoveryCodes(user.id);
-
-    return {
-      isSuccess: true,
-    };
-  } catch (error) {
-    return handleError(error, 'two-factor-disable-failed');
+    return handleError(error, 'two-factor-setup-failed');
   }
 }
 
@@ -606,6 +674,7 @@ export {
   deleteCurrentUser,
   initiateTwoFactorAuth,
   enableTwoFactorAuth,
-  verifyTwoFactorCode,
   disableTwoFactorAuth,
+  verifyTwoFactorCode,
+  useRecoveryCode,
 };
