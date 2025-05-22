@@ -9,10 +9,9 @@ type RecoveryCode = {
 
 const [getRecoveryCodes, writeRecoveryCodes] = createTable<RecoveryCode>('recovery-codes.json');
 
-async function getActiveRecoveryCode(userId: User['id']) {
+async function getActiveRecoveryCodes(userId: User['id']) {
   const codes = await getRecoveryCodes();
-  const activeCodes = codes.filter((code) => code.userId === userId && !code.usedAt);
-  return activeCodes[0] ?? null;
+  return codes.filter((code) => code.userId === userId && !code.usedAt);
 }
 
 async function createRecoveryCode(newCode: Omit<RecoveryCode, 'usedAt'>) {
@@ -52,7 +51,7 @@ async function deleteUserRecoveryCodes(userId: User['id']) {
 
 export {
   getRecoveryCodes,
-  getActiveRecoveryCode,
+  getActiveRecoveryCodes,
   createRecoveryCode,
   useRecoveryCode,
   deleteUserRecoveryCodes,
