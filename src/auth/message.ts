@@ -151,6 +151,14 @@ const authMessages = {
     type: 'error',
     message: 'Could not disable two-factor authentication. Please try again.',
   },
+  'recovery-code-invalid': {
+    type: 'error',
+    message: 'Invalid recovery code. Please try again.',
+  },
+  'recovery-code-failed': {
+    type: 'error',
+    message: 'Could not use recovery code. Please try again.',
+  },
 } satisfies Record<string, AuthMessage>;
 
 export function getAuthMessage(code: AuthCode): AuthMessage {
