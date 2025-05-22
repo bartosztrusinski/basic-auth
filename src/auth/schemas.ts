@@ -43,11 +43,23 @@ const addPasswordSchema = z
     path: ['confirmPassword'],
   });
 
-const totpSchema = z.object({
+// TODO dont use hardcoded length
+const twoFactorCodeSchema = z.object({
   code: z
     .string({ message: 'Code is required' })
     .min(1, 'Please enter a valid 6-digit code')
     .regex(/^\d{6}$/, 'Please enter a valid 6-digit code'),
+});
+
+// TODO dont use hardcoded length
+const recoveryCodeSchema = z.object({
+  code: z
+    .string({ message: 'Recovery code is required' })
+    .min(1, 'Please enter a valid recovery code')
+    .regex(
+      /^[ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz23456789]{12}$/,
+      'Please enter a valid recovery code',
+    ),
 });
 
 const oAuthTokenSchema = z.object({
@@ -103,7 +115,8 @@ export {
   loginSchema,
   resendVerificationEmailSchema,
   addPasswordSchema,
-  totpSchema,
+  twoFactorCodeSchema,
+  recoveryCodeSchema,
   oAuthTokenSchema,
   discordUserSchema,
   githubUserSchema,
