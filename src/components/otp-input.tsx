@@ -20,12 +20,14 @@ type Props = Override<
     onComplete?: (value: string) => void;
     containerClassName?: string;
     focusClassName?: string;
+    pattern?: RegExp;
   }
 >;
 
 export function OtpInput({
   value: externalValue,
   maxLength = 6,
+  pattern = /^\d*$/,
   defaultValue = '',
   placeholder,
   className = '',
@@ -86,13 +88,17 @@ export function OtpInput({
         type='text'
         autoComplete='one-time-code'
         inputMode='numeric'
+        pattern={pattern.source}
         className={`absolute inset-0 flex h-full w-full appearance-none border-none bg-transparent leading-none -tracking-[0.5em] text-transparent caret-transparent opacity-100 shadow-none outline-none selection:bg-inherit selection:text-inherit placeholder:text-inherit ${isFocused && isComplete && isNoSlotSelected ? focusClassName : ''} ${className}`}
         maxLength={maxLength}
         value={value}
         aria-placeholder={placeholder}
         onChange={(event) => {
-          const newValue = event.target.value.replace(/\D/g, '');
-          event.target.value = newValue;
+          const newValue = event.target.value;
+
+          if (!pattern.test(newValue) && newValue.length > 0) {
+            return;
+          }
 
           onChange?.(event);
 
