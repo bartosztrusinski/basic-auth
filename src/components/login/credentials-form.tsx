@@ -30,7 +30,7 @@ export function CredentialsForm({ onSuccess }: Props) {
         placeholder='Email'
         autoComplete='email'
         className='rounded-sm bg-white px-2 py-1 text-base text-black'
-        defaultValue={!state.isSuccess ? state.fields?.email : undefined}
+        defaultValue={state.isSuccess ? undefined : state.fields?.email}
       />
       <input
         type='password'

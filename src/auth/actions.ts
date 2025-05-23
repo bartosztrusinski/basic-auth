@@ -38,7 +38,6 @@ import { createRecoveryCodes } from '@/auth/recovery-code';
 import config from '@/auth/config';
 import serverConfig from '@/auth/config/server';
 
-// TODO add fields to actions
 type ActionState<T extends ZodSchema = z.ZodAny> = ActionSuccess | ActionFailure<T>;
 
 type ActionDataState<T extends Record<string, unknown>, U extends ZodSchema = z.ZodAny> =
@@ -66,6 +65,10 @@ async function signUp(_: unknown, formData: FormData): Promise<ActionState<typeo
     return {
       isSuccess: false,
       errors: error.errors.map((err) => err.message),
+      fields: {
+        email: formData.get('email') as string,
+        name: formData.get('name') as string,
+      },
     };
   }
 
@@ -98,7 +101,7 @@ async function signUp(_: unknown, formData: FormData): Promise<ActionState<typeo
       isSuccess: true,
     };
   } catch (error) {
-    return handleError(error, 'signup-failed');
+    return handleError(error, 'signup-failed', { email, name });
   }
 }
 
@@ -266,7 +269,10 @@ async function verifyEmail(token: VerificationToken['token']): Promise<ActionSta
   }
 }
 
-async function resendVerificationEmail(_: unknown, formData: FormData): Promise<ActionState> {
+async function resendVerificationEmail(
+  _: unknown,
+  formData: FormData,
+): Promise<ActionState<typeof resendVerificationEmailSchema>> {
   const { data, error } = resendVerificationEmailSchema.safeParse(
     Object.fromEntries(formData.entries()),
   );
@@ -275,6 +281,9 @@ async function resendVerificationEmail(_: unknown, formData: FormData): Promise<
     return {
       isSuccess: false,
       errors: error.errors.map((err) => err.message),
+      fields: {
+        email: formData.get('email') as string,
+      },
     };
   }
 
@@ -296,7 +305,7 @@ async function resendVerificationEmail(_: unknown, formData: FormData): Promise<
       isSuccess: true,
     };
   } catch (error) {
-    return handleError(error, 'verification-email-not-sent');
+    return handleError(error, 'verification-email-not-sent', { email });
   }
 }
 

@@ -21,6 +21,7 @@ export function SignupForm() {
         placeholder='Email'
         autoComplete='email'
         className='rounded-sm bg-white px-2 py-1 text-base text-black'
+        defaultValue={state.isSuccess ? undefined : state.fields?.email}
       />
       <input
         name='name'
@@ -28,6 +29,7 @@ export function SignupForm() {
         placeholder='Name'
         autoComplete='name'
         className='rounded-sm bg-white px-2 py-1 text-base text-black'
+        defaultValue={state.isSuccess ? undefined : state.fields?.name}
       />
       <input
         type='password'

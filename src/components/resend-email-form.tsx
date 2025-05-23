@@ -20,6 +20,7 @@ export function ResendEmailForm() {
         placeholder='Email'
         autoComplete='email'
         className='rounded bg-white px-2 py-1 text-base text-black'
+        defaultValue={state.isSuccess ? undefined : state.fields?.email}
       />
 
       {state.errors && <Alert variant='error' message={state.errors} />}
