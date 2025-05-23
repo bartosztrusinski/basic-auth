@@ -365,7 +365,7 @@ async function deleteCurrentUser(): Promise<ActionState> {
   }
 }
 
-async function initiateTwoFactorAuth(): Promise<
+async function initializeTwoFactorAuth(): Promise<
   ActionDataState<{ secret: TwoFactorSetup['secret']; qrCode: string }>
 > {
   const user = await currentUser();
@@ -681,7 +681,7 @@ export {
   resendVerificationEmail,
   addPassword,
   deleteCurrentUser,
-  initiateTwoFactorAuth,
+  initializeTwoFactorAuth,
   enableTwoFactorAuth,
   disableTwoFactorAuth,
   verifyTwoFactorCode,

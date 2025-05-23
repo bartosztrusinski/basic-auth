@@ -1,7 +1,7 @@
 'use client';
 
 import { useActionState, useEffect } from 'react';
-import { initiateTwoFactorAuth } from '@/actions';
+import { initializeTwoFactorAuth } from '@/actions';
 import { Alert } from '@/components/alert';
 import { type TwoFactorData } from '@/components/enable-two-factor';
 
@@ -10,7 +10,7 @@ type Props = {
 };
 
 export function InitializeTwoFactorForm({ onSuccess }: Props) {
-  const [state, action, isPending] = useActionState(initiateTwoFactorAuth, {
+  const [state, action, isPending] = useActionState(initializeTwoFactorAuth, {
     isSuccess: false,
   });
 

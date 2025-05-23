@@ -145,10 +145,10 @@ export async function unlinkAccount(provider: OAuthProvider): Promise<ActionStat
   return { isSuccess };
 }
 
-export async function initiateTwoFactorAuth(): Promise<
+export async function initializeTwoFactorAuth(): Promise<
   ActionState<{ qrCode: string; secret: TwoFactorSetup['secret'] }>
 > {
-  const { isSuccess, errors, authCode, data } = await actions.initiateTwoFactorAuth();
+  const { isSuccess, errors, authCode, data } = await actions.initializeTwoFactorAuth();
 
   await auth.protect({ returnBackUrl: '/profile', authCode });
 
