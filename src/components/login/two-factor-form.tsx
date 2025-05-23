@@ -19,18 +19,16 @@ export function TwoFactorForm({ token }: Props) {
   return (
     <form action={action} className='flex flex-col gap-5'>
       <div>
-        <label htmlFor='code' className='text-sm text-zinc-400'>
-          Two-Factor Authentication Code
-        </label>
+        <label htmlFor='code'>Two-Factor Authentication Code</label>
         <OtpInput
           id='code'
           name='code'
           required
           autoFocus
-          className='peer rounded'
+          className='peer rounded-sm'
           placeholder='314159'
-          focusClassName='outline-4 outline-zinc-400'
-          containerClassName='flex items-center gap-2 p-0.5 text-xl sm:text-2xl'
+          focusClassName='outline-4 outline-offset-4 outline-amber-500'
+          containerClassName='flex items-center gap-2 mt-1 text-xl sm:text-2xl'
         >
           {(slots) =>
             slots.map((slot, slotIndex) => (
@@ -39,7 +37,7 @@ export function TwoFactorForm({ token }: Props) {
                   <div className='h-0.5 rounded-full bg-zinc-400 px-1.5'></div>
                 )}
                 <div
-                  className={`flex aspect-square w-full place-content-center place-items-center rounded-sm bg-white text-black outline-2 outline-offset-4 outline-zinc-400 ${slot.isActive ? 'peer-focus:outline' : ''}`}
+                  className={`flex aspect-square w-full place-content-center place-items-center rounded-sm bg-white text-black outline-2 outline-offset-4 outline-amber-500 ${slot.isActive ? 'peer-focus:outline' : ''}`}
                 >
                   {slot.value}
                   {slot.hasCaret && (

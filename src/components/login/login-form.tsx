@@ -33,31 +33,31 @@ export function LoginForm() {
     <>
       <button
         type='button'
-        className='size-10 rounded bg-zinc-800 shadow outline-current focus-visible:outline-2'
+        className='size-9 rounded bg-zinc-800 shadow outline-current focus-visible:outline-2'
         onClick={goBack}
       >
-        ←<label className='sr-only'>Go back to credentials form</label>
+        <span className='sr-only'>Go back to credentials form</span>
+        <span aria-hidden='true'>←</span>
       </button>
 
-      {isRecoveryMode ? (
-        <RecoveryCodeForm token={twoFactorToken} />
-      ) : (
-        <TwoFactorForm token={twoFactorToken} />
-      )}
+      <div>
+        {isRecoveryMode ? (
+          <RecoveryCodeForm token={twoFactorToken} />
+        ) : (
+          <TwoFactorForm token={twoFactorToken} />
+        )}
 
-      <span className='text-balance text-sm text-zinc-400'>
-        {isRecoveryMode ? 'Want to enter Code from Authenticator? ' : 'Want to use Recovery Code? '}
-        <span className='whitespace-nowrap'>
-          Click{' '}
+        <div className='mt-2 text-sm'>
+          {isRecoveryMode ? 'Got access to Authenticator? ' : 'Lost access to Authenticator? '}
           <button
             type='button'
-            className='py-2 text-amber-500 hover:underline'
+            className='text-amber-500 hover:underline'
             onClick={toggleRecoveryMode}
           >
-            here
+            Enter {isRecoveryMode ? 'recovery' : ''} code
           </button>
-        </span>
-      </span>
+        </div>
+      </div>
     </>
   );
 }
