@@ -19,7 +19,7 @@ export default async function SignupPage({
         <Page.Title>Signup</Page.Title>
         <Page.Description>
           Already have an account?{' '}
-          <LoginLink searchParams={searchParams} className='text-teal-500 hover:underline'>
+          <LoginLink searchParams={searchParams} className='text-amber-500 hover:underline'>
             Log in
           </LoginLink>
         </Page.Description>

@@ -10,7 +10,7 @@ export default async function AdminPage() {
       <Page.Title>Admin Dashboard</Page.Title>
       <Page.Description>
         This page is only accessible to administrators, users with the{' '}
-        <code className='text-indigo-500'>admin</code> role.
+        <code className='text-amber-500'>admin</code> role.
       </Page.Description>
       <h2 className='pt-5 text-center text-xl font-bold'>Users in System</h2>
       <UsersList />

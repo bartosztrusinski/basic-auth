@@ -55,7 +55,7 @@ export function RecoveryCodes({ recoveryCodes, onClose }: Props) {
         className='rounded bg-zinc-800 p-2 text-sm shadow disabled:cursor-not-allowed disabled:opacity-50'
         onClick={onClose}
       >
-        I have saved my recovery codes
+        I have saved Recovery Codes
       </button>
     </>
   );

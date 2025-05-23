@@ -4,7 +4,7 @@ import { AuthNav } from '@/components/auth-nav';
 
 export function Header() {
   return (
-    <nav className='flex flex-wrap justify-between gap-x-6 gap-y-4 bg-zinc-800 p-4 text-zinc-50'>
+    <nav className='flex flex-wrap justify-between gap-x-6 gap-y-4 bg-zinc-800 p-4'>
       <ul className='flex items-center gap-5'>
         <li>
           <Link href='/'>

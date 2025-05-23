@@ -13,7 +13,8 @@ export default async function HomePage() {
         <span className='align-middle'>Basic Auth</span>
       </Page.Title>
       <Page.Description>
-        Server-side: {user ? `Welcome back ${user.name}` : 'You are not logged in'}
+        <span className='pr-2 font-medium text-amber-500'>Server</span>
+        {user ? `Welcome back ${user.name}` : 'You are not logged in'}
         <ClientComponent />
       </Page.Description>
     </Page>

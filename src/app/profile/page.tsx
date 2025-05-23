@@ -26,7 +26,7 @@ export default async function ProfilePage() {
       <Protect when={(user) => user.role !== 'admin'}>
         <Page.Description>
           <span className='text-zinc-400'>
-            You are logged in as an <code className='text-indigo-500'>admin</code>.
+            You are logged in as an <code className='text-amber-500'>admin</code>.
           </span>
         </Page.Description>
       </Protect>
