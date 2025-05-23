@@ -1,10 +1,10 @@
+import 'server-only';
 import { randomBytes } from 'node:crypto';
 import { db, type RecoveryCode } from '@/db';
 import { hash } from '@/auth/crypto';
+import config from '@/auth/config';
 
 const RECOVERY_CODES_COUNT = 10;
-const RECOVERY_CODE_LENGTH = 12;
-const RECOVERY_CODE_CHARACTERS = 'ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz23456789';
 
 export async function createRecoveryCodes(
   userId: RecoveryCode['userId'],
@@ -31,9 +31,10 @@ export async function createRecoveryCodes(
 }
 
 function generateRecoveryCode(): string {
-  const bytes = randomBytes(RECOVERY_CODE_LENGTH);
+  const bytes = randomBytes(config.recoveryCodeLength);
+  const characters = config.recoveryCodeAllowedCharacters;
 
   return Array.from(bytes)
-    .map((byte) => RECOVERY_CODE_CHARACTERS[byte % RECOVERY_CODE_CHARACTERS.length])
+    .map((byte) => characters[byte % characters.length])
     .join('');
 }

@@ -3,6 +3,7 @@
 import { useActionState, Fragment } from 'react';
 import { type TwoFactorAttempt } from '@/db';
 import { useRecoveryCode } from '@/auth/actions';
+import config from '@/auth/config';
 import { Alert } from '@/components/alert';
 import { OtpInput } from '@/components/otp-input';
 
@@ -26,8 +27,7 @@ export function RecoveryCodeForm({ token }: Props) {
           required
           autoFocus
           pattern={/^[A-Za-z0-9]*$/}
-          // TODO move to config
-          maxLength={12}
+          maxLength={config.recoveryCodeLength}
           className='peer rounded-sm'
           focusClassName='outline-2 outline-offset-4 outline-amber-500'
           containerClassName='flex items-center gap-1 mt-1 text-lg'
@@ -35,7 +35,7 @@ export function RecoveryCodeForm({ token }: Props) {
           {(slots) =>
             slots.map((slot, slotIndex) => (
               <Fragment key={slotIndex}>
-                {slotIndex % (12 / 3) === 0 && slotIndex !== 0 && (
+                {slotIndex % 4 === 0 && slotIndex !== 0 && (
                   <div className='h-0.5 rounded-full bg-zinc-400 px-1'></div>
                 )}
                 <div
@@ -44,9 +44,6 @@ export function RecoveryCodeForm({ token }: Props) {
                   {slot.value}
                   {slot.hasCaret && (
                     <div className='pointer-events-none h-[1em] w-[0.1em] animate-caret-blink bg-current'></div>
-                  )}
-                  {slot.placeholder && (
-                    <span className='pointer-events-none text-zinc-400'>{slot.placeholder}</span>
                   )}
                 </div>
               </Fragment>

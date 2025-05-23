@@ -22,6 +22,9 @@ const returnBackUrlKey = 'return-back-url';
 const verificationTokenKey = 'token';
 const authCodeKey = 'auth-code';
 
+const recoveryCodeAllowedCharacters = 'ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz23456789';
+const recoveryCodeLength = 12;
+
 const logoFilename = 'logo.png';
 
 export default Object.freeze({
@@ -42,5 +45,7 @@ export default Object.freeze({
   returnBackUrlKey,
   verificationTokenKey,
   authCodeKey,
+  recoveryCodeAllowedCharacters,
+  recoveryCodeLength,
   logoFilename,
 });

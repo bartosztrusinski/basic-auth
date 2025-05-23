@@ -1,4 +1,5 @@
 import { z } from 'zod';
+import config from '@/auth/config';
 
 const email = z
   .string({ message: 'Email is required' })
@@ -43,7 +44,6 @@ const addPasswordSchema = z
     path: ['confirmPassword'],
   });
 
-// TODO dont use hardcoded length
 const twoFactorCodeSchema = z.object({
   code: z
     .string({ message: 'Code is required' })
@@ -51,14 +51,12 @@ const twoFactorCodeSchema = z.object({
     .regex(/^\d{6}$/, 'Please enter a valid 6-digit code'),
 });
 
-// TODO dont use hardcoded length
 const recoveryCodeSchema = z.object({
   code: z
     .string({ message: 'Recovery code is required' })
-    .min(1, 'Please enter a valid recovery code')
     .regex(
-      /^[ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz23456789]{12}$/,
-      'Please enter a valid recovery code',
+      new RegExp(`^[${config.recoveryCodeAllowedCharacters}]{${config.recoveryCodeLength}}$`),
+      `Please enter a valid ${config.recoveryCodeLength}-character recovery code`,
     ),
 });
 
