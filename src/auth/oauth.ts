@@ -12,7 +12,7 @@ import {
 import { fetcher } from '@/auth/util';
 import { AuthError } from '@/auth/message';
 import { oAuthTokenSchema } from '@/auth/schemas';
-import { generateRandomValue } from '@/auth/crypto';
+import { generateRandomString } from '@/auth/crypto';
 import config from '@/auth/config';
 import providers, { OAuthProviderEnum } from '@/auth/config/providers';
 
@@ -250,7 +250,7 @@ async function validateState(state: string) {
 }
 
 async function generateState() {
-  const state = generateRandomValue(64);
+  const state = generateRandomString(64);
 
   await setStateCookie(state);
 
@@ -258,7 +258,7 @@ async function generateState() {
 }
 
 async function generateCodeVerifier() {
-  const codeVerifier = generateRandomValue(64);
+  const codeVerifier = generateRandomString(64);
 
   await setCodeVerifierCookie(codeVerifier);
 

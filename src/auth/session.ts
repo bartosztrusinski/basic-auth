@@ -10,7 +10,7 @@ import {
   deleteSessionCookie,
   setAuthSyncCookie,
 } from '@/auth/cookie';
-import { generateRandomValue } from '@/auth/crypto';
+import { generateRandomString } from '@/auth/crypto';
 import config from '@/auth/config';
 import serverConfig from '@/auth/config/server';
 
@@ -152,7 +152,7 @@ export async function createUserSession({
   userId,
   userRole,
 }: Omit<BackendSession, 'expirationTime'>) {
-  const sessionId = generateRandomValue(512);
+  const sessionId = generateRandomString(512);
 
   const session = await db.createSession({
     id: sessionId,

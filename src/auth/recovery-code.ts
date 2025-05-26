@@ -1,7 +1,7 @@
 import 'server-only';
 import { randomBytes } from 'node:crypto';
 import { db, type RecoveryCode } from '@/db';
-import { hash } from '@/auth/crypto';
+import { hashLowEntropy } from '@/auth/crypto';
 import config from '@/auth/config';
 
 const RECOVERY_CODES_COUNT = 10;
@@ -18,7 +18,7 @@ export async function createRecoveryCodes(
   const generatedCodes = [...uniqueCodes];
 
   try {
-    const hashedCodes = await Promise.all(generatedCodes.map((code) => hash(code)));
+    const hashedCodes = await Promise.all(generatedCodes.map((code) => hashLowEntropy(code)));
 
     for (const code of hashedCodes) {
       await db.createRecoveryCode({ code, userId });
