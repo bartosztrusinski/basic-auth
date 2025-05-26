@@ -4,24 +4,19 @@ import {
   createDecipheriv,
   createHmac,
   randomBytes,
-  scrypt,
   timingSafeEqual,
-  type ScryptOptions,
-  type BinaryLike,
   type CipherGCMTypes,
   type BinaryToTextEncoding,
 } from 'node:crypto';
-import { promisify } from 'node:util';
+import argon2 from 'argon2';
 import { env } from '@/env';
-
-const scryptPromise = promisify<BinaryLike, BinaryLike, number, ScryptOptions, Buffer>(scrypt);
 
 const ENCODING: BinaryToTextEncoding = 'base64url';
 const ENCRYPTION_ALGORITHM: CipherGCMTypes = 'aes-256-gcm';
 const HASH_ALGORITHM = 'sha256';
 const IV_LENGTH = 12;
-const SALT_LENGTH = 16;
 const DELIMITER = ':';
+const PEPPER = Buffer.from(env.PEPPER, ENCODING);
 
 function encrypt(data: string): string {
   const iv = randomBytes(IV_LENGTH);
@@ -59,42 +54,16 @@ function decrypt(data: string): string {
   return decryptedSecret;
 }
 
-/**
- * Hash a low-entropy value using scrypt with a salt and pepper
- * @param value - The value to hash
- * @param salt - The salt to use. Defaults to random 16 bytes
- * @returns The salt and hash string separated by a delimiter
- */
-async function hashLowEntropy(value: string, salt = generateSalt()): Promise<string> {
-  const hmac = createHmac(HASH_ALGORITHM, Buffer.from(env.PEPPER, ENCODING))
-    .update(value.normalize())
-    .digest(ENCODING);
-  const hash = await scryptPromise(hmac, Buffer.from(salt, ENCODING), 32, { N: 16384, r: 8, p: 1 });
-
-  return `${salt}${DELIMITER}${hash.toString(ENCODING)}`;
+function hashLowEntropy(value: string): Promise<string> {
+  return argon2.hash(value.normalize(), { secret: PEPPER });
 }
 
-/**
- * Hash a high-entropy value using HMAC with a pepper
- * @param value - The value to hash
- * @returns The hash string
- */
 function hashHighEntropy(value: string): string {
-  return createHmac(HASH_ALGORITHM, Buffer.from(env.PEPPER, ENCODING))
-    .update(value.normalize())
-    .digest(ENCODING);
+  return createHmac(HASH_ALGORITHM, PEPPER).update(value.normalize()).digest(ENCODING);
 }
 
-async function compareHashLowEntropy(value: string, hashedValue: string): Promise<boolean> {
-  const [salt, hash] = hashedValue.split(DELIMITER);
-  const hashedInput = await hashLowEntropy(value, salt);
-  const [, inputHash] = hashedInput.split(DELIMITER);
-
-  if (!hash || !inputHash || !salt) {
-    throw new Error('Invalid hash format');
-  }
-
-  return timingSafeEqual(Buffer.from(hash, ENCODING), Buffer.from(inputHash, ENCODING));
+function compareHashLowEntropy(value: string, hashedValue: string): Promise<boolean> {
+  return argon2.verify(hashedValue, value, { secret: PEPPER });
 }
 
 function compareHashHighEntropy(value: string, hashedValue: string): boolean {
@@ -106,10 +75,6 @@ function generateRandomString(byteLength: number) {
   return randomBytes(byteLength).toString(ENCODING);
 }
 
-function generateSalt() {
-  return generateRandomString(SALT_LENGTH);
-}
-
 export {
   encrypt,
   decrypt,
@@ -118,5 +83,4 @@ export {
   compareHashLowEntropy,
   compareHashHighEntropy,
   generateRandomString,
-  generateSalt,
 };
