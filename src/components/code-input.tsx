@@ -24,7 +24,7 @@ type Props = Override<
   }
 >;
 
-export function OtpInput({
+export function CodeInput({
   value: externalValue,
   maxLength = 6,
   pattern = /^\d*$/,

@@ -5,7 +5,7 @@ import { type TwoFactorAttempt } from '@/db';
 import { useRecoveryCode } from '@/auth/actions';
 import config from '@/auth/config';
 import { Alert } from '@/components/alert';
-import { OtpInput } from '@/components/otp-input';
+import { CodeInput } from '@/components/code-input';
 
 type Props = {
   token: TwoFactorAttempt['token'];
@@ -21,7 +21,7 @@ export function RecoveryCodeForm({ token }: Props) {
     <form action={action} className='flex flex-col gap-5'>
       <div>
         <label htmlFor='code'>Recovery Code</label>
-        <OtpInput
+        <CodeInput
           id='code'
           name='code'
           required
@@ -49,7 +49,7 @@ export function RecoveryCodeForm({ token }: Props) {
               </Fragment>
             ))
           }
-        </OtpInput>
+        </CodeInput>
       </div>
 
       {state.errors && <Alert variant='error' message={state.errors} />}

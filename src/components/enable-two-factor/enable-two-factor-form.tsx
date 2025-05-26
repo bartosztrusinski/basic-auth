@@ -4,7 +4,7 @@ import { useActionState, useEffect, useRef } from 'react';
 import Image from 'next/image';
 import { enableTwoFactorAuth } from '@/actions';
 import { Alert } from '@/components/alert';
-import { OtpInput } from '@/components/otp-input';
+import { CodeInput } from '@/components/code-input';
 import { type TwoFactorData } from '@/components/enable-two-factor';
 
 type Props = {
@@ -37,7 +37,7 @@ export function EnableTwoFactorForm({ secret, qrCode, onSuccess }: Props) {
         className='rounded'
       />
       <form ref={formRef} action={action} className='flex flex-col gap-3 self-stretch'>
-        <OtpInput
+        <CodeInput
           name='code'
           required
           autoFocus
@@ -62,7 +62,7 @@ export function EnableTwoFactorForm({ secret, qrCode, onSuccess }: Props) {
               </div>
             ))
           }
-        </OtpInput>
+        </CodeInput>
 
         {state.errors && <Alert variant='error' message={state.errors} />}
 

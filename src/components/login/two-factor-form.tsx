@@ -4,7 +4,7 @@ import { useActionState, Fragment } from 'react';
 import { type TwoFactorAttempt } from '@/db';
 import { verifyTwoFactorCode } from '@/auth/actions';
 import { Alert } from '@/components/alert';
-import { OtpInput } from '@/components/otp-input';
+import { CodeInput } from '@/components/code-input';
 
 type Props = {
   token: TwoFactorAttempt['token'];
@@ -20,7 +20,7 @@ export function TwoFactorForm({ token }: Props) {
     <form action={action} className='flex flex-col gap-5'>
       <div>
         <label htmlFor='code'>Two-Factor Authentication Code</label>
-        <OtpInput
+        <CodeInput
           id='code'
           name='code'
           required
@@ -50,7 +50,7 @@ export function TwoFactorForm({ token }: Props) {
               </Fragment>
             ))
           }
-        </OtpInput>
+        </CodeInput>
       </div>
 
       {state.errors && <Alert variant='error' message={state.errors} />}
