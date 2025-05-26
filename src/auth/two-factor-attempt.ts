@@ -1,17 +1,23 @@
 import 'server-only';
 import { db, type TwoFactorAttempt } from '@/db';
-import { generateRandomValue } from '@/auth/crypto';
+import { generateRandomString, hashHighEntropy } from '@/auth/crypto';
 import serverConfig from '@/auth/config/server';
 
-export async function createTwoFactorAttempt(userId: TwoFactorAttempt['userId']) {
-  const token = generateRandomValue(32);
+export async function createTwoFactorAttempt(
+  userId: TwoFactorAttempt['userId'],
+): Promise<TwoFactorAttempt> {
+  const token = generateRandomString(64);
+  const hashedToken = hashHighEntropy(token);
   const expirationTime = Date.now() + serverConfig.twoFactorAttemptExpirationInSeconds * 1000;
 
   const twoFactorAttempt = await db.createTwoFactorAttempt({
     userId,
-    token,
+    token: hashedToken,
     expirationTime,
   });
 
-  return twoFactorAttempt;
+  return {
+    ...twoFactorAttempt,
+    token,
+  };
 }

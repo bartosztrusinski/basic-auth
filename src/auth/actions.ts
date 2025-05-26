@@ -12,7 +12,6 @@ import {
   type RecoveryCode,
   type TwoFactorSetup,
 } from '@/db';
-import { env } from '@/env';
 import {
   signupSchema,
   loginSchema,
@@ -32,7 +31,13 @@ import { generateAuthorizationUrl, deleteProviderAccount, type OAuthProvider } f
 import { sendExistingUserLoginGuidanceEmail, sendVerificationEmail } from '@/auth/email';
 import { createEmailVerificationToken } from '@/auth/verification-token';
 import { type AuthCode, AuthError, getAuthMessage } from '@/auth/message';
-import { compareHash, decrypt, encrypt, hash } from '@/auth/crypto';
+import {
+  hashLowEntropy,
+  hashHighEntropy,
+  compareHashLowEntropy,
+  decrypt,
+  encrypt,
+} from '@/auth/crypto';
 import { createTwoFactorAttempt } from '@/auth/two-factor-attempt';
 import { createRecoveryCodes } from '@/auth/recovery-code';
 import config from '@/auth/config';
@@ -86,7 +91,7 @@ async function signUp(_: unknown, formData: FormData): Promise<ActionState<typeo
     }
 
     if (!existingUser) {
-      const hashedPassword = await hash(password);
+      const hashedPassword = await hashLowEntropy(password);
       await db.createUser({ email, name, password: hashedPassword });
     }
 
@@ -135,7 +140,7 @@ async function logIn(
       throw new AuthError('invalid-credentials');
     }
 
-    const isCorrectPassword = await compareHash(password, user.password);
+    const isCorrectPassword = await compareHashLowEntropy(password, user.password);
 
     if (!isCorrectPassword || !user.emailVerified) {
       throw new AuthError('invalid-credentials');
@@ -242,7 +247,8 @@ async function logOutEverywhere(): Promise<ActionState> {
 
 async function verifyEmail(token: VerificationToken['token']): Promise<ActionState> {
   try {
-    const verificationToken = await db.getVerificationTokenByToken(token);
+    const hashedToken = hashHighEntropy(token);
+    const verificationToken = await db.getVerificationTokenByToken(hashedToken);
 
     if (!verificationToken || verificationToken.expirationTime < Date.now()) {
       throw new AuthError('email-verification-expired');
@@ -259,7 +265,7 @@ async function verifyEmail(token: VerificationToken['token']): Promise<ActionSta
       await db.updateUser(user.id, { emailVerified: Date.now() });
     }
 
-    await db.deleteVerificationToken(verificationToken.email);
+    await db.deleteVerificationToken(email);
 
     return {
       isSuccess: true,
@@ -332,7 +338,7 @@ async function addPassword(_: unknown, formData: FormData): Promise<ActionState>
 
     const { password } = data;
 
-    const hashedPassword = await hash(password);
+    const hashedPassword = await hashLowEntropy(password);
 
     await db.updateUser(user.id, {
       password: hashedPassword,
@@ -384,7 +390,7 @@ async function initializeTwoFactorAuth(): Promise<
     }
 
     const secret = new OTPAuth.Secret({ size: 20 }).base32;
-    const encryptedSecret = encrypt(secret, Buffer.from(env.ENCRYPTION_KEY, 'base64'));
+    const encryptedSecret = encrypt(secret);
 
     await db.deleteTwoFactorSetup(user.id);
     await db.createTwoFactorSetup({
@@ -410,6 +416,7 @@ async function initializeTwoFactorAuth(): Promise<
       },
     };
   } catch (error) {
+    console.log(error);
     return handleError(error, 'two-factor-setup-failed');
   }
 }
@@ -454,10 +461,7 @@ async function enableTwoFactorAuth(
       throw new AuthError('two-factor-expired');
     }
 
-    const decryptedSecret = decrypt(
-      twoFactorSetup.secret,
-      Buffer.from(env.ENCRYPTION_KEY, 'base64'),
-    );
+    const decryptedSecret = decrypt(twoFactorSetup.secret);
 
     const totp = new OTPAuth.TOTP({
       issuer: config.appName,
@@ -512,6 +516,76 @@ async function disableTwoFactorAuth(): Promise<ActionState> {
   }
 }
 
+async function verifyTwoFactorCode(
+  token: TwoFactorAttempt['token'],
+  _: unknown,
+  formData: FormData,
+): Promise<ActionDataState<{ session: Session }>> {
+  const { data, error } = twoFactorCodeSchema.safeParse(Object.fromEntries(formData.entries()));
+
+  if (error) {
+    return {
+      isSuccess: false,
+      errors: error.errors.map((err) => err.message),
+    };
+  }
+
+  const { code } = data;
+
+  try {
+    const hashedToken = hashHighEntropy(token);
+    const twoFactorAttempt = await db.getTwoFactorAttemptByToken(hashedToken);
+
+    if (!twoFactorAttempt) {
+      throw new AuthError('two-factor-invalid-code');
+    }
+
+    if (twoFactorAttempt.expirationTime < Date.now()) {
+      throw new AuthError('two-factor-expired');
+    }
+
+    const user = await db.getUserById(twoFactorAttempt.userId);
+
+    if (!user) {
+      throw new AuthError('two-factor-invalid-code');
+    }
+
+    if (!user.twoFactorSecret) {
+      throw new AuthError('two-factor-not-enabled');
+    }
+
+    const decryptedSecret = decrypt(user.twoFactorSecret);
+
+    const totp = new OTPAuth.TOTP({
+      issuer: config.appName,
+      label: user.email,
+      secret: decryptedSecret,
+    });
+
+    const delta = totp.validate({ token: code, window: 0 });
+
+    if (delta !== 0) {
+      throw new AuthError('two-factor-invalid-code');
+    }
+
+    await db.deleteTwoFactorAttempt(hashedToken);
+
+    const session = await createUserSession({
+      userId: user.id,
+      userRole: user.role,
+    });
+
+    return {
+      isSuccess: true,
+      data: {
+        session,
+      },
+    };
+  } catch (error) {
+    return handleError(error, 'two-factor-setup-failed');
+  }
+}
+
 async function useRecoveryCode(
   token: TwoFactorAttempt['token'],
   _: unknown,
@@ -529,7 +603,8 @@ async function useRecoveryCode(
   const { code } = data;
 
   try {
-    const twoFactorAttempt = await db.getTwoFactorAttemptByToken(token);
+    const hashedToken = hashHighEntropy(token);
+    const twoFactorAttempt = await db.getTwoFactorAttemptByToken(hashedToken);
 
     if (!twoFactorAttempt) {
       throw new AuthError('two-factor-invalid-code');
@@ -553,7 +628,7 @@ async function useRecoveryCode(
 
     let correctCode: RecoveryCode | null = null;
     for (const recoveryCode of activeRecoveryCodes) {
-      const isMatch = await compareHash(code, recoveryCode.code);
+      const isMatch = await compareHashLowEntropy(code, recoveryCode.code);
 
       if (isMatch) {
         correctCode = recoveryCode;
@@ -566,7 +641,7 @@ async function useRecoveryCode(
     }
 
     await db.useRecoveryCode(correctCode);
-    await db.deleteTwoFactorAttempt(token);
+    await db.deleteTwoFactorAttempt(hashedToken);
 
     const session = await createUserSession({
       userId: user.id,
@@ -581,78 +656,6 @@ async function useRecoveryCode(
     };
   } catch (error) {
     return handleError(error, 'recovery-code-failed');
-  }
-}
-
-async function verifyTwoFactorCode(
-  token: TwoFactorAttempt['token'],
-  _: unknown,
-  formData: FormData,
-): Promise<ActionDataState<{ session: Session }>> {
-  const { data, error } = twoFactorCodeSchema.safeParse(Object.fromEntries(formData.entries()));
-
-  if (error) {
-    return {
-      isSuccess: false,
-      errors: error.errors.map((err) => err.message),
-    };
-  }
-
-  const { code } = data;
-
-  try {
-    const twoFactorAttempt = await db.getTwoFactorAttemptByToken(token);
-
-    if (!twoFactorAttempt) {
-      throw new AuthError('two-factor-invalid-code');
-    }
-
-    if (twoFactorAttempt.expirationTime < Date.now()) {
-      throw new AuthError('two-factor-expired');
-    }
-
-    const user = await db.getUserById(twoFactorAttempt.userId);
-
-    if (!user) {
-      throw new AuthError('two-factor-invalid-code');
-    }
-
-    if (!user.twoFactorSecret) {
-      throw new AuthError('two-factor-not-enabled');
-    }
-
-    const decryptedSecret = decrypt(
-      user.twoFactorSecret,
-      Buffer.from(env.ENCRYPTION_KEY, 'base64'),
-    );
-
-    const totp = new OTPAuth.TOTP({
-      issuer: config.appName,
-      label: user.email,
-      secret: decryptedSecret,
-    });
-
-    const delta = totp.validate({ token: code, window: 0 });
-
-    if (delta !== 0) {
-      throw new AuthError('two-factor-invalid-code');
-    }
-
-    await db.deleteTwoFactorAttempt(token);
-
-    const session = await createUserSession({
-      userId: user.id,
-      userRole: user.role,
-    });
-
-    return {
-      isSuccess: true,
-      data: {
-        session,
-      },
-    };
-  } catch (error) {
-    return handleError(error, 'two-factor-setup-failed');
   }
 }
 
