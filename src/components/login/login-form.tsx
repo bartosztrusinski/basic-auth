@@ -54,7 +54,7 @@ export function LoginForm() {
             className='text-amber-500 hover:underline'
             onClick={toggleRecoveryMode}
           >
-            Enter {isRecoveryMode ? 'recovery' : ''} code
+            Enter {isRecoveryMode ? '' : 'recovery'} code
           </button>
         </div>
       </div>

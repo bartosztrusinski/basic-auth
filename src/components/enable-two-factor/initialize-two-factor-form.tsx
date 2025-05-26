@@ -22,7 +22,7 @@ export function InitializeTwoFactorForm({ onSuccess }: Props) {
   }, [state, onSuccess]);
 
   return (
-    <form action={action}>
+    <form action={action} className='space-y-2'>
       {state.errors && <Alert variant='error' message={state.errors} />}
       <button
         disabled={isPending}

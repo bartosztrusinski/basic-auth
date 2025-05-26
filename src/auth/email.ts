@@ -1,7 +1,7 @@
 import 'server-only';
 import { Resend } from 'resend';
 import { env } from '@/env';
-import { type VerificationToken } from '@/db';
+import { type User, type VerificationToken } from '@/db';
 import {
   VerificationEmail,
   VerificationEmailPlainText,
@@ -19,7 +19,7 @@ const resend = new Resend(env.RESEND_API_KEY);
 export async function sendVerificationEmail(
   email: VerificationToken['email'],
   token: VerificationToken['token'],
-  name: string,
+  name: User['name'],
 ) {
   const expirationTimeHours = serverConfig.verificationTokenExpirationInSeconds / 60 / 60;
   const url = new URL(config.emailVerificationRoute, config.baseUrl);
@@ -49,10 +49,7 @@ export async function sendVerificationEmail(
   }
 }
 
-export async function sendExistingUserLoginGuidanceEmail(
-  email: VerificationToken['email'],
-  name: string,
-) {
+export async function sendExistingUserLoginGuidanceEmail(email: User['email'], name: User['name']) {
   const props = {
     name,
   };
