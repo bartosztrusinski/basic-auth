@@ -1,7 +1,12 @@
 'use client';
 
-import { useEffect, useState, type ReactNode, type InputHTMLAttributes } from 'react';
-import { type Override } from '@/auth/util';
+import {
+  useEffect,
+  useState,
+  type ReactNode,
+  type InputHTMLAttributes,
+  type ChangeEvent,
+} from 'react';
 
 export type SlotProps = {
   value: string | null;
@@ -10,6 +15,8 @@ export type SlotProps = {
   isActive: boolean;
 };
 
+type Override<T, U> = Omit<T, keyof U> & U;
+
 type Props = Override<
   Omit<InputHTMLAttributes<HTMLInputElement>, 'type' | 'autoComplete' | 'inputMode'>,
   {
@@ -17,7 +24,7 @@ type Props = Override<
     defaultValue?: string;
     maxLength?: number;
     children: (slots: SlotProps[]) => ReactNode;
-    onComplete?: (value: string) => void;
+    onComplete?: (options: { event: ChangeEvent<HTMLInputElement>; isPaste: boolean }) => void;
     containerClassName?: string;
     focusClassName?: string;
     pattern?: RegExp;
@@ -107,7 +114,8 @@ export function CodeInput({
           }
 
           if (newValue.length === maxLength) {
-            onComplete?.(newValue);
+            const isPaste = (event.nativeEvent as InputEvent).inputType === 'insertFromPaste';
+            onComplete?.({ event, isPaste });
           }
         }}
         onSelect={(event) => {

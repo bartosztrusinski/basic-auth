@@ -44,7 +44,11 @@ export function EnableTwoFactorForm({ secret, qrCode, onSuccess }: Props) {
           className='peer rounded'
           focusClassName='outline-2 outline-zinc-400'
           containerClassName='w-full mx-auto max-w-64 flex gap-1 p-0.5 text-lg'
-          onComplete={() => formRef.current?.requestSubmit()}
+          onComplete={({ isPaste }) => {
+            if (isPaste) {
+              formRef.current?.requestSubmit();
+            }
+          }}
         >
           {(slots) =>
             slots.map((slot, slotIndex) => (

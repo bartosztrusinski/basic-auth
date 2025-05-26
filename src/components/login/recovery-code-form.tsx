@@ -1,6 +1,6 @@
 'use client';
 
-import { useActionState, Fragment } from 'react';
+import { useActionState, Fragment, useRef } from 'react';
 import { type TwoFactorAttempt } from '@/db';
 import { useRecoveryCode } from '@/auth/actions';
 import config from '@/auth/config';
@@ -12,13 +12,14 @@ type Props = {
 };
 
 export function RecoveryCodeForm({ token }: Props) {
+  const formRef = useRef<HTMLFormElement>(null);
   const [state, action, isPending] = useActionState(useRecoveryCode.bind(null, token), {
     isSuccess: false,
     errors: '',
   });
 
   return (
-    <form action={action} className='flex flex-col gap-5'>
+    <form ref={formRef} action={action} className='flex flex-col gap-5'>
       <div>
         <label htmlFor='code'>Recovery Code</label>
         <CodeInput
@@ -31,6 +32,11 @@ export function RecoveryCodeForm({ token }: Props) {
           className='peer rounded-sm'
           focusClassName='outline-2 outline-offset-4 outline-amber-500'
           containerClassName='flex items-center gap-1 mt-1 text-lg'
+          onComplete={({ isPaste }) => {
+            if (isPaste) {
+              formRef.current?.requestSubmit();
+            }
+          }}
         >
           {(slots) =>
             slots.map((slot, slotIndex) => (

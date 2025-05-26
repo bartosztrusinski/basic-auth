@@ -3,8 +3,6 @@ import { type NextRequest } from 'next/server';
 import { type AuthCode } from '@/auth/message';
 import config from '@/auth/config';
 
-type Override<T, U> = Omit<T, keyof U> & U;
-
 type Null<T extends Record<string, unknown>> = Record<keyof T, null>;
 
 type FullOrNull<T extends Record<string, unknown>> = T | Null<T>;
@@ -89,4 +87,4 @@ export {
   isSameObject,
   getSearchParam,
 };
-export type { Override, RedirectOptions, Null, FullOrNull };
+export type { RedirectOptions, Null, FullOrNull };

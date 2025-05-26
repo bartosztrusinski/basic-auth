@@ -1,6 +1,6 @@
 'use client';
 
-import { useActionState, Fragment } from 'react';
+import { useActionState, Fragment, useRef } from 'react';
 import { type TwoFactorAttempt } from '@/db';
 import { verifyTwoFactorCode } from '@/auth/actions';
 import { Alert } from '@/components/alert';
@@ -11,13 +11,14 @@ type Props = {
 };
 
 export function TwoFactorForm({ token }: Props) {
+  const formRef = useRef<HTMLFormElement>(null);
   const [state, action, isPending] = useActionState(verifyTwoFactorCode.bind(null, token), {
     isSuccess: false,
     errors: '',
   });
 
   return (
-    <form action={action} className='flex flex-col gap-5'>
+    <form ref={formRef} action={action} className='flex flex-col gap-5'>
       <div>
         <label htmlFor='code'>Two-Factor Authentication Code</label>
         <CodeInput
@@ -29,6 +30,11 @@ export function TwoFactorForm({ token }: Props) {
           placeholder='314159'
           focusClassName='outline-4 outline-offset-4 outline-amber-500'
           containerClassName='flex items-center gap-2 mt-1 text-xl sm:text-2xl'
+          onComplete={({ isPaste }) => {
+            if (isPaste) {
+              formRef.current?.requestSubmit();
+            }
+          }}
         >
           {(slots) =>
             slots.map((slot, slotIndex) => (
