@@ -3,7 +3,6 @@ import { redirectToLogin, currentUser } from '@/auth/session';
 import { Protect } from '@/auth/components/protect';
 import { AccountsManager } from '@/components/accounts-manager';
 import { UserProfile } from '@/components/user-profile';
-import { Page } from '@/components/page';
 import { AddPasswordForm } from '@/components/add-password-form';
 import { LogoutEverywhereButton } from '@/components/logout-everywhere-button';
 import { DeleteUserButton } from '@/components/delete-user-button';
@@ -21,12 +20,12 @@ export default async function ProfilePage() {
   const { email, name, role } = user;
 
   return (
-    <Page>
-      <Page.Title>Your Profile</Page.Title>
+    <div className='container'>
+      <h1 className='title'>Your Profile</h1>
       <Protect when={(user) => user.role !== 'admin'}>
-        <Page.Description>
+        <p className='text-center'>
           You are logged in as <span className='font-mono text-amber-500'>admin</span>
-        </Page.Description>
+        </p>
       </Protect>
       <div className='space-y-8 pb-4'>
         <section>
@@ -72,6 +71,6 @@ export default async function ProfilePage() {
           </p>
         </section>
       </div>
-    </Page>
+    </div>
   );
 }

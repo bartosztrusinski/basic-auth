@@ -1,6 +1,5 @@
 import { LoggedOut } from '@/auth/components/logged-out';
 import { RedirectToLogin } from '@/auth/components/redirect-to-login';
-import { Page } from '@/components/page';
 
 export default async function PrivatePage() {
   return (
@@ -8,10 +7,10 @@ export default async function PrivatePage() {
       <LoggedOut>
         <RedirectToLogin returnBackUrl='/private' />
       </LoggedOut>
-      <Page>
-        <Page.Title>Private</Page.Title>
-        <Page.Description>This page is only accessible to authenticated users.</Page.Description>
-      </Page>
+      <div className='container'>
+        <h1 className='title'>Private</h1>
+        <p className='text-center'>This page is only accessible to authenticated users.</p>
+      </div>
     </>
   );
 }

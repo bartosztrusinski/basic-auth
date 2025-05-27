@@ -1,6 +1,5 @@
 import { LoggedIn } from '@/auth/components/logged-in';
 import { ReturnBack } from '@/auth/components/return-back';
-import { Page } from '@/components/page';
 import { ResendEmailForm } from '@/components/resend-email-form';
 
 export default async function ResendEmailPage() {
@@ -9,13 +8,13 @@ export default async function ResendEmailPage() {
       <LoggedIn>
         <ReturnBack />
       </LoggedIn>
-      <Page>
-        <Page.Title>Resend Email</Page.Title>
-        <Page.Description>
+      <div className='container'>
+        <h1 className='title'>Resend Email</h1>
+        <p className='text-center'>
           Enter your email address and we will send you a new verification email.
-        </Page.Description>
+        </p>
         <ResendEmailForm />
-      </Page>
+      </div>
     </>
   );
 }

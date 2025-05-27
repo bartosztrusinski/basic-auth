@@ -1,5 +1,4 @@
 import { redirectAuth } from '@/auth/util';
-import { Page } from '@/components/page';
 import { VerifyEmailForm } from '@/components/verify-email-form';
 
 export default async function VerifyEmailPage({
@@ -17,10 +16,10 @@ export default async function VerifyEmailPage({
   }
 
   return (
-    <Page>
-      <Page.Title>Verify Email</Page.Title>
-      <Page.Description>Click the button below to verify your email address</Page.Description>
+    <div className='container'>
+      <h1 className='title'>Verify Email</h1>
+      <p className='text-center'>Click the button below to verify your email address</p>
       <VerifyEmailForm token={token} />
-    </Page>
+    </div>
   );
 }

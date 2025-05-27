@@ -14,11 +14,14 @@ export const metadata: Metadata = {
 
 export default async function RootLayout({ children }: Readonly<{ children: ReactNode }>) {
   return (
-    <html lang='en' className={`${GeistSans.variable} [&:has(dialog[open])]:overflow-hidden`}>
-      <body className='bg-zinc-900 text-zinc-50'>
+    <html
+      lang='en'
+      className={`bg-zinc-900 text-zinc-50 ${GeistSans.variable} [&:has(dialog[open])]:overflow-hidden`}
+    >
+      <body>
         <AuthProvider>
           <Header />
-          <main className='mx-auto mt-4 w-full max-w-sm p-4'>{children}</main>
+          <main>{children}</main>
         </AuthProvider>
         <AuthToaster />
       </body>

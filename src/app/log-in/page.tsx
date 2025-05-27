@@ -1,7 +1,6 @@
 import { LoggedIn } from '@/auth/components/logged-in';
 import { ReturnBack } from '@/auth/components/return-back';
 import { ProviderButtons } from '@/components/provider-buttons';
-import { Page } from '@/components/page';
 import { LoginForm } from '@/components/login/login-form';
 
 export default async function LoginPage({
@@ -14,11 +13,11 @@ export default async function LoginPage({
       <LoggedIn>
         <ReturnBack searchParams={searchParams} />
       </LoggedIn>
-      <Page>
-        <Page.Title>Login</Page.Title>
+      <div className='container'>
+        <h1 className='title'>Login</h1>
         <ProviderButtons />
         <LoginForm />
-      </Page>
+      </div>
     </>
   );
 }
