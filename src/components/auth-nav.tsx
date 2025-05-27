@@ -2,7 +2,7 @@
 
 import Link from 'next/link';
 import { useAuth } from '@/auth/hooks/use-auth';
-import { LoginLink, SignupLink } from '@/auth/components/auth-link';
+import config from '@/auth/config';
 import { LogoutButton } from '@/components/logout-button';
 
 export function AuthNav() {
@@ -22,10 +22,10 @@ export function AuthNav() {
       ) : (
         <>
           <li>
-            <LoginLink>Log In</LoginLink>
+            <Link href={config.loginRoute}>Log In</Link>
           </li>
           <li>
-            <SignupLink>Sign Up</SignupLink>
+            <Link href='/sign-up'>Sign Up</Link>
           </li>
         </>
       )}

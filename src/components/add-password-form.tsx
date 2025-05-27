@@ -1,6 +1,6 @@
 'use client';
 
-import { type FormEvent, useActionState, useRef, useState, useTransition } from 'react';
+import { type FormEvent, useActionState, useId, useRef, useState, useTransition } from 'react';
 import { toast } from 'sonner';
 import { type User } from '@/db';
 import { addPassword } from '@/actions';
@@ -13,6 +13,7 @@ type Props = {
 };
 
 export function AddPasswordForm({ email }: Props) {
+  const id = useId();
   const formRef = useRef<HTMLFormElement>(null);
   const [errors, setErrors] = useState<string | string[] | null>(null);
   const [isPending, startTransition] = useTransition();
@@ -52,43 +53,42 @@ export function AddPasswordForm({ email }: Props) {
       heading='Set Password'
       description='After setting a password, you will be able to log in with your email and password.'
     >
-      <form ref={formRef} action={action} onSubmit={handleSubmit} className='flex flex-col gap-3'>
-        <input
-          type='email'
-          id='email'
-          name='email'
-          required
-          autoFocus
-          placeholder='Email'
-          autoComplete='email'
-          className='hidden'
-          defaultValue={email}
-        />
-        <input
-          type='password'
-          id='password'
-          name='password'
-          required
-          placeholder='Password'
-          autoComplete='new-password'
-          className='rounded bg-white px-2 py-1 text-base text-black'
-        />
-        <input
-          type='password'
-          id='confirmPassword'
-          name='confirmPassword'
-          required
-          placeholder='Confirm Password'
-          autoComplete='new-password'
-          className='rounded bg-white px-2 py-1 text-base text-black'
-        />
+      <form ref={formRef} action={action} onSubmit={handleSubmit}>
+        <input name='email' type='hidden' className='hidden' defaultValue={email} />
 
-        <Alert variant='error' message={errors ?? state.errors ?? []} />
+        <div className='space-y-3'>
+          <div className='flex flex-col'>
+            <label htmlFor={`${id}-password`}>Password</label>
+            <input
+              id={`${id}-password`}
+              name='password'
+              type='password'
+              placeholder='********'
+              autoComplete='new-password'
+              required
+              autoFocus
+              className='rounded-sm bg-white px-2 py-1 text-base text-black'
+            />
+          </div>
+          <div className='flex flex-col'>
+            <label htmlFor={`${id}-confirmPassword`}>Confirm Password</label>
+            <input
+              id={`${id}-confirmPassword`}
+              name='confirmPassword'
+              type='password'
+              placeholder='********'
+              autoComplete='new-password'
+              required
+              className='rounded-sm bg-white px-2 py-1 text-base text-black'
+            />
+          </div>
 
+          <Alert variant='error' message={errors ?? state.errors ?? []} />
+        </div>
         <button
           type='submit'
           disabled={isPending || isActionPending}
-          className='rounded border border-zinc-500 p-2'
+          className='mt-5 w-full rounded border border-zinc-500 p-2'
         >
           {isPending || isActionPending ? 'Submitting...' : 'Set Password'}
         </button>

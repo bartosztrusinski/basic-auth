@@ -50,6 +50,7 @@ export function AccountItem({ provider, name, isLinked, isUnlinkingEnabled }: Pr
       <form action={action} onSubmit={handleSubmit} className='basis-24'>
         {!isLinked ? (
           <button
+            type='submit'
             disabled={isPending || isActionPending}
             className='w-full rounded border border-zinc-400 p-1 px-2 font-bold shadow disabled:cursor-not-allowed disabled:opacity-50'
           >
@@ -58,6 +59,7 @@ export function AccountItem({ provider, name, isLinked, isUnlinkingEnabled }: Pr
         ) : (
           isUnlinkingEnabled && (
             <button
+              type='submit'
               disabled={isPending || isActionPending}
               className='w-full rounded bg-red-600 p-1 px-2 font-bold shadow disabled:cursor-not-allowed disabled:opacity-50'
             >

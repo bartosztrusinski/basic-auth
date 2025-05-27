@@ -14,7 +14,9 @@ export function ProviderButton({ provider, name }: Props) {
         await logInWithProvider(provider);
       }}
     >
-      <button className='w-full rounded bg-zinc-800 p-2 font-bold shadow-lg'>{name}</button>
+      <button type='submit' className='w-full rounded bg-zinc-800 p-2 font-bold shadow-lg'>
+        {name}
+      </button>
     </form>
   );
 }

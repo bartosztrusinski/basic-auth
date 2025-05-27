@@ -1,10 +1,11 @@
 'use client';
 
 import { useState } from 'react';
+import Link from 'next/link';
 import { type TwoFactorAttempt } from '@/db';
 import { RecoveryCodeForm } from './recovery-code-form';
 import { TwoFactorForm } from './two-factor-form';
-import { CredentialsForm } from '@/components/login/credentials-form';
+import { CredentialsForm } from './credentials-form';
 
 export function LoginForm() {
   const [twoFactorToken, setTwoFactorToken] = useState<TwoFactorAttempt['token'] | null>(null);
@@ -21,11 +22,27 @@ export function LoginForm() {
 
   if (!twoFactorToken) {
     return (
-      <CredentialsForm
-        onSuccess={(data) => {
-          setTwoFactorToken(data?.twoFactorToken ?? null);
-        }}
-      />
+      <>
+        <CredentialsForm
+          onSuccess={(data) => {
+            setTwoFactorToken(data?.twoFactorToken ?? null);
+          }}
+        />
+        <div className='text-zinc-400'>
+          <p>
+            Don&apos;t have an account?{' '}
+            <Link href='/sign-up' className='text-amber-500 hover:underline'>
+              Sign up
+            </Link>
+          </p>
+          <p>
+            Didn&apos;t get verification email?{' '}
+            <Link href='/resend-email' className='text-amber-500 hover:underline'>
+              Resend email
+            </Link>
+          </p>
+        </div>
+      </>
     );
   }
 
@@ -40,24 +57,18 @@ export function LoginForm() {
         <span aria-hidden='true'>←</span>
       </button>
 
-      <div>
-        {isRecoveryMode ? (
-          <RecoveryCodeForm token={twoFactorToken} />
-        ) : (
-          <TwoFactorForm token={twoFactorToken} />
-        )}
+      {isRecoveryMode ? (
+        <RecoveryCodeForm token={twoFactorToken} />
+      ) : (
+        <TwoFactorForm token={twoFactorToken} />
+      )}
 
-        <div className='mt-2 text-sm'>
-          {isRecoveryMode ? 'Got access to Authenticator? ' : 'Lost access to Authenticator? '}
-          <button
-            type='button'
-            className='text-amber-500 hover:underline'
-            onClick={toggleRecoveryMode}
-          >
-            Enter {isRecoveryMode ? '' : 'recovery'} code
-          </button>
-        </div>
-      </div>
+      <p className='text-zinc-400'>
+        {isRecoveryMode ? 'Got access to Authenticator? ' : 'No access to Authenticator? '}
+        <button className='text-amber-500 hover:underline' onClick={toggleRecoveryMode}>
+          Enter {isRecoveryMode ? '2FA' : 'recovery'} code
+        </button>
+      </p>
     </>
   );
 }

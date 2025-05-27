@@ -1,5 +1,5 @@
-import { Protect } from '@/auth/components/protect';
 import { db } from '@/db';
+import { Protect } from '@/auth/components/protect';
 
 export async function UsersList() {
   const users = await db.getUsers();
@@ -7,18 +7,16 @@ export async function UsersList() {
   return (
     <Protect
       when={(user) => user.role !== 'admin'}
-      fallback={<p className='text-center'>You do not have permission to view this data.</p>}
+      fallback={<p className='text-center'>You do not have permission to view this data</p>}
     >
-      <ul className='max-h-80 space-y-3 overflow-y-auto px-2'>
+      <ul className='max-h-80 space-y-3 overflow-y-auto'>
         {users.map((user) => (
-          <li
-            key={user.id}
-            className='flex flex-wrap items-center justify-between gap-3 rounded bg-zinc-800 p-3 shadow'
-          >
-            <div className='flex flex-col'>
-              <strong>{user.name}</strong> ({user.email})
+          <li key={user.id} className='rounded bg-zinc-800 p-2 px-4 shadow'>
+            <div className='flex items-center justify-between gap-2'>
+              {user.name}
+              <strong className='font-mono font-medium text-amber-500'>{user.role}</strong>
             </div>
-            <div className='text-sm text-zinc-400'>{user.role}</div>
+            <span className='text-sm'>{user.email}</span>
           </li>
         ))}
       </ul>

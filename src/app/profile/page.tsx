@@ -25,12 +25,10 @@ export default async function ProfilePage() {
       <Page.Title>Your Profile</Page.Title>
       <Protect when={(user) => user.role !== 'admin'}>
         <Page.Description>
-          <span className='text-zinc-400'>
-            You are logged in as an <code className='text-amber-500'>admin</code>.
-          </span>
+          You are logged in as <span className='font-mono text-amber-500'>admin</span>
         </Page.Description>
       </Protect>
-      <article className='space-y-8 pb-4'>
+      <div className='space-y-8 pb-4'>
         <section>
           <UserProfile user={{ name, email, role }} roles={UserRoles} />
           <p className='pt-2 text-sm text-zinc-400'>View and update your profile information</p>
@@ -73,7 +71,7 @@ export default async function ProfilePage() {
             This action is irreversible and will delete all your data
           </p>
         </section>
-      </article>
+      </div>
     </Page>
   );
 }

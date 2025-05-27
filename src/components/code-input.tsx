@@ -18,7 +18,7 @@ export type SlotProps = {
 type Override<T, U> = Omit<T, keyof U> & U;
 
 type Props = Override<
-  Omit<InputHTMLAttributes<HTMLInputElement>, 'type' | 'autoComplete' | 'inputMode'>,
+  Omit<InputHTMLAttributes<HTMLInputElement>, 'type' | 'inputMode'>,
   {
     value?: string;
     defaultValue?: string;
@@ -36,6 +36,7 @@ export function CodeInput({
   maxLength = 6,
   pattern = /^\d*$/,
   defaultValue = '',
+  autoComplete = 'one-time-code',
   placeholder,
   className = '',
   containerClassName = '',
@@ -93,13 +94,13 @@ export function CodeInput({
       <input
         {...props}
         type='text'
-        autoComplete='one-time-code'
         inputMode='numeric'
+        autoComplete={autoComplete}
         pattern={pattern.source}
-        className={`absolute inset-0 flex h-full w-full appearance-none border-none bg-transparent leading-none -tracking-[0.5em] text-transparent caret-transparent opacity-100 shadow-none outline-none selection:bg-inherit selection:text-inherit placeholder:text-inherit ${isFocused && isComplete && isNoSlotSelected ? focusClassName : ''} ${className}`}
         maxLength={maxLength}
-        value={value}
         aria-placeholder={placeholder}
+        value={value}
+        className={`absolute inset-0 flex h-full w-full appearance-none border-none bg-transparent leading-none -tracking-[0.5em] text-transparent caret-transparent opacity-100 shadow-none outline-none selection:bg-inherit selection:text-inherit placeholder:text-inherit ${isFocused && isComplete && isNoSlotSelected ? focusClassName : ''} ${className}`}
         onChange={(event) => {
           const newValue = event.target.value;
 

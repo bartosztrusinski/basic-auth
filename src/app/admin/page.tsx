@@ -8,12 +8,11 @@ export default async function AdminPage() {
   return (
     <Page>
       <Page.Title>Admin Dashboard</Page.Title>
-      <Page.Description>
-        This page is only accessible to administrators, users with the{' '}
-        <code className='text-amber-500'>admin</code> role.
-      </Page.Description>
-      <h2 className='pt-5 text-center text-xl font-bold'>Users in System</h2>
-      <UsersList />
+      <Page.Description>This page is accessible only to administrators</Page.Description>
+      <section>
+        <h2 className='mb-2 text-lg font-medium'>Users in the System</h2>
+        <UsersList />
+      </section>
     </Page>
   );
 }

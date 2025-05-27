@@ -1,6 +1,6 @@
 'use client';
 
-import { type FormEvent, useActionState, useState, useTransition } from 'react';
+import { type FormEvent, useActionState, useId, useState, useTransition } from 'react';
 import { toast } from 'sonner';
 import { type User } from '@/db';
 import { useCurrentUser } from '@/auth/hooks/use-current-user';
@@ -13,6 +13,7 @@ type Props = {
 };
 
 export function UserProfile({ user, roles }: Props) {
+  const id = useId();
   const [isEditing, setIsEditing] = useState(false);
   const [errors, setErrors] = useState<string | string[] | null>(null);
   const [isPending, startTransition] = useTransition();
@@ -50,35 +51,38 @@ export function UserProfile({ user, roles }: Props) {
   }
 
   return (
-    <div className='space-y-4 rounded-lg border border-zinc-600 p-6'>
-      <p>
-        <strong>Email:</strong> {user.email}
-      </p>
+    <div className='space-y-3 rounded-lg border border-zinc-600 p-6 pt-4'>
+      <div className='flex flex-col break-all'>
+        <span className='font-medium text-zinc-400'>Email</span>
+        {user.email}
+      </div>
       {isEditing || isPending || isActionPending ? (
-        <form action={action} onSubmit={handleSubmit} className='space-y-4'>
-          <div className='flex items-center gap-2'>
-            <label htmlFor='name'>
-              <strong>Name:</strong>
+        <form action={action} onSubmit={handleSubmit} className='space-y-3'>
+          <div className='flex flex-col'>
+            <label htmlFor={`${id}-name`} className='font-medium text-zinc-400'>
+              Name
             </label>
             <input
-              id='name'
+              id={`${id}-name`}
               name='name'
-              required
-              placeholder='Name'
-              defaultValue={user.name}
+              placeholder='John Doe'
               autoComplete='name'
-              className='h-6 grow rounded bg-white px-1 text-base text-black'
+              required
+              autoFocus
+              className='rounded-sm bg-white px-1 text-base text-black'
+              defaultValue={user.name}
             />
           </div>
-          <div className='flex items-center gap-2'>
-            <label htmlFor='role'>
-              <strong>Role:</strong>
+          <div className='flex flex-col'>
+            <label htmlFor={`${id}-role`} className='font-medium text-zinc-400'>
+              Role
             </label>
             <select
-              id='role'
+              id={`${id}-role`}
               name='role'
+              required
+              className='min-h-6 rounded-sm bg-white px-1 text-base text-black'
               defaultValue={user.role}
-              className='h-6 grow rounded bg-white px-1 text-base text-black'
             >
               {roles.map((role) => (
                 <option key={role} value={role}>
@@ -94,14 +98,14 @@ export function UserProfile({ user, roles }: Props) {
             <button
               type='submit'
               disabled={isPending || isActionPending}
-              className='w-full rounded border border-zinc-500 p-2'
+              className='grow rounded border border-zinc-500 p-2'
             >
               {isPending || isActionPending ? 'Saving...' : 'Save'}
             </button>
             <button
               type='button'
               onClick={closeForm}
-              className='w-10 shrink-0 rounded border border-zinc-500'
+              className='size-10 rounded border border-zinc-500'
             >
               ⨉
             </button>
@@ -109,12 +113,14 @@ export function UserProfile({ user, roles }: Props) {
         </form>
       ) : (
         <>
-          <p>
-            <strong>Name:</strong> {user.name}
-          </p>
-          <p>
-            <strong>Role:</strong> {user.role}
-          </p>
+          <div className='flex flex-col break-all'>
+            <span className='font-medium text-zinc-400'>Name</span>
+            {user.name}
+          </div>
+          <div className='flex flex-col'>
+            <span className='font-medium text-zinc-400'>Role</span>
+            {user.role}
+          </div>
           <button onClick={openForm} className='w-full rounded border border-zinc-500 p-2'>
             Edit Profile
           </button>

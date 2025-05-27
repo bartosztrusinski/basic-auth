@@ -1,32 +1,44 @@
 'use client';
 
-import { useActionState } from 'react';
+import { useActionState, useId } from 'react';
 import { resendVerificationEmail } from '@/auth/actions';
 import { Alert } from '@/components/alert';
 import { AuthAlert } from '@/components/auth-alert';
 
 export function ResendEmailForm() {
+  const id = useId();
   const [state, action, isPending] = useActionState(resendVerificationEmail, {
     isSuccess: false,
     errors: '',
   });
 
   return (
-    <form action={action} className='flex flex-col gap-5'>
-      <input
-        type='email'
-        name='email'
-        required
-        placeholder='Email'
-        autoComplete='email'
-        className='rounded bg-white px-2 py-1 text-base text-black'
-        defaultValue={state.isSuccess ? undefined : state.fields?.email}
-      />
+    <form action={action}>
+      <div className='space-y-3'>
+        <div className='flex flex-col'>
+          <label htmlFor={id}>Email</label>
+          <input
+            id={id}
+            name='email'
+            type='email'
+            placeholder='john@doe.com'
+            autoComplete='email'
+            required
+            autoFocus
+            className='rounded bg-white px-2 py-1 text-base text-black'
+            defaultValue={state.isSuccess ? undefined : state.fields?.email}
+          />
+        </div>
 
-      {state.errors && <Alert variant='error' message={state.errors} />}
-      {state.isSuccess && <AuthAlert authCode='verification-email-sent' />}
+        {state.errors && <Alert variant='error' message={state.errors} />}
+        {state.isSuccess && <AuthAlert authCode='verification-email-sent' />}
+      </div>
 
-      <button disabled={isPending} className='rounded border-2 border-white p-1'>
+      <button
+        type='submit'
+        disabled={isPending}
+        className='mt-5 w-full rounded border-2 border-white p-1'
+      >
         {isPending ? 'Sending...' : 'Send Email'}
       </button>
     </form>
