@@ -16,7 +16,7 @@ export default async function RootLayout({ children }: Readonly<{ children: Reac
   return (
     <html
       lang='en'
-      className={`bg-zinc-900 text-zinc-50 ${GeistSans.variable} [&:has(dialog[open])]:overflow-hidden`}
+      className={`bg-neutral-900 text-neutral-50 ${GeistSans.variable} [&:has(dialog[open])]:overflow-hidden`}
     >
       <body>
         <AuthProvider>

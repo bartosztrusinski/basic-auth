@@ -24,28 +24,28 @@ export default async function ProfilePage() {
       <h1 className='title'>Your Profile</h1>
       <Protect when={(user) => user.role !== 'admin'}>
         <p className='text-center'>
-          You are logged in as <span className='font-mono text-amber-500'>admin</span>
+          You are logged in as <span className='text-primary-500 font-mono'>admin</span>
         </p>
       </Protect>
       <div className='space-y-8 pb-4'>
         <section>
           <UserProfile user={{ name, email, role }} roles={UserRoles} />
-          <p className='pt-2 text-sm text-zinc-400'>View and update your profile information</p>
+          <p className='pt-2 text-sm text-neutral-400'>View and update your profile information</p>
         </section>
         <section className='space-y-3'>
           <AccountsManager accounts={accounts} />
-          <p className='text-sm text-zinc-400'>View and manage your connected accounts</p>
+          <p className='text-sm text-neutral-400'>View and manage your connected accounts</p>
         </section>
         <Protect when={(user) => user.hasPassword}>
           <section>
             <AddPasswordForm email={user.email} />
-            <p className='pt-2 text-sm text-zinc-400'>Set a password for your account</p>
+            <p className='pt-2 text-sm text-neutral-400'>Set a password for your account</p>
           </section>
         </Protect>
         <Protect when={(user) => user.isTwoFactorEnabled || !user.hasPassword}>
           <section>
             <EnableTwoFactorButton />
-            <p className='pt-2 text-sm text-zinc-400'>
+            <p className='pt-2 text-sm text-neutral-400'>
               Enable two-factor authentication for your account
             </p>
           </section>
@@ -53,20 +53,20 @@ export default async function ProfilePage() {
         <Protect when={(user) => !user.isTwoFactorEnabled}>
           <section>
             <DisableTwoFactorButton />
-            <p className='pt-2 text-sm text-zinc-400'>
+            <p className='pt-2 text-sm text-neutral-400'>
               Disable two-factor authentication for your account
             </p>
           </section>
         </Protect>
         <section>
           <LogoutEverywhereButton />
-          <p className='pt-2 text-sm text-zinc-400'>
+          <p className='pt-2 text-sm text-neutral-400'>
             This will log you out from all devices and sessions
           </p>
         </section>
         <section>
           <DeleteUserButton />
-          <p className='pt-2 text-sm text-zinc-400'>
+          <p className='pt-2 text-sm text-neutral-400'>
             This action is irreversible and will delete all your data
           </p>
         </section>

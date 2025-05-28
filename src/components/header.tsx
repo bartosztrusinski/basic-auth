@@ -5,7 +5,7 @@ import { AuthNav } from '@/components/auth-nav';
 export function Header() {
   return (
     <header>
-      <nav className='flex flex-wrap justify-between gap-x-6 gap-y-4 bg-zinc-800 p-4'>
+      <nav className='flex flex-wrap justify-between gap-x-6 gap-y-4 bg-neutral-800 p-4'>
         <ul className='flex items-center gap-5'>
           <li>
             <Link href='/' className='link block hover:no-underline'>

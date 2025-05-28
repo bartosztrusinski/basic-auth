@@ -33,7 +33,7 @@ export function RecoveryCodeForm({ token }: Props) {
             autoFocus
             autoComplete='off'
             className='peer rounded-sm'
-            focusClassName='outline outline-2 outline-offset-4 outline-amber-500'
+            focusClassName='outline outline-2 outline-offset-4 outline-primary-500'
             containerClassName='flex items-center gap-1 mt-1 text-lg'
             onComplete={({ isPaste }) => {
               if (isPaste) {
@@ -45,10 +45,10 @@ export function RecoveryCodeForm({ token }: Props) {
               slots.map((slot, slotIndex) => (
                 <Fragment key={slotIndex}>
                   {slotIndex % 4 === 0 && slotIndex !== 0 && (
-                    <div className='h-0.5 rounded-full bg-zinc-400 px-1'></div>
+                    <div className='h-0.5 rounded-full bg-neutral-400 px-1'></div>
                   )}
                   <div
-                    className={`flex min-h-7 w-full place-content-center place-items-center rounded-sm bg-white text-black outline-2 outline-offset-2 outline-amber-500 ${slot.isActive ? 'peer-focus:outline' : ''}`}
+                    className={`outline-primary-500 flex min-h-7 w-full place-content-center place-items-center rounded-sm bg-white text-black outline-2 outline-offset-2 ${slot.isActive ? 'peer-focus:outline' : ''}`}
                   >
                     {slot.value}
                     {slot.hasCaret && (

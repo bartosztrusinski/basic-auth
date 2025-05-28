@@ -1,5 +1,6 @@
 import { type Config } from 'tailwindcss';
 import { fontFamily } from 'tailwindcss/defaultTheme';
+import colors from 'tailwindcss/colors';
 
 export default {
   content: ['./src/**/*.tsx'],
@@ -7,6 +8,12 @@ export default {
     extend: {
       fontFamily: {
         sans: ['var(--font-geist-sans)', ...fontFamily.sans],
+      },
+      colors: {
+        neutral: colors.zinc,
+        primary: colors.amber,
+        success: colors.green,
+        danger: colors.red,
       },
       keyframes: {
         'caret-blink': {

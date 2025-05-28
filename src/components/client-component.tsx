@@ -15,7 +15,7 @@ export function ClientComponent() {
 
   return (
     <span className='mt-1 block'>
-      <span className='pr-2 font-medium text-amber-500'>Client</span>
+      <span className='text-primary-500 pr-2 font-medium'>Client</span>
       {isLoggedIn ? `Welcome ${currentUser.name}` : 'You are not logged in'}
     </span>
   );

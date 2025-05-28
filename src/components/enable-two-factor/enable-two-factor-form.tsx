@@ -30,7 +30,7 @@ export function EnableTwoFactorForm({ secret, qrCode, onSuccess }: Props) {
   return (
     <div className='flex flex-col items-center gap-4'>
       <strong
-        className='break-all rounded bg-zinc-800 px-3 py-1.5 font-mono font-normal selection:bg-amber-500 selection:text-zinc-900'
+        className='selection:bg-primary-500 break-all rounded bg-neutral-800 px-3 py-1.5 font-mono font-normal selection:text-neutral-900'
         aria-label='Two-factor authentication secret'
       >
         {secret}
@@ -52,7 +52,7 @@ export function EnableTwoFactorForm({ secret, qrCode, onSuccess }: Props) {
               required
               autoFocus
               className='peer rounded-sm'
-              focusClassName='outline-2 outline-offset-2 outline-amber-500'
+              focusClassName='outline-2 outline-offset-2 outline-primary-500'
               containerClassName='flex gap-1 mt-1 text-xl'
               onComplete={({ isPaste }) => {
                 if (isPaste) {
@@ -64,7 +64,7 @@ export function EnableTwoFactorForm({ secret, qrCode, onSuccess }: Props) {
                 slots.map((slot, slotIndex) => (
                   <div
                     key={slotIndex}
-                    className={`flex aspect-square min-h-8 w-full min-w-8 place-content-center place-items-center rounded-sm bg-zinc-800 text-zinc-50 outline-2 outline-amber-500 ${slot.isActive ? 'peer-focus:outline' : ''}`}
+                    className={`outline-primary-500 flex aspect-square min-h-8 w-full min-w-8 place-content-center place-items-center rounded-sm bg-neutral-800 text-neutral-50 outline-2 ${slot.isActive ? 'peer-focus:outline' : ''}`}
                   >
                     {slot.value}
                     {slot.hasCaret && (

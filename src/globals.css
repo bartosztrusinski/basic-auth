@@ -12,26 +12,26 @@
   }
 
   .btn {
-    @apply w-full appearance-none rounded bg-zinc-800 p-2 font-semibold shadow outline-2 outline-offset-4 outline-amber-500 transition-all duration-100 ease-in-out hover:scale-[1.03] focus-visible:outline active:scale-100 disabled:cursor-not-allowed disabled:opacity-60;
+    @apply outline-primary-500 w-full appearance-none rounded bg-neutral-800 p-2 font-semibold shadow outline-2 outline-offset-4 transition-all duration-100 ease-in-out hover:scale-[1.03] focus-visible:outline active:scale-100 disabled:cursor-not-allowed disabled:opacity-60;
   }
 
   .btn-success {
-    @apply bg-green-600 outline-green-600;
+    @apply bg-success-600 outline-success-600;
   }
 
   .btn-danger {
-    @apply bg-red-600 outline-red-600;
+    @apply bg-danger-600 outline-danger-600;
   }
 
   .form-control {
-    @apply min-h-8 w-full min-w-0 rounded-sm border-none bg-white px-2 py-1 text-base leading-normal text-black shadow outline-2 outline-offset-2 outline-amber-500 focus-visible:outline;
+    @apply outline-primary-500 min-h-8 w-full min-w-0 rounded-sm border-none bg-white px-2 py-1 text-base leading-normal text-black shadow outline-2 outline-offset-2 focus-visible:outline;
   }
 
   .link {
-    @apply rounded-sm text-amber-500 outline-2 outline-offset-2 outline-amber-500 transition-all duration-100 ease-in-out hover:underline focus-visible:outline;
+    @apply text-primary-500 outline-primary-500 rounded-sm outline-2 outline-offset-2 transition-all duration-100 ease-in-out hover:underline focus-visible:outline;
   }
 
   .link-neutral {
-    @apply text-inherit hover:text-amber-500 hover:no-underline;
+    @apply hover:text-primary-500 text-inherit hover:no-underline;
   }
 }

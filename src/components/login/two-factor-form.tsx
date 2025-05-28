@@ -30,7 +30,7 @@ export function TwoFactorForm({ token }: Props) {
             required
             autoFocus
             className='peer rounded-sm'
-            focusClassName='outline outline-4 outline-offset-4 outline-amber-500'
+            focusClassName='outline outline-4 outline-offset-4 outline-primary-500'
             containerClassName='flex items-center gap-2 mt-1 text-xl sm:text-2xl'
             onComplete={({ isPaste }) => {
               if (isPaste) {
@@ -42,17 +42,19 @@ export function TwoFactorForm({ token }: Props) {
               slots.map((slot, slotIndex) => (
                 <Fragment key={slotIndex}>
                   {slotIndex === slots.length / 2 && (
-                    <div className='h-0.5 rounded-full bg-zinc-400 px-1.5'></div>
+                    <div className='h-0.5 rounded-full bg-neutral-400 px-1.5'></div>
                   )}
                   <div
-                    className={`flex aspect-square w-full place-content-center place-items-center rounded-sm bg-white text-black outline-2 outline-offset-4 outline-amber-500 ${slot.isActive ? 'peer-focus:outline' : ''}`}
+                    className={`outline-primary-500 flex aspect-square w-full place-content-center place-items-center rounded-sm bg-white text-black outline-2 outline-offset-4 ${slot.isActive ? 'peer-focus:outline' : ''}`}
                   >
                     {slot.value}
                     {slot.hasCaret && (
                       <div className='pointer-events-none h-[1em] w-[0.1em] animate-caret-blink bg-current'></div>
                     )}
                     {slot.placeholder && (
-                      <span className='pointer-events-none text-zinc-400'>{slot.placeholder}</span>
+                      <span className='pointer-events-none text-neutral-400'>
+                        {slot.placeholder}
+                      </span>
                     )}
                   </div>
                 </Fragment>

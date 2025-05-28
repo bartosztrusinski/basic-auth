@@ -46,7 +46,7 @@ export function Dialog({
         ref={ref}
         onClose={closeDialog}
         onMouseDown={handleBackdropClick}
-        className='bg-transparent shadow-lg shadow-zinc-950 backdrop:bg-zinc-950/50 backdrop:backdrop-blur-sm'
+        className='bg-transparent shadow-lg shadow-neutral-950 backdrop:bg-neutral-950/50 backdrop:backdrop-blur-sm'
       >
         {typeof children === 'function' ? children(closeDialog, openDialog) : children}
       </dialog>

@@ -38,7 +38,7 @@ export function LoginForm() {
           <TwoFactorForm token={twoFactorToken} />
         )}
 
-        <p className='text-zinc-400'>
+        <p className='text-neutral-400'>
           {isRecoveryMode ? 'Got access to Authenticator? ' : 'No access to Authenticator? '}
           <button className='link' onClick={toggleRecoveryMode}>
             Enter {isRecoveryMode ? '2FA' : 'recovery'} code
@@ -55,7 +55,7 @@ export function LoginForm() {
           setTwoFactorToken(data?.twoFactorToken ?? null);
         }}
       />
-      <div className='text-zinc-400'>
+      <div className='text-neutral-400'>
         <p>
           Don&apos;t have an account?{' '}
           <Link href='/sign-up' className='link'>

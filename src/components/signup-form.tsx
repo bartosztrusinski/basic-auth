@@ -65,7 +65,7 @@ export function SignupForm() {
           {isPending ? 'Submitting...' : 'Sign Up'}
         </button>
       </form>
-      <p className='text-zinc-400'>
+      <p className='text-neutral-400'>
         Already have an account?{' '}
         <Link href={config.loginRoute} className='link'>
           Log in

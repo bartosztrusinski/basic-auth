@@ -51,15 +51,15 @@ export function UserProfile({ user, roles }: Props) {
   }
 
   return (
-    <div className='space-y-5 rounded-lg border border-zinc-600 p-6 pt-4'>
+    <div className='space-y-5 rounded-lg border border-neutral-600 p-6 pt-4'>
       <div className='flex flex-col break-all'>
-        <span className='font-medium text-zinc-400'>Email</span>
+        <span className='font-medium text-neutral-400'>Email</span>
         {user.email}
       </div>
       {isEditing || isPending || isActionPending ? (
         <form action={action} onSubmit={handleSubmit} className='space-y-3'>
           <div className='flex flex-col'>
-            <label htmlFor={`${id}-name`} className='font-medium text-zinc-400'>
+            <label htmlFor={`${id}-name`} className='font-medium text-neutral-400'>
               Name
             </label>
             <input
@@ -74,7 +74,7 @@ export function UserProfile({ user, roles }: Props) {
             />
           </div>
           <div className='flex flex-col'>
-            <label htmlFor={`${id}-role`} className='font-medium text-zinc-400'>
+            <label htmlFor={`${id}-role`} className='font-medium text-neutral-400'>
               Role
             </label>
             <select
@@ -110,11 +110,11 @@ export function UserProfile({ user, roles }: Props) {
       ) : (
         <>
           <div className='flex flex-col break-all'>
-            <span className='font-medium text-zinc-400'>Name</span>
+            <span className='font-medium text-neutral-400'>Name</span>
             {user.name}
           </div>
           <div className='flex flex-col'>
-            <span className='font-medium text-zinc-400'>Role</span>
+            <span className='font-medium text-neutral-400'>Role</span>
             {user.role}
           </div>
           <button onClick={openForm} className='btn'>

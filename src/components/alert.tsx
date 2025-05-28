@@ -10,13 +10,13 @@ type Props = {
 };
 
 const variants: Record<Variant, { classes: string; accentChar: ReactNode }> = {
-  default: { classes: 'border-zinc-700', accentChar: '🔐' },
+  default: { classes: 'border-neutral-700', accentChar: '🔐' },
   success: {
-    classes: 'bg-green-950 text-green-500 border-green-900',
+    classes: 'bg-success-950 text-success-500 border-success-900',
     accentChar: <SuccessIcon />,
   },
   error: {
-    classes: 'bg-red-950 border-red-900 text-red-400',
+    classes: 'bg-danger-950 border-danger-900 text-danger-400',
     accentChar: <ErrorIcon />,
   },
 };

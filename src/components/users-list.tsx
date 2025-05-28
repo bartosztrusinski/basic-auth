@@ -11,10 +11,10 @@ export async function UsersList() {
     >
       <ul className='max-h-80 space-y-3 overflow-y-auto'>
         {users.map((user) => (
-          <li key={user.id} className='rounded bg-zinc-800 p-2 px-4 shadow'>
+          <li key={user.id} className='rounded bg-neutral-800 p-2 px-4 shadow'>
             <div className='flex items-center justify-between gap-2'>
               {user.name}
-              <strong className='font-mono font-medium text-amber-500'>{user.role}</strong>
+              <strong className='text-primary-500 font-mono font-medium'>{user.role}</strong>
             </div>
             <span className='text-sm'>{user.email}</span>
           </li>
