@@ -50,7 +50,7 @@ export function LoginForm() {
     <>
       <button
         type='button'
-        className='size-9 rounded bg-zinc-800 shadow outline-current focus-visible:outline-2'
+        className='btn flex size-9 items-center justify-center font-bold'
         onClick={goBack}
       >
         <span className='sr-only'>Go back to credentials form</span>
@@ -65,7 +65,10 @@ export function LoginForm() {
 
       <p className='text-zinc-400'>
         {isRecoveryMode ? 'Got access to Authenticator? ' : 'No access to Authenticator? '}
-        <button className='text-amber-500 hover:underline' onClick={toggleRecoveryMode}>
+        <button
+          className='rounded text-amber-500 outline-2 outline-offset-2 outline-amber-500 hover:underline focus-visible:outline'
+          onClick={toggleRecoveryMode}
+        >
           Enter {isRecoveryMode ? '2FA' : 'recovery'} code
         </button>
       </p>

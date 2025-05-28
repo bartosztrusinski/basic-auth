@@ -98,15 +98,11 @@ export function UserProfile({ user, roles }: Props) {
             <button
               type='submit'
               disabled={isPending || isActionPending}
-              className='grow rounded border border-zinc-500 p-2'
+              className='btn w-auto grow'
             >
               {isPending || isActionPending ? 'Saving...' : 'Save'}
             </button>
-            <button
-              type='button'
-              onClick={closeForm}
-              className='size-10 rounded border border-zinc-500'
-            >
+            <button type='button' onClick={closeForm} className='btn size-10'>
               ⨉
             </button>
           </div>
@@ -121,7 +117,7 @@ export function UserProfile({ user, roles }: Props) {
             <span className='font-medium text-zinc-400'>Role</span>
             {user.role}
           </div>
-          <button onClick={openForm} className='w-full rounded border border-zinc-500 p-2'>
+          <button onClick={openForm} className='btn'>
             Edit Profile
           </button>
         </>

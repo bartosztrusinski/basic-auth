@@ -30,7 +30,7 @@ export function EnableTwoFactorForm({ secret, qrCode, onSuccess }: Props) {
   return (
     <div className='flex flex-col items-center gap-4'>
       <strong
-        className='break-all rounded bg-zinc-800 px-3 py-1.5 font-mono font-normal'
+        className='break-all rounded bg-zinc-800 px-3 py-1.5 font-mono font-normal selection:bg-amber-500 selection:text-zinc-900'
         aria-label='Two-factor authentication secret'
       >
         {secret}
@@ -79,10 +79,7 @@ export function EnableTwoFactorForm({ secret, qrCode, onSuccess }: Props) {
           {state.errors && <Alert variant='error' message={state.errors} />}
         </div>
 
-        <button
-          disabled={isPending}
-          className='mt-5 w-full rounded border border-zinc-700 p-2 text-sm shadow disabled:cursor-not-allowed disabled:opacity-50'
-        >
+        <button disabled={isPending} className='btn mt-5 text-sm'>
           {isPending ? 'Confirming...' : 'Confirm'}
         </button>
       </form>

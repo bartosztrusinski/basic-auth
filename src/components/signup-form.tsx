@@ -61,11 +61,7 @@ export function SignupForm() {
           {state.isSuccess && <AuthAlert authCode='verification-email-sent' />}
         </div>
 
-        <button
-          type='submit'
-          disabled={isPending}
-          className='mt-5 w-full rounded bg-zinc-800 p-2 font-bold shadow outline-current focus-visible:outline-2'
-        >
+        <button type='submit' disabled={isPending} className='btn mt-5'>
           {isPending ? 'Submitting...' : 'Sign Up'}
         </button>
       </form>

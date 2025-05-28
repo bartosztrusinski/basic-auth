@@ -48,7 +48,7 @@ export function AddPasswordForm({ email }: Props) {
 
   return (
     <ClassyDialog
-      trigger={<button className='w-full rounded border border-zinc-500 p-2'>Add Password</button>}
+      trigger={<button className='btn'>Add Password</button>}
       onClose={handleClose}
       heading='Set Password'
       description='After setting a password, you will be able to log in with your email and password.'
@@ -85,11 +85,7 @@ export function AddPasswordForm({ email }: Props) {
 
           <Alert variant='error' message={errors ?? state.errors ?? []} />
         </div>
-        <button
-          type='submit'
-          disabled={isPending || isActionPending}
-          className='mt-5 w-full rounded border border-zinc-500 p-2'
-        >
+        <button type='submit' disabled={isPending || isActionPending} className='btn mt-5'>
           {isPending || isActionPending ? 'Submitting...' : 'Set Password'}
         </button>
       </form>

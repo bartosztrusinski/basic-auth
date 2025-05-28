@@ -33,7 +33,7 @@ export function RecoveryCodeForm({ token }: Props) {
             autoFocus
             autoComplete='off'
             className='peer rounded-sm'
-            focusClassName='outline-2 outline-offset-4 outline-amber-500'
+            focusClassName='outline outline-2 outline-offset-4 outline-amber-500'
             containerClassName='flex items-center gap-1 mt-1 text-lg'
             onComplete={({ isPaste }) => {
               if (isPaste) {
@@ -64,10 +64,7 @@ export function RecoveryCodeForm({ token }: Props) {
         {state.errors && <Alert variant='error' message={state.errors} />}
       </div>
 
-      <button
-        disabled={isPending}
-        className='mt-5 w-full rounded bg-zinc-800 p-2 font-bold shadow outline-current focus-visible:outline-2'
-      >
+      <button disabled={isPending} className='btn mt-5'>
         {isPending ? 'Logging In...' : 'Use Recovery Code'}
       </button>
     </form>

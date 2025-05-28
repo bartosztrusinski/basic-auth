@@ -34,11 +34,7 @@ export function ResendEmailForm() {
         {state.isSuccess && <AuthAlert authCode='verification-email-sent' />}
       </div>
 
-      <button
-        type='submit'
-        disabled={isPending}
-        className='mt-5 w-full rounded border-2 border-white p-1'
-      >
+      <button type='submit' disabled={isPending} className='btn mt-5'>
         {isPending ? 'Sending...' : 'Send Email'}
       </button>
     </form>

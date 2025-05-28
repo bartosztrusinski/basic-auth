@@ -42,11 +42,7 @@ export function EnableTwoFactorButton() {
 
   return (
     <ClassyDialog
-      trigger={
-        <button className='w-full rounded border border-zinc-500 p-2'>
-          Enable Two-Factor Authentication
-        </button>
-      }
+      trigger={<button className='btn'>Enable Two-Factor Authentication</button>}
       onClose={handleClose}
       shouldCloseOnBackdropClick={false}
       heading={step.title}

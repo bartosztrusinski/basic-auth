@@ -13,11 +13,7 @@ export function VerifyEmailForm({ token }: Props) {
 
   return (
     <form action={action}>
-      <button
-        type='submit'
-        disabled={isPending}
-        className='w-full rounded border-2 border-white p-1'
-      >
+      <button type='submit' disabled={isPending} className='btn'>
         {isPending ? 'Verifying...' : 'Verify Email'}
       </button>
     </form>

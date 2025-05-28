@@ -24,10 +24,7 @@ export function InitializeTwoFactorForm({ onSuccess }: Props) {
   return (
     <form action={action} className='space-y-3'>
       {state.errors && <Alert variant='error' message={state.errors} />}
-      <button
-        disabled={isPending}
-        className='w-full rounded border border-zinc-700 p-2 text-sm shadow disabled:cursor-not-allowed disabled:opacity-50'
-      >
+      <button disabled={isPending} className='btn text-sm'>
         {isPending ? 'Initiating...' : 'Continue'}
       </button>
     </form>

@@ -38,7 +38,7 @@ export function AccountItem({ provider, name, isLinked, isUnlinkingEnabled }: Pr
   }
 
   return (
-    <div className='flex min-h-14 justify-between rounded-lg bg-zinc-800 p-3'>
+    <div className='flex justify-between rounded-lg border border-zinc-600 p-3 shadow-md'>
       <div className='flex items-center gap-2'>
         <span className='font-semibold'>{name}</span>
         {isLinked && (
@@ -49,11 +49,7 @@ export function AccountItem({ provider, name, isLinked, isUnlinkingEnabled }: Pr
       </div>
       <form action={action} onSubmit={handleSubmit} className='basis-24'>
         {!isLinked ? (
-          <button
-            type='submit'
-            disabled={isPending || isActionPending}
-            className='w-full rounded border border-zinc-400 p-1 px-2 font-bold shadow disabled:cursor-not-allowed disabled:opacity-50'
-          >
+          <button type='submit' disabled={isPending || isActionPending} className='btn p-1'>
             {isPending || isActionPending ? 'Linking...' : 'Link'}
           </button>
         ) : (
@@ -61,7 +57,7 @@ export function AccountItem({ provider, name, isLinked, isUnlinkingEnabled }: Pr
             <button
               type='submit'
               disabled={isPending || isActionPending}
-              className='w-full rounded bg-red-600 p-1 px-2 font-bold shadow disabled:cursor-not-allowed disabled:opacity-50'
+              className='btn btn-danger p-1'
             >
               {isPending || isActionPending ? 'Unlinking...' : 'Unlink'}
             </button>

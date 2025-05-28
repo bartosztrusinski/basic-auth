@@ -10,4 +10,16 @@
   .title {
     @apply text-center text-3xl font-bold;
   }
+
+  .btn {
+    @apply w-full appearance-none rounded bg-zinc-800 p-2 font-semibold shadow outline-2 outline-offset-4 outline-amber-500 transition-all duration-100 ease-in-out hover:scale-[1.03] focus-visible:outline active:scale-100 disabled:cursor-not-allowed disabled:opacity-60;
+  }
+
+  .btn-success {
+    @apply bg-green-600 outline-green-600;
+  }
+
+  .btn-danger {
+    @apply bg-red-600 outline-red-600;
+  }
 }
