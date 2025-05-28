@@ -30,8 +30,4 @@
   .link {
     @apply text-primary-500 outline-primary-500 rounded-sm outline-2 outline-offset-2 transition-all duration-100 ease-in-out hover:underline focus-visible:outline;
   }
-
-  .link-neutral {
-    @apply hover:text-primary-500 text-inherit hover:no-underline;
-  }
 }

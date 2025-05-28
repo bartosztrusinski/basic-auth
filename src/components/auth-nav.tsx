@@ -1,8 +1,8 @@
 'use client';
 
-import Link from 'next/link';
 import { useAuth } from '@/auth/hooks/use-auth';
 import config from '@/auth/config';
+import { NavLink } from '@/components/nav-link';
 import { LogoutButton } from '@/components/logout-button';
 
 export function AuthNav() {
@@ -13,9 +13,7 @@ export function AuthNav() {
       {isLoggedIn ? (
         <>
           <li>
-            <Link href='/profile' className='link link-neutral'>
-              Profile
-            </Link>
+            <NavLink href='/profile'>Profile</NavLink>
           </li>
           <li>
             <LogoutButton />
@@ -24,14 +22,10 @@ export function AuthNav() {
       ) : (
         <>
           <li>
-            <Link href={config.loginRoute} className='link link-neutral'>
-              Log In
-            </Link>
+            <NavLink href={config.loginRoute}>Log In</NavLink>
           </li>
           <li>
-            <Link href='/sign-up' className='link link-neutral'>
-              Sign Up
-            </Link>
+            <NavLink href='/sign-up'>Sign Up</NavLink>
           </li>
         </>
       )}

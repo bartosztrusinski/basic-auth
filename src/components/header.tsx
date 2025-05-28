@@ -1,6 +1,31 @@
 import Link from 'next/link';
 import Image from 'next/image';
 import { AuthNav } from '@/components/auth-nav';
+import { NavLink } from '@/components/nav-link';
+
+type Route = {
+  href: string;
+  name: string;
+};
+
+const links: Route[] = [
+  {
+    href: '/',
+    name: 'Home',
+  },
+  {
+    href: '/about',
+    name: 'About',
+  },
+  {
+    href: '/private',
+    name: 'Private',
+  },
+  {
+    href: '/admin',
+    name: 'Admin',
+  },
+];
 
 export function Header() {
   return (
@@ -12,26 +37,12 @@ export function Header() {
               <Image src='/logo.png' alt='App logo' width={32} height={32} />
             </Link>
           </li>
-          <li>
-            <Link href='/' className='link link-neutral'>
-              Home
-            </Link>
-          </li>
-          <li>
-            <Link href='/about' className='link link-neutral'>
-              About
-            </Link>
-          </li>
-          <li>
-            <Link href='/private' className='link link-neutral'>
-              Private
-            </Link>
-          </li>
-          <li>
-            <Link href='/admin' className='link link-neutral'>
-              Admin
-            </Link>
-          </li>
+
+          {links.map((link) => (
+            <li key={link.href}>
+              <NavLink href={link.href}>{link.name}</NavLink>
+            </li>
+          ))}
         </ul>
         <AuthNav />
       </nav>

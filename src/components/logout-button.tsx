@@ -11,7 +11,7 @@ export function LogoutButton() {
       <button
         type='submit'
         disabled={isPending}
-        className='link link-neutral disabled:cursor-not-allowed disabled:opacity-75'
+        className='link hover:text-primary-500 text-inherit hover:no-underline disabled:cursor-not-allowed disabled:opacity-75'
       >
         Log Out
       </button>
