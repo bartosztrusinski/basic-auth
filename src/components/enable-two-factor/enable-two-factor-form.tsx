@@ -30,7 +30,7 @@ export function EnableTwoFactorForm({ secret, qrCode, onSuccess }: Props) {
   return (
     <div className='flex flex-col items-center gap-4'>
       <strong
-        className='selection:bg-primary-500 break-all rounded bg-neutral-800 px-3 py-1.5 font-mono font-normal selection:text-neutral-900'
+        className='break-all rounded bg-neutral-800 px-3 py-1.5 font-mono font-normal'
         aria-label='Two-factor authentication secret'
       >
         {secret}

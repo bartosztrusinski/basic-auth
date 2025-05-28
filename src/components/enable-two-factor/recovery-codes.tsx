@@ -38,7 +38,7 @@ export function RecoveryCodes({ recoveryCodes, onClose }: Props) {
 
   return (
     <>
-      <div className='selection:bg-primary-500 flex flex-row flex-wrap items-center justify-center gap-x-4 gap-y-2 py-2 font-mono selection:text-neutral-900'>
+      <div className='flex flex-row flex-wrap items-center justify-center gap-x-4 gap-y-2 py-2 font-mono'>
         {recoveryCodes.map((code) => (
           <div className='rounded bg-neutral-800 px-2 py-1' key={code}>
             {formatCode(code)}
