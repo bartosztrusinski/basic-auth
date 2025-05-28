@@ -25,7 +25,7 @@ export function ResendEmailForm() {
             autoComplete='email'
             required
             autoFocus
-            className='rounded bg-white px-2 py-1 text-base text-black'
+            className='form-control'
             defaultValue={state.isSuccess ? undefined : state.fields?.email}
           />
         </div>

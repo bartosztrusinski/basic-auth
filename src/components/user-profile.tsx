@@ -51,7 +51,7 @@ export function UserProfile({ user, roles }: Props) {
   }
 
   return (
-    <div className='space-y-3 rounded-lg border border-zinc-600 p-6 pt-4'>
+    <div className='space-y-5 rounded-lg border border-zinc-600 p-6 pt-4'>
       <div className='flex flex-col break-all'>
         <span className='font-medium text-zinc-400'>Email</span>
         {user.email}
@@ -69,7 +69,7 @@ export function UserProfile({ user, roles }: Props) {
               autoComplete='name'
               required
               autoFocus
-              className='rounded-sm bg-white px-1 text-base text-black'
+              className='form-control'
               defaultValue={user.name}
             />
           </div>
@@ -81,7 +81,7 @@ export function UserProfile({ user, roles }: Props) {
               id={`${id}-role`}
               name='role'
               required
-              className='min-h-6 rounded-sm bg-white px-1 text-base text-black'
+              className='form-control'
               defaultValue={user.role}
             >
               {roles.map((role) => (

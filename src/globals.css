@@ -22,4 +22,8 @@
   .btn-danger {
     @apply bg-red-600 outline-red-600;
   }
+
+  .form-control {
+    @apply min-h-8 w-full min-w-0 rounded-sm border-none bg-white px-2 py-1 text-base leading-normal text-black shadow outline-2 outline-offset-2 outline-amber-500 focus-visible:outline;
+  }
 }

@@ -67,7 +67,7 @@ export function AddPasswordForm({ email }: Props) {
               autoComplete='new-password'
               required
               autoFocus
-              className='rounded-sm bg-white px-2 py-1 text-base text-black'
+              className='form-control'
             />
           </div>
           <div className='flex flex-col'>
@@ -79,7 +79,7 @@ export function AddPasswordForm({ email }: Props) {
               placeholder='********'
               autoComplete='new-password'
               required
-              className='rounded-sm bg-white px-2 py-1 text-base text-black'
+              className='form-control'
             />
           </div>
 

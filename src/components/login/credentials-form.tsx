@@ -34,7 +34,7 @@ export function CredentialsForm({ onSuccess }: Props) {
             autoComplete='email'
             required
             autoFocus
-            className='rounded-sm bg-white px-2 py-1 text-base text-black'
+            className='form-control'
             defaultValue={state.isSuccess ? undefined : state.fields?.email}
           />
         </div>
@@ -47,7 +47,7 @@ export function CredentialsForm({ onSuccess }: Props) {
             placeholder='********'
             autoComplete='current-password'
             required
-            className='rounded-sm bg-white px-2 py-1 text-base text-black'
+            className='form-control'
           />
         </div>
 

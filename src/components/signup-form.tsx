@@ -28,7 +28,7 @@ export function SignupForm() {
               autoComplete='email'
               required
               autoFocus
-              className='rounded-sm bg-white px-2 py-1 text-base text-black'
+              className='form-control'
               defaultValue={state.isSuccess ? undefined : state.fields?.email}
             />
           </div>
@@ -40,7 +40,7 @@ export function SignupForm() {
               placeholder='John Doe'
               autoComplete='name'
               required
-              className='rounded-sm bg-white px-2 py-1 text-base text-black'
+              className='form-control'
               defaultValue={state.isSuccess ? undefined : state.fields?.name}
             />
           </div>
@@ -53,7 +53,7 @@ export function SignupForm() {
               placeholder='********'
               autoComplete='new-password'
               required
-              className='rounded-sm bg-white px-2 py-1 text-base text-black'
+              className='form-control'
             />
           </div>
 
