@@ -67,7 +67,7 @@ export function SignupForm() {
       </form>
       <p className='text-zinc-400'>
         Already have an account?{' '}
-        <Link href={config.loginRoute} className='text-amber-500 hover:underline'>
+        <Link href={config.loginRoute} className='link'>
           Log in
         </Link>
       </p>

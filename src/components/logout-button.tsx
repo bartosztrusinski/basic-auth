@@ -11,7 +11,7 @@ export function LogoutButton() {
       <button
         type='submit'
         disabled={isPending}
-        className='btn py-0 font-normal shadow-none transition-none hover:scale-100'
+        className='link link-neutral disabled:cursor-not-allowed disabled:opacity-75'
       >
         Log Out
       </button>

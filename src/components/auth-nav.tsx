@@ -13,7 +13,9 @@ export function AuthNav() {
       {isLoggedIn ? (
         <>
           <li>
-            <Link href='/profile'>Profile</Link>
+            <Link href='/profile' className='link link-neutral'>
+              Profile
+            </Link>
           </li>
           <li>
             <LogoutButton />
@@ -22,10 +24,14 @@ export function AuthNav() {
       ) : (
         <>
           <li>
-            <Link href={config.loginRoute}>Log In</Link>
+            <Link href={config.loginRoute} className='link link-neutral'>
+              Log In
+            </Link>
           </li>
           <li>
-            <Link href='/sign-up'>Sign Up</Link>
+            <Link href='/sign-up' className='link link-neutral'>
+              Sign Up
+            </Link>
           </li>
         </>
       )}

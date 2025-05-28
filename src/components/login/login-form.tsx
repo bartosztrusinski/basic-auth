@@ -40,10 +40,7 @@ export function LoginForm() {
 
         <p className='text-zinc-400'>
           {isRecoveryMode ? 'Got access to Authenticator? ' : 'No access to Authenticator? '}
-          <button
-            className='rounded text-amber-500 outline-2 outline-offset-2 outline-amber-500 hover:underline focus-visible:outline'
-            onClick={toggleRecoveryMode}
-          >
+          <button className='link' onClick={toggleRecoveryMode}>
             Enter {isRecoveryMode ? '2FA' : 'recovery'} code
           </button>
         </p>
@@ -61,13 +58,13 @@ export function LoginForm() {
       <div className='text-zinc-400'>
         <p>
           Don&apos;t have an account?{' '}
-          <Link href='/sign-up' className='text-amber-500 hover:underline'>
+          <Link href='/sign-up' className='link'>
             Sign up
           </Link>
         </p>
         <p>
           Didn&apos;t get verification email?{' '}
-          <Link href='/resend-email' className='text-amber-500 hover:underline'>
+          <Link href='/resend-email' className='link'>
             Resend email
           </Link>
         </p>
