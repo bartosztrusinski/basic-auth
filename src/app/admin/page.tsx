@@ -2,7 +2,7 @@ import { auth } from '@/auth/session';
 import { UsersList } from '@/components/users-list';
 
 export default async function AdminPage() {
-  await auth.protect({ role: 'admin', unauthorizedUrl: '/profile' });
+  await auth.protect({ role: 'admin', unauthorizedUrl: '/profile', returnBackUrl: '/admin' });
 
   return (
     <div className='container'>
