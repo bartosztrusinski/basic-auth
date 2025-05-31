@@ -45,7 +45,7 @@ export function TwoFactorForm({ token }: Props) {
                     <div className='h-0.5 rounded-full bg-neutral-400 px-1.5'></div>
                   )}
                   <div
-                    className={`outline-primary-500 flex aspect-square w-full place-content-center place-items-center rounded-sm bg-white text-black outline-2 outline-offset-4 ${slot.isActive ? 'peer-focus:outline' : ''}`}
+                    className={`flex aspect-square w-full place-content-center place-items-center rounded-sm bg-white text-black outline-2 outline-offset-4 outline-primary-500 ${slot.isActive ? 'peer-focus:outline' : ''}`}
                   >
                     {slot.value}
                     {slot.hasCaret && (

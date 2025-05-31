@@ -70,7 +70,7 @@ function _Button({ children, href }: { children: ReactNode; href: string }) {
     <Section className='py-[12px] text-center'>
       <Button
         href={href}
-        className='bg-primary-500 min-w-[92px] rounded-[4px] px-[32px] py-[12px] text-[15px] font-bold text-neutral-700 no-underline'
+        className='min-w-[92px] rounded-[4px] bg-primary-500 px-[32px] py-[12px] text-[15px] font-bold text-neutral-700 no-underline'
       >
         {children}
       </Button>

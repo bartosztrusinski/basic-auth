@@ -48,7 +48,7 @@ export function RecoveryCodeForm({ token }: Props) {
                     <div className='h-0.5 rounded-full bg-neutral-400 px-1'></div>
                   )}
                   <div
-                    className={`outline-primary-500 flex min-h-7 w-full place-content-center place-items-center rounded-sm bg-white text-black outline-2 outline-offset-2 ${slot.isActive ? 'peer-focus:outline' : ''}`}
+                    className={`flex min-h-7 w-full place-content-center place-items-center rounded-sm bg-white text-black outline-2 outline-offset-2 outline-primary-500 ${slot.isActive ? 'peer-focus:outline' : ''}`}
                   >
                     {slot.value}
                     {slot.hasCaret && (

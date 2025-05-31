@@ -12,7 +12,7 @@ export default async function HomePage() {
         <span className='align-middle'>Basic Auth</span>
       </h1>
       <p className='text-center'>
-        <span className='text-primary-500 pr-2 font-medium'>Server</span>
+        <span className='pr-2 font-medium text-primary-500'>Server</span>
         {user ? `Welcome ${user.name}` : 'You are not logged in'}
         <ClientComponent />
       </p>

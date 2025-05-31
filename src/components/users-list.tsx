@@ -14,7 +14,7 @@ export async function UsersList() {
           <li key={user.id} className='rounded bg-neutral-800 p-2 px-4 shadow'>
             <div className='flex items-center justify-between gap-2'>
               {user.name}
-              <strong className='text-primary-500 font-mono font-medium'>{user.role}</strong>
+              <strong className='font-mono font-medium text-primary-500'>{user.role}</strong>
             </div>
             <span className='text-sm'>{user.email}</span>
           </li>

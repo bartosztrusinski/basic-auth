@@ -64,7 +64,7 @@ export function EnableTwoFactorForm({ secret, qrCode, onSuccess }: Props) {
                 slots.map((slot, slotIndex) => (
                   <div
                     key={slotIndex}
-                    className={`outline-primary-500 flex aspect-square min-h-8 w-full min-w-8 place-content-center place-items-center rounded-sm bg-neutral-800 text-neutral-50 outline-2 ${slot.isActive ? 'peer-focus:outline' : ''}`}
+                    className={`flex aspect-square min-h-8 w-full min-w-8 place-content-center place-items-center rounded-sm bg-neutral-800 text-neutral-50 outline-2 outline-primary-500 ${slot.isActive ? 'peer-focus:outline' : ''}`}
                   >
                     {slot.value}
                     {slot.hasCaret && (

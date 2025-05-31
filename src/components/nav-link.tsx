@@ -16,7 +16,7 @@ export function NavLink({ children, className, ...props }: Props) {
   return (
     <Link
       {...props}
-      className={`link hover:text-primary-500 text-inherit hover:no-underline ${isActive ? 'text-primary-500' : ''} ${className}`}
+      className={`link text-inherit hover:text-primary-500 hover:no-underline ${isActive ? 'text-primary-500' : ''} ${className}`}
     >
       {children}
     </Link>

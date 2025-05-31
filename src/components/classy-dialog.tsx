@@ -15,7 +15,7 @@ export function ClassyDialog({ children, heading, description, ...props }: Props
           {typeof children === 'function' ? children(closeDialog, openDialog) : children}
           <button
             onClick={closeDialog}
-            className='btn btn-danger text-danger-500 absolute right-2 top-2 size-7 bg-opacity-0 p-0 shadow-none outline-offset-0 transition-colors hover:scale-100 hover:bg-opacity-20'
+            className='btn btn-danger absolute right-2 top-2 size-7 bg-opacity-0 p-0 text-danger-500 shadow-none outline-offset-0 transition-colors hover:scale-100 hover:bg-opacity-20'
           >
             ⨉
           </button>
