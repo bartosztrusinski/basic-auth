@@ -27,7 +27,12 @@ import {
   deleteAllUserSessions,
   deleteUserSession,
 } from '@/auth/session';
-import { generateAuthorizationUrl, deleteProviderAccount, type OAuthProvider } from '@/auth/oauth';
+import {
+  generateAuthorizationUrl,
+  deleteProviderAccount,
+  type OAuthProvider,
+  type StateData,
+} from '@/auth/oauth';
 import { sendExistingUserLoginGuidanceEmail, sendVerificationEmail } from '@/auth/email';
 import { createEmailVerificationToken } from '@/auth/verification-token';
 import { type AuthCode, AuthError, getAuthMessage } from '@/auth/message';
@@ -168,11 +173,14 @@ async function logIn(
   }
 }
 
-async function logInWithProvider(provider: OAuthProvider): Promise<ActionState> {
+async function logInWithProvider(
+  provider: OAuthProvider,
+  stateData: StateData = {},
+): Promise<ActionState> {
   let authorizationUrl: URL;
 
   try {
-    authorizationUrl = await generateAuthorizationUrl(provider);
+    authorizationUrl = await generateAuthorizationUrl(provider, stateData);
   } catch (error) {
     return handleError(error, 'oauth-login-failed');
   }
@@ -180,7 +188,10 @@ async function logInWithProvider(provider: OAuthProvider): Promise<ActionState> 
   redirect(authorizationUrl.toString());
 }
 
-async function linkAccount(provider: OAuthProvider): Promise<ActionState> {
+async function linkAccount(
+  provider: OAuthProvider,
+  stateData: StateData = {},
+): Promise<ActionState> {
   let authorizationUrl: URL;
   const { userId } = await auth();
 
@@ -189,7 +200,7 @@ async function linkAccount(provider: OAuthProvider): Promise<ActionState> {
       throw new AuthError('unauthenticated');
     }
 
-    authorizationUrl = await generateAuthorizationUrl(provider);
+    authorizationUrl = await generateAuthorizationUrl(provider, stateData);
   } catch (error) {
     return handleError(error, 'oauth-link-failed');
   }

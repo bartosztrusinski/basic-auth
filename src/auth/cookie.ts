@@ -1,6 +1,7 @@
 import 'server-only';
 import { cookies } from 'next/headers';
 import { type NextResponse, type NextRequest } from 'next/server';
+import { type StateData } from '@/auth/oauth';
 import config from '@/auth/config';
 import serverConfig from '@/auth/config/server';
 
@@ -47,19 +48,29 @@ export async function setAuthSyncCookie(response?: NextResponse) {
   cookieStore.set(config.syncAuthCookieKey, value, attributes);
 }
 
-export async function getStateCookie() {
+export async function getStateCookie(state: string): Promise<StateData | null> {
   const cookieStore = await cookies();
-  return cookieStore.get(serverConfig.stateCookieKey)?.value;
+  const stringifiedData = cookieStore.get(state)?.value;
+
+  if (!stringifiedData) {
+    return null;
+  }
+
+  try {
+    return JSON.parse(stringifiedData) as StateData;
+  } catch {
+    return null;
+  }
 }
 
-export async function setStateCookie(state: string) {
+export async function setStateCookie(state: string, data: StateData = {}) {
   const cookieStore = await cookies();
-  cookieStore.set(serverConfig.stateCookieKey, state, serverConfig.stateCookieAttributes);
+  cookieStore.set(state, JSON.stringify(data), serverConfig.oAuthCookieAttributes);
 }
 
-export async function deleteStateCookie() {
+export async function deleteStateCookie(state: string) {
   const cookieStore = await cookies();
-  cookieStore.delete(serverConfig.stateCookieKey);
+  cookieStore.delete(state);
 }
 
 export async function getCodeVerifierCookie() {
@@ -72,7 +83,7 @@ export async function setCodeVerifierCookie(codeVerifier: string) {
   cookieStore.set(
     serverConfig.codeVerifierCookieKey,
     codeVerifier,
-    serverConfig.codeVerifierCookieAttributes,
+    serverConfig.oAuthCookieAttributes,
   );
 }
 

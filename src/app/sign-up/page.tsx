@@ -3,15 +3,11 @@ import { ReturnBack } from '@/auth/components/return-back';
 import { ProviderButtons } from '@/components/provider-buttons';
 import { SignupForm } from '@/components/signup-form';
 
-export default async function SignupPage({
-  searchParams,
-}: {
-  searchParams: Promise<Record<string, string | undefined>>;
-}) {
+export default async function SignupPage() {
   return (
     <>
       <LoggedIn>
-        <ReturnBack searchParams={searchParams} />
+        <ReturnBack />
       </LoggedIn>
       <div className='container'>
         <h1 className='title'>Signup</h1>

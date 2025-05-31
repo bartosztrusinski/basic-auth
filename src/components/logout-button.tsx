@@ -1,7 +1,7 @@
 'use client';
 
 import { useActionState } from 'react';
-import { logOut } from '@/actions';
+import { logOut } from '@/auth/actions';
 
 export function LogoutButton() {
   const [, action, isPending] = useActionState(logOut, null);
@@ -11,7 +11,7 @@ export function LogoutButton() {
       <button
         type='submit'
         disabled={isPending}
-        className='link hover:text-primary-500 text-inherit hover:no-underline disabled:cursor-not-allowed disabled:opacity-75'
+        className='link text-inherit hover:text-primary-500 hover:no-underline disabled:cursor-not-allowed disabled:opacity-75'
       >
         Log Out
       </button>

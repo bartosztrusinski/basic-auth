@@ -5,7 +5,7 @@ import { db, type RecoveryCode, type TwoFactorSetup, type VerificationToken } fr
 import { editProfileSchema } from '@/schemas';
 import { auth, redirectToLogin, updateUserSession } from '@/auth/session';
 import { redirectAuth } from '@/auth/util';
-import { type OAuthProvider } from '@/auth/oauth';
+import { type OAuthProvider, type StateData } from '@/auth/oauth';
 import * as actions from '@/auth/actions';
 
 // eslint-disable-next-line @typescript-eslint/no-empty-object-type
@@ -60,25 +60,32 @@ export async function verifyEmail(token: VerificationToken['token']): Promise<Ac
   redirectAuth('/resend-email', { authCode });
 }
 
-export async function linkAccount(provider: OAuthProvider): Promise<ActionState> {
-  const { isSuccess, errors, authCode } = await actions.linkAccount(provider);
+export async function linkAccount(
+  provider: OAuthProvider,
+  stateData: StateData = {},
+): Promise<ActionState> {
+  const { isSuccess, errors, authCode } = await actions.linkAccount(provider, stateData);
 
   await auth.protect({ returnBackUrl: '/profile', authCode });
 
   return isSuccess ? { isSuccess } : { isSuccess, errors };
 }
 
-export async function logOut(): Promise<ActionState> {
-  const { isSuccess, errors } = await actions.logOut();
+export async function unlinkAccount(provider: OAuthProvider): Promise<ActionState> {
+  const { isSuccess, errors, authCode } = await actions.unlinkAccount(provider);
 
-  if (isSuccess) {
-    redirectToLogin({ authCode: null, returnBackUrl: '/profile', syncAuth: true });
+  await auth.protect({ returnBackUrl: '/profile', authCode });
+
+  if (!isSuccess) {
+    return {
+      isSuccess,
+      errors,
+    };
   }
 
-  return {
-    isSuccess,
-    errors,
-  };
+  revalidatePath('/profile');
+
+  return { isSuccess };
 }
 
 export async function logOutEverywhere(): Promise<ActionState> {
@@ -87,7 +94,7 @@ export async function logOutEverywhere(): Promise<ActionState> {
   const { isSuccess, errors } = await actions.logOutEverywhere();
 
   if (isSuccess) {
-    redirectToLogin({ authCode: 'logout-everywhere', returnBackUrl: '/profile', syncAuth: true });
+    redirectToLogin({ authCode: 'logout-everywhere', syncAuth: true });
   }
 
   return {
@@ -119,30 +126,13 @@ export async function deleteCurrentUser(): Promise<ActionState> {
   const { isSuccess, errors } = await actions.deleteCurrentUser();
 
   if (isSuccess) {
-    redirectToLogin({ authCode: 'account-deleted', returnBackUrl: '/profile', syncAuth: true });
+    redirectToLogin({ authCode: 'account-deleted', syncAuth: true });
   }
 
   return {
     isSuccess,
     errors,
   };
-}
-
-export async function unlinkAccount(provider: OAuthProvider): Promise<ActionState> {
-  const { isSuccess, errors, authCode } = await actions.unlinkAccount(provider);
-
-  await auth.protect({ returnBackUrl: '/profile', authCode });
-
-  if (!isSuccess) {
-    return {
-      isSuccess,
-      errors,
-    };
-  }
-
-  revalidatePath('/profile');
-
-  return { isSuccess };
 }
 
 export async function initializeTwoFactorAuth(): Promise<

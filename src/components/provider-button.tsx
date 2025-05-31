@@ -1,17 +1,17 @@
 import { logInWithProvider } from '@/auth/actions';
-import { type OAuthProvider } from '@/auth/oauth';
+import { type OAuthProvider, type StateData } from '@/auth/oauth';
 
 type Props = {
   provider: OAuthProvider;
   name: string;
-};
+} & StateData;
 
-export function ProviderButton({ provider, name }: Props) {
+export function ProviderButton({ provider, name, ...stateData }: Props) {
   return (
     <form
       action={async () => {
         'use server';
-        await logInWithProvider(provider);
+        await logInWithProvider(provider, stateData);
       }}
     >
       <button type='submit' className='btn'>

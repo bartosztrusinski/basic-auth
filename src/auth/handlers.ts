@@ -82,21 +82,31 @@ async function handleOAuthAccountLink(
   state: string | null,
 ): Promise<void> {
   const { userId } = await auth();
+  let redirectUrl: string = config.defaultRedirectRoute;
 
   try {
     if (!userId) {
       throw new Error('User not logged in');
     }
 
-    const { provider, oAuthUser } = await exchangeCodeForOAuthUser(rawProvider, code, state);
+    const { provider, oAuthUser, stateData } = await exchangeCodeForOAuthUser(
+      rawProvider,
+      code,
+      state,
+    );
+
+    if (stateData.redirectUrl) {
+      redirectUrl = stateData.redirectUrl;
+    }
+
     await createProviderAccount(provider, oAuthUser.id, userId);
   } catch (error) {
-    redirectAuth(config.oAuthRedirectRoute, {
+    redirectAuth(redirectUrl, {
       authCode: error instanceof AuthError ? error.authCode : 'oauth-link-failed',
     });
   }
 
-  redirectAuth(config.oAuthRedirectRoute, { authCode: 'oauth-link' });
+  redirectAuth(redirectUrl, { authCode: 'oauth-link' });
 }
 
 async function handleOAuthSignup(
@@ -104,8 +114,19 @@ async function handleOAuthSignup(
   code: string | null,
   state: string | null,
 ): Promise<void> {
+  let redirectUrl: string = config.defaultRedirectRoute;
+
   try {
-    const { provider, oAuthUser } = await exchangeCodeForOAuthUser(rawProvider, code, state);
+    const { provider, oAuthUser, stateData } = await exchangeCodeForOAuthUser(
+      rawProvider,
+      code,
+      state,
+    );
+
+    if (stateData.redirectUrl) {
+      redirectUrl = stateData.redirectUrl;
+    }
+
     const user = await signUpWithProvider(provider, oAuthUser);
     await createUserSession({
       userId: user.id,
@@ -117,5 +138,5 @@ async function handleOAuthSignup(
     });
   }
 
-  redirect(config.defaultRedirectRoute);
+  redirect(redirectUrl);
 }

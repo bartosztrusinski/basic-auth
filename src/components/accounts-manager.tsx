@@ -1,15 +1,15 @@
 import { type Account } from '@/db';
 import { getProviderName } from '@/auth/oauth';
 import { OAuthProviderEnum } from '@/auth/config/providers';
-import { type OAuthProvider } from '@/auth/oauth';
+import { type OAuthProvider, type StateData } from '@/auth/oauth';
 import { currentUser } from '@/auth/session';
 import { AccountItem } from '@/components/account-item';
 
 type Props = {
   accounts: Account[];
-};
+} & StateData;
 
-export async function AccountsManager({ accounts }: Props) {
+export async function AccountsManager({ accounts, ...stateData }: Props) {
   const user = await currentUser();
 
   if (!user) {
@@ -27,6 +27,7 @@ export async function AccountsManager({ accounts }: Props) {
       name={getProviderName(provider)}
       isLinked={isLinked(provider)}
       isUnlinkingEnabled={isUnlinkingEnabled}
+      {...stateData}
     />
   ));
 }

@@ -4,7 +4,6 @@ const appName = env.NEXT_PUBLIC_APP_NAME ?? 'Basic Auth';
 
 const baseUrl = env.NEXT_PUBLIC_BASE_URL ?? 'http://localhost:3000';
 const defaultRedirectRoute = '/';
-const oAuthRedirectRoute = '/profile';
 const loginRoute = '/log-in';
 const emailVerificationRoute = '/verify-email';
 
@@ -27,10 +26,9 @@ const recoveryCodeLength = 12;
 const logoFilename = 'logo.png';
 
 export default Object.freeze({
-  baseUrl,
   appName,
+  baseUrl,
   defaultRedirectRoute,
-  oAuthRedirectRoute,
   loginRoute,
   emailVerificationRoute,
   apiBaseRoute,

@@ -2,54 +2,43 @@ import 'server-only';
 import { env } from '@/env';
 import config from '@/auth/config';
 
+const fromEmailAddress = env.FROM_EMAIL_ADDRESS ?? 'onboarding@resend.dev';
+
+const sessionCookieKey = 'session-id';
+const codeVerifierCookieKey = 'oauth-code-verifier';
+
 const oAuthCookiesDefaultExpirationInSeconds = 60 * 5;
+const sessionExpirationInSeconds = env.SESSION_EXPIRATION_IN_SECONDS ?? 60 * 60 * 24 * 7;
+const verificationTokenExpirationInSeconds = 60 * 60 * 12;
+const twoFactorSetupExpirationInSeconds = 60 * 5;
+const twoFactorAttemptExpirationInSeconds = 60 * 5;
+
 const secureCookieAttributes = {
   secure: true,
   httpOnly: true,
   sameSite: 'lax',
 } as const;
 
-const sessionExpirationInSeconds = env.SESSION_EXPIRATION_IN_SECONDS ?? 60 * 60 * 24 * 7;
-const sessionCookieKey = 'session-id';
 const sessionCookieAttributes = {
   ...secureCookieAttributes,
   maxAge: sessionExpirationInSeconds,
   path: '/',
 };
 
-const stateExpirationInSeconds = oAuthCookiesDefaultExpirationInSeconds;
-const stateCookieKey = 'oauth-state';
-const stateCookieAttributes = {
+const oAuthCookieAttributes = {
   ...secureCookieAttributes,
-  maxAge: stateExpirationInSeconds,
+  maxAge: oAuthCookiesDefaultExpirationInSeconds,
   path: `${config.apiBaseRoute}/${config.apiOAuthEndpoint}`,
 };
-
-const codeVerifierExpirationInSeconds = oAuthCookiesDefaultExpirationInSeconds;
-const codeVerifierCookieKey = 'oauth-code-verifier';
-const codeVerifierCookieAttributes = {
-  ...secureCookieAttributes,
-  maxAge: codeVerifierExpirationInSeconds,
-  path: `${config.apiBaseRoute}/${config.apiOAuthEndpoint}`,
-};
-
-const verificationTokenExpirationInSeconds = 60 * 60 * 12;
-const twoFactorSetupExpirationInSeconds = 60 * 5;
-const twoFactorAttemptExpirationInSeconds = 60 * 5;
-const fromEmailAddress = env.FROM_EMAIL_ADDRESS ?? 'onboarding@resend.dev';
 
 export default Object.freeze({
-  sessionExpirationInSeconds,
+  fromEmailAddress,
   sessionCookieKey,
-  sessionCookieAttributes,
-  stateExpirationInSeconds,
-  stateCookieKey,
-  stateCookieAttributes,
-  codeVerifierExpirationInSeconds,
   codeVerifierCookieKey,
-  codeVerifierCookieAttributes,
+  sessionExpirationInSeconds,
   verificationTokenExpirationInSeconds,
   twoFactorSetupExpirationInSeconds,
   twoFactorAttemptExpirationInSeconds,
-  fromEmailAddress,
+  sessionCookieAttributes,
+  oAuthCookieAttributes,
 });

@@ -3,7 +3,7 @@ import { getSearchParam } from '@/auth/util';
 import config from '@/auth/config';
 
 type Props = {
-  returnUrl?: string;
+  returnUrl?: string | null;
   searchParams?: Promise<Record<string, string | undefined>>;
 };
 

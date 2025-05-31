@@ -37,11 +37,18 @@ type OAuthProviderUser<Schema extends z.ZodSchema> = {
   userMapper: (providerUser: z.infer<Schema>) => OAuthUser;
 };
 
-async function generateAuthorizationUrl(provider: OAuthProvider) {
+type StateData = {
+  redirectUrl?: string | null;
+};
+
+async function generateAuthorizationUrl(
+  provider: OAuthProvider,
+  stateData: StateData = {},
+): Promise<URL> {
   const { authorizationUrl, clientId, scope } = providers[provider];
   const responseType = 'code';
   const redirectUrl = getRedirectUrl(provider);
-  const state = await generateState();
+  const state = await generateState(stateData);
   const codeVerifier = await generateCodeVerifier();
   const codeChallenge = await generateCodeChallenge(codeVerifier);
   const codeChallengeMethod = 'S256';
@@ -61,7 +68,11 @@ async function exchangeCodeForOAuthUser(
   rawProvider: string | undefined,
   code: string | null,
   state: string | null,
-) {
+): Promise<{
+  oAuthUser: OAuthUser;
+  provider: OAuthProvider;
+  stateData: StateData;
+}> {
   const { success: isValidProvider, data: provider } = OAuthProviderEnum.safeParse(rawProvider);
 
   if (!isValidProvider) {
@@ -76,16 +87,16 @@ async function exchangeCodeForOAuthUser(
     throw new Error('Missing state');
   }
 
-  const isValidState = await validateState(state);
+  const stateData = await validateState(state);
 
-  if (!isValidState) {
+  if (!stateData) {
     throw new Error('Invalid state');
   }
 
   const { tokenType, accessToken } = await fetchOAuthToken(provider, code);
   const oAuthUser = await fetchOAuthUser(provider, accessToken, tokenType);
 
-  return { oAuthUser, provider };
+  return { oAuthUser, provider, stateData };
 }
 
 async function fetchOAuthToken(provider: OAuthProvider, code: string) {
@@ -238,21 +249,17 @@ function getRedirectUrl(provider: OAuthProvider) {
 }
 
 async function validateState(state: string) {
-  const storedState = await getStateCookie();
+  const storedState = await getStateCookie(state);
 
-  if (!storedState) {
-    return false;
-  }
+  await deleteStateCookie(state);
 
-  await deleteStateCookie();
-
-  return state === storedState;
+  return storedState;
 }
 
-async function generateState() {
+async function generateState(data: StateData = {}) {
   const state = generateRandomString(64);
 
-  await setStateCookie(state);
+  await setStateCookie(state, data);
 
   return state;
 }
@@ -283,4 +290,4 @@ export {
   getRedirectUrl,
   createProvider,
 };
-export type { OAuthUser, OAuthProvider, OAuthProviderConfig, OAuthProviderUser };
+export type { OAuthUser, OAuthProvider, OAuthProviderConfig, OAuthProviderUser, StateData };
