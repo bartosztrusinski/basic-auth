@@ -43,7 +43,6 @@ export function AddPasswordForm({ email }: Props) {
 
   function handleClose() {
     setErrors(null);
-    formRef.current?.reset();
   }
 
   return (

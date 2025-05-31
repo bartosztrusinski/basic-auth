@@ -25,7 +25,7 @@ export function Dialog({
   onClose,
   shouldCloseOnBackdropClick = true,
 }: DialogProps) {
-  const ref = useRef<HTMLDialogElement>(null);
+  const dialogRef = useRef<HTMLDialogElement>(null);
   const [internalIsOpen, setInternalIsOpen] = useState(false);
   const isOpen = externalIsOpen ?? internalIsOpen;
   const isControlled = externalIsOpen !== undefined;
@@ -39,7 +39,7 @@ export function Dialog({
   }
 
   function handleBackdropClick(event: MouseEvent<HTMLDialogElement>) {
-    const isBackdropClick = event.target === ref.current;
+    const isBackdropClick = event.target === dialogRef.current;
 
     if (shouldCloseOnBackdropClick && isBackdropClick) {
       closeDialog();
@@ -48,9 +48,9 @@ export function Dialog({
 
   useEffect(() => {
     if (isOpen) {
-      ref.current?.showModal();
+      dialogRef.current?.showModal();
     } else {
-      ref.current?.close();
+      dialogRef.current?.close();
     }
   }, [isOpen]);
 
@@ -86,7 +86,7 @@ export function Dialog({
         })}
       {isOpen && (
         <dialog
-          ref={ref}
+          ref={dialogRef}
           onClose={closeDialog}
           onMouseDown={handleBackdropClick}
           className='bg-transparent shadow-lg shadow-neutral-950 backdrop:bg-neutral-950/50 backdrop:backdrop-blur-sm'

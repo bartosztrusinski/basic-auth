@@ -84,7 +84,7 @@ export function CodeInput({
   useEffect(() => {
     if (externalValue && !onChange) {
       console.error(
-        'You provided a `value` prop to an OTP Input without an `onChange` handler. This will render a read-only field. If the field should be mutable use `defaultValue`',
+        'You provided a `value` prop without an `onChange` handler. This will render a read-only field. If the field should be mutable use `defaultValue`',
       );
     }
   }, [externalValue, onChange]);
