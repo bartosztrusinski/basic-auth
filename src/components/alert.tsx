@@ -10,7 +10,7 @@ type Props = {
 };
 
 const variants: Record<Variant, { classes: string; accentChar: ReactNode }> = {
-  default: { classes: 'border-neutral-700', accentChar: '🔐' },
+  default: { classes: 'border-neutral-600', accentChar: '🔐' },
   success: {
     classes: 'bg-success-950 text-success-500 border-success-900',
     accentChar: <SuccessIcon />,
@@ -30,16 +30,18 @@ export function Alert({ message, variant = 'default' }: Props) {
 
   return (
     <div
-      className={`flex items-center gap-2 text-wrap rounded border p-2 text-left text-sm ${classes}`}
+      className={`flex items-center gap-2 text-wrap rounded border p-2 text-left text-sm shadow ${classes}`}
     >
-      <span>{accentChar}</span>
-      <span className='font-light'>
-        {Array.isArray(message) ? (
-          message.map((err, index) => <p key={index}>{err}</p>)
-        ) : (
-          <p>{message}</p>
-        )}
-      </span>
+      {accentChar}
+      {Array.isArray(message) ? (
+        <div>
+          {message.map((err, index) => (
+            <p key={index}>{err}</p>
+          ))}
+        </div>
+      ) : (
+        <p>{message}</p>
+      )}
     </div>
   );
 }
