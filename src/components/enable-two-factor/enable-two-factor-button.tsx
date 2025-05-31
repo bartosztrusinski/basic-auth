@@ -4,7 +4,11 @@ import { toast } from 'sonner';
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { getAuthMessage } from '@/auth/message';
-import { ClassyDialog } from '@/components/classy-dialog';
+import {
+  ClassyDialog,
+  ClassyDialogDescription,
+  ClassyDialogTitle,
+} from '@/components/classy-dialog';
 import { steps, type TwoFactorData } from '@/components/enable-two-factor';
 
 export function EnableTwoFactorButton() {
@@ -45,10 +49,18 @@ export function EnableTwoFactorButton() {
       trigger={<button className='btn'>Enable Two-Factor Authentication</button>}
       onClose={handleClose}
       shouldCloseOnBackdropClick={false}
-      heading={step.title}
-      description={step.description}
     >
-      {(closeDialog) => <step.Component {...data} onSuccess={goToNextStep} onClose={closeDialog} />}
+      {(closeDialog) => (
+        <>
+          <ClassyDialogTitle>
+            <h2>{step.title}</h2>
+          </ClassyDialogTitle>
+          <ClassyDialogDescription>
+            <p>{step.description}</p>
+          </ClassyDialogDescription>
+          <step.Component {...data} onSuccess={goToNextStep} onClose={closeDialog} />
+        </>
+      )}
     </ClassyDialog>
   );
 }

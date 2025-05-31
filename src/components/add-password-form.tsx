@@ -5,7 +5,11 @@ import { toast } from 'sonner';
 import { type User } from '@/db';
 import { addPassword } from '@/actions';
 import { Alert } from '@/components/alert';
-import { ClassyDialog } from '@/components/classy-dialog';
+import {
+  ClassyDialog,
+  ClassyDialogDescription,
+  ClassyDialogTitle,
+} from '@/components/classy-dialog';
 import { getAuthMessage } from '@/auth/message';
 
 type Props = {
@@ -46,12 +50,13 @@ export function AddPasswordForm({ email }: Props) {
   }
 
   return (
-    <ClassyDialog
-      trigger={<button className='btn'>Add Password</button>}
-      onClose={handleClose}
-      heading='Set Password'
-      description='After setting a password, you will be able to log in with your email and password.'
-    >
+    <ClassyDialog trigger={<button className='btn'>Add Password</button>} onClose={handleClose}>
+      <ClassyDialogTitle>
+        <h2>Set Password</h2>
+      </ClassyDialogTitle>
+      <ClassyDialogDescription>
+        <p>After setting a password, you will be able to log in with your email and password.</p>
+      </ClassyDialogDescription>
       <form ref={formRef} action={action} onSubmit={handleSubmit}>
         <input name='email' type='hidden' className='hidden' defaultValue={email} />
 
