@@ -38,7 +38,7 @@ export function AccountItem({ provider, name, isLinked, isUnlinkingEnabled, ...s
   }
 
   return (
-    <div className='flex justify-between rounded-lg border border-neutral-600 p-3 shadow-md'>
+    <div className='flex justify-between rounded-xl border border-neutral-700 p-3 shadow-lg'>
       <div className='flex items-center gap-2'>
         <span className='font-semibold'>{name}</span>
         {isLinked && (

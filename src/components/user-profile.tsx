@@ -51,7 +51,7 @@ export function UserProfile({ user, roles }: Props) {
   }
 
   return (
-    <div className='space-y-5 rounded-lg border border-neutral-600 p-6 pt-4'>
+    <div className='space-y-5 rounded-xl border border-neutral-700 p-4 shadow-lg'>
       <div className='flex flex-col break-all'>
         <span className='font-medium text-neutral-400'>Email</span>
         {user.email}
