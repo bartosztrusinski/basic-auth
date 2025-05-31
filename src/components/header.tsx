@@ -30,10 +30,10 @@ const links: Route[] = [
 export function Header() {
   return (
     <header>
-      <nav className='flex flex-wrap justify-between gap-x-6 gap-y-4 bg-neutral-800 p-4'>
-        <ul className='flex items-center gap-5'>
-          <li>
-            <Link href='/' className='link block hover:no-underline'>
+      <nav className='flex flex-wrap justify-between gap-3 bg-neutral-800 p-3 sm:px-6 sm:py-4'>
+        <ul className='flex items-center gap-4 sm:gap-6'>
+          <li className='shrink-0'>
+            <Link href='/' className='link hover:no-underline'>
               <Image src='/logo.png' alt='App logo' width={32} height={32} />
             </Link>
           </li>

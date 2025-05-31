@@ -9,7 +9,7 @@ export function AuthNav() {
   const { isLoggedIn } = useAuth();
 
   return (
-    <ul className='flex items-center gap-5'>
+    <ul className='flex items-center gap-4 sm:gap-6'>
       {isLoggedIn ? (
         <>
           <li>
