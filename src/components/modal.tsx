@@ -17,40 +17,40 @@ import {
 } from 'react';
 import { callAll } from '@/util';
 
-type DialogContext = {
+type ModalContext = {
   isOpen: boolean;
   setIsOpen: Dispatch<SetStateAction<boolean>>;
 };
 
-type DialogContentProps = {
+type ModalContentProps = {
   children: ReactNode;
   shouldCloseOnBackdropClick?: boolean;
 };
 
-type DialogButtonProps = {
+type ModalButtonProps = {
   children: ReactElement<Record<string, unknown> & { onClick?: MouseEventHandler }>;
 };
 
-const DialogContext = createContext<DialogContext>({
+const ModalContext = createContext<ModalContext>({
   isOpen: false,
   setIsOpen: () => null,
 });
 
-function useDialog(): DialogContext {
-  return useContext(DialogContext);
+function useModal(): ModalContext {
+  return useContext(ModalContext);
 }
 
-function Dialog({ children }: { children: ReactNode }) {
+function Modal({ children }: { children: ReactNode }) {
   const [isOpen, setIsOpen] = useState(false);
 
-  return <DialogContext.Provider value={{ isOpen, setIsOpen }}>{children}</DialogContext.Provider>;
+  return <ModalContext.Provider value={{ isOpen, setIsOpen }}>{children}</ModalContext.Provider>;
 }
 
-function DialogContent({ children, shouldCloseOnBackdropClick = true }: DialogContentProps) {
+function ModalContent({ children, shouldCloseOnBackdropClick = true }: ModalContentProps) {
   const dialogRef = useRef<HTMLDialogElement>(null);
-  const { isOpen, setIsOpen } = useDialog();
+  const { isOpen, setIsOpen } = useModal();
 
-  function closeDialog() {
+  function closeModal() {
     setIsOpen(false);
   }
 
@@ -58,7 +58,7 @@ function DialogContent({ children, shouldCloseOnBackdropClick = true }: DialogCo
     const isBackdropClick = event.target === dialogRef.current;
 
     if (shouldCloseOnBackdropClick && isBackdropClick) {
-      closeDialog();
+      closeModal();
     }
   }
 
@@ -77,7 +77,7 @@ function DialogContent({ children, shouldCloseOnBackdropClick = true }: DialogCo
   return (
     <dialog
       ref={dialogRef}
-      onClose={closeDialog}
+      onClose={closeModal}
       onMouseDown={handleBackdropClick}
       className='bg-transparent shadow-lg shadow-neutral-950 backdrop:bg-neutral-950/50 backdrop:backdrop-blur-sm'
     >
@@ -86,22 +86,22 @@ function DialogContent({ children, shouldCloseOnBackdropClick = true }: DialogCo
   );
 }
 
-function DialogOpenButton({ children }: DialogButtonProps) {
-  const { setIsOpen } = useDialog();
+function ModalOpenButton({ children }: ModalButtonProps) {
+  const { setIsOpen } = useModal();
 
-  return <DialogButton onClick={() => setIsOpen(true)}>{children}</DialogButton>;
+  return <ModalButton onClick={() => setIsOpen(true)}>{children}</ModalButton>;
 }
 
-function DialogCloseButton({ children }: DialogButtonProps) {
-  const { setIsOpen } = useDialog();
+function ModalCloseButton({ children }: ModalButtonProps) {
+  const { setIsOpen } = useModal();
 
-  return <DialogButton onClick={() => setIsOpen(false)}>{children}</DialogButton>;
+  return <ModalButton onClick={() => setIsOpen(false)}>{children}</ModalButton>;
 }
 
-function DialogButton({ children, onClick }: { onClick: MouseEventHandler } & DialogButtonProps) {
+function ModalButton({ children, onClick }: { onClick: MouseEventHandler } & ModalButtonProps) {
   if (!isValidElement(children)) {
     throw new Error(`
-      ${DialogButton.name} expects a single React element as its child.`);
+      ${ModalButton.name} expects a single React element as its child.`);
   }
 
   return cloneElement(children, {
@@ -110,4 +110,4 @@ function DialogButton({ children, onClick }: { onClick: MouseEventHandler } & Di
   });
 }
 
-export { Dialog, DialogContent, DialogOpenButton, DialogCloseButton };
+export { Modal, ModalContent, ModalOpenButton, ModalCloseButton };
