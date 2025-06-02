@@ -1,21 +1,27 @@
 'use client';
 
 import { useEffect, useRef, useState } from 'react';
+import { useRouter } from 'next/navigation';
+import { toast } from 'sonner';
+import { getAuthMessage } from '@/auth/message';
 import { type TwoFactorData } from '@/components/enable-two-factor';
+import { ModalCloseButton } from '@/components/modal';
+import { formatCode } from '@/util';
 
 type Props = {
   recoveryCodes: TwoFactorData['recoveryCodes'];
-  onClose?: () => void;
 };
 
-function formatCode(code: string, { delimiter = '-', blockLength = 4 } = {}) {
-  const regex = new RegExp(`.{${blockLength}}(?!$)`, 'g');
-  return code.replace(regex, `$&${delimiter}`);
-}
-
-export function RecoveryCodes({ recoveryCodes, onClose }: Props) {
+export function RecoveryCodes({ recoveryCodes }: Props) {
   const [isCopied, setIsCopied] = useState(false);
   const timeoutId = useRef<number>();
+  const router = useRouter();
+
+  function handleClose() {
+    const { message } = getAuthMessage('two-factor-enabled');
+    toast.success(message);
+    router.refresh();
+  }
 
   async function copyCodesToClipboard() {
     await navigator.clipboard.writeText(recoveryCodes.join('\n'));
@@ -51,9 +57,11 @@ export function RecoveryCodes({ recoveryCodes, onClose }: Props) {
       >
         {isCopied ? 'Copied!' : 'Copy to Clipboard'}
       </button>
-      <button className='btn text-sm font-bold' onClick={onClose}>
-        I have saved Recovery Codes
-      </button>
+      <ModalCloseButton>
+        <button className='btn text-sm font-bold' onClick={handleClose}>
+          I have saved Recovery Codes
+        </button>
+      </ModalCloseButton>
     </>
   );
 }

@@ -1,88 +1,69 @@
 'use client';
 
-import { useActionState, useEffect, useId, useRef } from 'react';
-import Image from 'next/image';
-import { enableTwoFactorAuth } from '@/actions';
-import { Alert } from '@/components/alert';
-import { CodeInput } from '@/components/code-input';
-import { type TwoFactorData } from '@/components/enable-two-factor';
+import { useState } from 'react';
+import { type RecoveryCode, type TwoFactorSetup } from '@/db';
+import { ModalTitle, ModalDescription } from '@/components/classy-modal';
+import { InitializeTwoFactorForm } from './initialize-two-factor-form';
+import { TwoFactorCodeForm } from './two-factor-code-form';
+import { RecoveryCodes } from './recovery-codes';
 
-type Props = {
-  secret: TwoFactorData['secret'];
-  qrCode: TwoFactorData['qrCode'];
-  onSuccess?: (data: Partial<TwoFactorData>) => void;
+export type TwoFactorData = {
+  qrCode: string;
+  secret: TwoFactorSetup['secret'];
+  recoveryCodes: RecoveryCode['code'][];
 };
 
-export function EnableTwoFactorForm({ secret, qrCode, onSuccess }: Props) {
-  const id = useId();
-  const formRef = useRef<HTMLFormElement>(null);
-  const [state, action, isPending] = useActionState(enableTwoFactorAuth, {
-    isSuccess: false,
-  });
+const formSteps = [
+  {
+    title: 'Enable Two-Factor Authentication',
+    description:
+      'To enhance your account security, it is recommended to enable 2FA authentication. This will require a second form of verification in addition to your password. You will need an authenticator app.',
+    Component: InitializeTwoFactorForm,
+  },
+  {
+    title: 'Enable Two-Factor Authentication',
+    description:
+      'Scan the QR code below with your authenticator app or enter the code manually to set up two-factor authentication.',
+    Component: TwoFactorCodeForm,
+  },
+  {
+    title: 'Two-Factor Authentication Enabled',
+    description:
+      'Two-Factor Authentication has been enabled! Please save your recovery codes in a safe place. You will need them to access your account if you lose access to your authenticator app.',
+    Component: RecoveryCodes,
+  },
+];
 
-  useEffect(() => {
-    if (state.isSuccess) {
-      const { recoveryCodes } = state;
-      onSuccess?.({ recoveryCodes });
-    }
-  }, [state, onSuccess]);
+export function EnableTwoFactorForm() {
+  const [currentStep, setCurrentStep] = useState(0);
+  const [data, setData] = useState<TwoFactorData>({
+    qrCode: '',
+    secret: '',
+    recoveryCodes: [],
+  });
+  const formStep = formSteps[currentStep];
+
+  if (!formStep) {
+    return null;
+  }
+
+  const { title, description, Component } = formStep;
+
+  function goToNextStep(data: Partial<TwoFactorData>) {
+    setData((prevData) => ({
+      ...prevData,
+      ...data,
+    }));
+    setCurrentStep((prevStep) => prevStep + 1);
+  }
 
   return (
-    <div className='flex flex-col items-center gap-4'>
-      <strong
-        className='break-all rounded bg-neutral-800 px-3 py-1.5 font-mono font-normal'
-        aria-label='Two-factor authentication secret'
-      >
-        {secret}
-      </strong>
-      <Image
-        src={qrCode}
-        alt='QR code for Two-Factor Authentication'
-        width={240}
-        height={240}
-        className='rounded'
-      />
-      <form ref={formRef} action={action} className='self-stretch'>
-        <div className='space-y-3'>
-          <div className='mx-auto max-w-72'>
-            <label htmlFor={id}>Two-Factor Authentication Code</label>
-            <CodeInput
-              id={id}
-              name='code'
-              required
-              autoFocus
-              className='peer rounded-sm'
-              focusClassName='outline-2 outline-offset-2 outline-primary-500'
-              containerClassName='flex gap-1 mt-1 text-xl'
-              onComplete={({ isPaste }) => {
-                if (isPaste) {
-                  formRef.current?.requestSubmit();
-                }
-              }}
-            >
-              {(slots) =>
-                slots.map((slot, slotIndex) => (
-                  <div
-                    key={slotIndex}
-                    className={`flex aspect-square min-h-8 w-full min-w-8 place-content-center place-items-center rounded-sm bg-neutral-800 text-neutral-50 outline-2 outline-primary-500 ${slot.isActive ? 'peer-focus:outline' : ''}`}
-                  >
-                    {slot.value}
-                    {slot.hasCaret && (
-                      <div className='pointer-events-none h-[1em] w-[0.1em] animate-caret-blink bg-current'></div>
-                    )}
-                  </div>
-                ))
-              }
-            </CodeInput>
-          </div>
-
-          {state.errors && <Alert variant='error' message={state.errors} />}
-        </div>
-
-        <button disabled={isPending} className='btn mt-5 text-sm'>
-          {isPending ? 'Confirming...' : 'Confirm'}
-        </button>
-      </form>
-    </div>
+    <>
+      <ModalTitle>
+        <h2>{title}</h2>
+      </ModalTitle>
+      <ModalDescription>{description}</ModalDescription>
+      <Component {...data} onSuccess={goToNextStep} />
+    </>
   );
 }

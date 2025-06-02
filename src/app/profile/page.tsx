@@ -3,11 +3,11 @@ import { redirectToLogin, currentUser } from '@/auth/session';
 import { Protect } from '@/auth/components/protect';
 import { AccountsManager } from '@/components/accounts-manager';
 import { UserProfile } from '@/components/user-profile';
-import { AddPasswordForm } from '@/components/add-password-form';
-import { LogoutEverywhereButton } from '@/components/logout-everywhere-button';
-import { DeleteUserButton } from '@/components/delete-user-button';
-import { EnableTwoFactorButton } from '@/components/enable-two-factor';
-import { DisableTwoFactorButton } from '@/components/disable-two-factor-button';
+import { AddPasswordModal } from '@/components/add-password';
+import { EnableTwoFactorModal } from '@/components/enable-two-factor';
+import { DisableTwoFactorModal } from '@/components/disable-two-factor';
+import { LogoutEverywhereModal } from '@/components/logout-everywhere';
+import { DeleteUserModal } from '@/components/delete-user';
 
 export default async function ProfilePage() {
   const user = await currentUser();
@@ -47,13 +47,13 @@ export default async function ProfilePage() {
           </section>
           <Protect when={(user) => user.hasPassword}>
             <section>
-              <AddPasswordForm email={user.email} />
+              <AddPasswordModal email={user.email} />
               <p className='pt-2 text-sm text-neutral-400'>Set a password for your account</p>
             </section>
           </Protect>
           <Protect when={(user) => user.isTwoFactorEnabled || !user.hasPassword}>
             <section>
-              <EnableTwoFactorButton />
+              <EnableTwoFactorModal />
               <p className='pt-2 text-sm text-neutral-400'>
                 Enable Two-Factor authentication for your account
               </p>
@@ -61,20 +61,20 @@ export default async function ProfilePage() {
           </Protect>
           <Protect when={(user) => !user.isTwoFactorEnabled}>
             <section>
-              <DisableTwoFactorButton />
+              <DisableTwoFactorModal />
               <p className='pt-2 text-sm text-neutral-400'>
                 Disable Two-Factor authentication for your account
               </p>
             </section>
           </Protect>
           <section>
-            <LogoutEverywhereButton />
+            <LogoutEverywhereModal />
             <p className='pt-2 text-sm text-neutral-400'>
               This will log you out from all devices and sessions
             </p>
           </section>
           <section>
-            <DeleteUserButton />
+            <DeleteUserModal />
             <p className='pt-2 text-sm text-neutral-400'>
               This action is irreversible and will delete all your data
             </p>
