@@ -4,7 +4,7 @@ import {
   ModalButtonsContainer,
   ModalConfirmButton,
   ModalCancelButton,
-} from '@/components/classy-modal';
+} from '@/components/ui/classy-modal';
 
 export function LogoutEverywhereForm() {
   const [, action, isPending] = useActionState(logOutEverywhere, null);

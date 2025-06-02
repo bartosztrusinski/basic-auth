@@ -2,7 +2,7 @@
 
 import { useActionState, useEffect } from 'react';
 import { initializeTwoFactorAuth } from '@/actions';
-import { Alert } from '@/components/alert';
+import { Alert } from '@/components/ui/alert';
 import { type TwoFactorData } from '@/components/enable-two-factor';
 
 type Props = {

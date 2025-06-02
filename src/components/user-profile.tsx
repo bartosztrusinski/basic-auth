@@ -5,7 +5,7 @@ import { toast } from 'sonner';
 import { type User } from '@/db';
 import { useCurrentUser } from '@/auth/hooks/use-current-user';
 import { editProfile } from '@/actions';
-import { Alert } from '@/components/alert';
+import { Alert } from '@/components/ui/alert';
 
 type Props = {
   user: Pick<User, 'email' | 'name' | 'role'>;

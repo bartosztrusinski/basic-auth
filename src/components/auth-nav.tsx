@@ -2,7 +2,7 @@
 
 import { useAuth } from '@/auth/hooks/use-auth';
 import config from '@/auth/config';
-import { NavLink } from '@/components/nav-link';
+import { NavLink } from '@/components/ui/nav-link';
 import { LogoutButton } from '@/components/logout-button';
 
 export function AuthNav() {

@@ -4,8 +4,8 @@ import { useActionState, Fragment, useRef, useId } from 'react';
 import { type TwoFactorAttempt } from '@/db';
 import { useRecoveryCode } from '@/auth/actions';
 import config from '@/auth/config';
-import { Alert } from '@/components/alert';
-import { CodeInput } from '@/components/code-input';
+import { Alert } from '@/components/ui/alert';
+import { CodeInput } from '@/components/ui/code-input';
 
 type Props = {
   token: TwoFactorAttempt['token'];

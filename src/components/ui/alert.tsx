@@ -1,6 +1,6 @@
 import { type ReactNode } from 'react';
-import { ErrorIcon } from '@/components/error-icon';
-import { SuccessIcon } from '@/components/success-icon';
+import { ErrorIcon } from '@/components/ui/error-icon';
+import { SuccessIcon } from '@/components/ui/success-icon';
 
 type Variant = 'default' | 'success' | 'error';
 

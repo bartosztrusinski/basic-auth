@@ -1,12 +1,12 @@
 'use client';
 
-import { Modal, ModalContent, ModalOpenButton } from '@/components/modal';
+import { Modal, ModalContent, ModalOpenButton } from '@/components/ui/modal';
 import {
   ModalCloseButton,
   ModalContainer,
   ModalDescription,
   ModalTitle,
-} from '@/components/classy-modal';
+} from '@/components/ui/classy-modal';
 import { DisableTwoFactorForm } from './disable-two-factor-form';
 
 export function DisableTwoFactorModal() {

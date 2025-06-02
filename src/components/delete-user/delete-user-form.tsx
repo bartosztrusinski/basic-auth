@@ -4,7 +4,7 @@ import {
   ModalButtonsContainer,
   ModalCancelButton,
   ModalConfirmButton,
-} from '@/components/classy-modal';
+} from '@/components/ui/classy-modal';
 
 export function DeleteUserForm() {
   const [, action, isPending] = useActionState(deleteCurrentUser, null);

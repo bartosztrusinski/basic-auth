@@ -1,7 +1,7 @@
 import Link from 'next/link';
 import Image from 'next/image';
+import { NavLink } from '@/components/ui/nav-link';
 import { AuthNav } from '@/components/auth-nav';
-import { NavLink } from '@/components/nav-link';
 
 type Route = {
   href: string;

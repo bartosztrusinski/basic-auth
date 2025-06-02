@@ -1,13 +1,13 @@
 'use client';
 
 import { type ComponentProps } from 'react';
-import { Modal, ModalContent, ModalOpenButton } from '@/components/modal';
+import { Modal, ModalContent, ModalOpenButton } from '@/components/ui/modal';
 import {
   ModalTitle,
   ModalDescription,
   ModalCloseButton,
   ModalContainer,
-} from '@/components/classy-modal';
+} from '@/components/ui/classy-modal';
 import { AddPasswordForm } from './add-password-form';
 
 type Props = ComponentProps<typeof AddPasswordForm>;

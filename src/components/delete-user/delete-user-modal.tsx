@@ -1,12 +1,12 @@
 'use client';
 
-import { Modal, ModalContent, ModalOpenButton } from '@/components/modal';
+import { Modal, ModalContent, ModalOpenButton } from '@/components/ui/modal';
 import {
   ModalContainer,
   ModalTitle,
   ModalDescription,
   ModalCloseButton,
-} from '@/components/classy-modal';
+} from '@/components/ui/classy-modal';
 import { DeleteUserForm } from './delete-user-form';
 
 export function DeleteUserModal() {

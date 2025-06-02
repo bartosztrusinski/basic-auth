@@ -4,7 +4,7 @@ import { useActionState, useId } from 'react';
 import Link from 'next/link';
 import { signUp } from '@/auth/actions';
 import config from '@/auth/config';
-import { Alert } from '@/components/alert';
+import { Alert } from '@/components/ui/alert';
 import { AuthAlert } from '@/components/auth-alert';
 
 export function SignupForm() {

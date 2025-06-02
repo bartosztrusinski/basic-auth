@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import { type RecoveryCode, type TwoFactorSetup } from '@/db';
-import { ModalTitle, ModalDescription } from '@/components/classy-modal';
+import { ModalTitle, ModalDescription } from '@/components/ui/classy-modal';
 import { InitializeTwoFactorForm } from './initialize-two-factor-form';
 import { TwoFactorCodeForm } from './two-factor-code-form';
 import { RecoveryCodes } from './recovery-codes';

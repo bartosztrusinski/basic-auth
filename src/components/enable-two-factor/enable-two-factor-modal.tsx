@@ -1,7 +1,7 @@
 'use client';
 
-import { Modal, ModalContent, ModalOpenButton } from '@/components/modal';
-import { ModalCloseButton, ModalContainer } from '@/components/classy-modal';
+import { Modal, ModalContent, ModalOpenButton } from '@/components/ui/modal';
+import { ModalCloseButton, ModalContainer } from '@/components/ui/classy-modal';
 import { EnableTwoFactorForm } from './enable-two-factor-form';
 
 export function EnableTwoFactorModal() {

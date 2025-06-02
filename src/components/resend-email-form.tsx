@@ -2,7 +2,7 @@
 
 import { useActionState, useId } from 'react';
 import { resendVerificationEmail } from '@/auth/actions';
-import { Alert } from '@/components/alert';
+import { Alert } from '@/components/ui/alert';
 import { AuthAlert } from '@/components/auth-alert';
 
 export function ResendEmailForm() {

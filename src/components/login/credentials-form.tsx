@@ -2,7 +2,7 @@
 
 import { useActionState, useEffect, useId } from 'react';
 import { logIn } from '@/auth/actions';
-import { Alert } from '@/components/alert';
+import { Alert } from '@/components/ui/alert';
 
 type Props = {
   onSuccess?: (data: Awaited<ReturnType<typeof logIn>>['data']) => void;

@@ -5,7 +5,7 @@ import { useRouter } from 'next/navigation';
 import { toast } from 'sonner';
 import { getAuthMessage } from '@/auth/message';
 import { type TwoFactorData } from '@/components/enable-two-factor';
-import { ModalCloseButton } from '@/components/modal';
+import { ModalCloseButton } from '@/components/ui/modal';
 import { formatCode } from '@/util';
 
 type Props = {

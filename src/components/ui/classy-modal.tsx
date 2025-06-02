@@ -1,5 +1,5 @@
 import { type ComponentProps, type ReactNode } from 'react';
-import { ModalCloseButton as UnstyledModalCloseButton } from '@/components/modal';
+import { ModalCloseButton as UnstyledModalCloseButton } from '@/components/ui/modal';
 
 function ModalContainer({ children, className }: ComponentProps<'div'>) {
   return (

@@ -6,7 +6,7 @@ import {
   ModalButtonsContainer,
   ModalConfirmButton,
   ModalCancelButton,
-} from '@/components/classy-modal';
+} from '@/components/ui/classy-modal';
 
 export function DisableTwoFactorForm() {
   const [, action, isActionPending] = useActionState(disableTwoFactorAuth, null);

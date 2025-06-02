@@ -3,8 +3,8 @@
 import { useActionState, useEffect, useId, useRef } from 'react';
 import Image from 'next/image';
 import { enableTwoFactorAuth } from '@/actions';
-import { Alert } from '@/components/alert';
-import { CodeInput } from '@/components/code-input';
+import { Alert } from '@/components/ui/alert';
+import { CodeInput } from '@/components/ui/code-input';
 import { type TwoFactorData } from '@/components/enable-two-factor';
 
 type Props = {

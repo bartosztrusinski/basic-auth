@@ -5,7 +5,7 @@ import { toast } from 'sonner';
 import { type User } from '@/db';
 import { getAuthMessage } from '@/auth/message';
 import { addPassword } from '@/actions';
-import { Alert } from '@/components/alert';
+import { Alert } from '@/components/ui/alert';
 
 type Props = {
   email: User['email'];
