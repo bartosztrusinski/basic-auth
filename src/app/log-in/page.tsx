@@ -2,7 +2,7 @@ import { LoggedIn } from '@/auth/components/logged-in';
 import { ReturnBack } from '@/auth/components/return-back';
 import { getSearchParam } from '@/auth/util';
 import config from '@/auth/config';
-import { ProviderButtons } from '@/components/provider-buttons';
+import { OAuthLoginButtons } from '@/components/oauth/oauth-login-buttons';
 import { LoginForm } from '@/components/login/login-form';
 
 export default async function LoginPage({
@@ -19,7 +19,7 @@ export default async function LoginPage({
       </LoggedIn>
       <div className='container'>
         <h1 className='title'>Login</h1>
-        <ProviderButtons redirectUrl={returnBackUrl} />
+        <OAuthLoginButtons redirectUrl={returnBackUrl} />
         <LoginForm />
       </div>
     </>

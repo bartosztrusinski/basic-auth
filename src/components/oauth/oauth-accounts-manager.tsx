@@ -3,13 +3,13 @@ import { getProviderName } from '@/auth/oauth';
 import { OAuthProviderEnum } from '@/auth/config/providers';
 import { type OAuthProvider, type StateData } from '@/auth/oauth';
 import { currentUser } from '@/auth/session';
-import { AccountItem } from '@/components/account-item';
+import { OAuthAccountManager } from '@/components/oauth/oauth-account-manager';
 
 type Props = {
   accounts: Account[];
 } & StateData;
 
-export async function AccountsManager({ accounts, ...stateData }: Props) {
+export async function OAuthAccountsManager({ accounts, ...stateData }: Props) {
   const user = await currentUser();
 
   if (!user) {
@@ -21,7 +21,7 @@ export async function AccountsManager({ accounts, ...stateData }: Props) {
   const isUnlinkingEnabled = accounts.length > 1 || user.hasPassword;
 
   return OAuthProviderEnum.options.map((provider) => (
-    <AccountItem
+    <OAuthAccountManager
       key={provider}
       provider={provider}
       name={getProviderName(provider)}

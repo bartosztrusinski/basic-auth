@@ -13,7 +13,13 @@ type Props = {
   isUnlinkingEnabled: boolean;
 } & StateData;
 
-export function AccountItem({ provider, name, isLinked, isUnlinkingEnabled, ...stateData }: Props) {
+export function OAuthAccountManager({
+  provider,
+  name,
+  isLinked,
+  isUnlinkingEnabled,
+  ...stateData
+}: Props) {
   const accountAction = isLinked
     ? unlinkAccount.bind(null, provider)
     : linkAccount.bind(null, provider, stateData);

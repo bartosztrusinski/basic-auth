@@ -6,7 +6,7 @@ type Props = {
   name: string;
 } & StateData;
 
-export function ProviderButton({ provider, name, ...stateData }: Props) {
+export function OAuthLoginButton({ provider, name, ...stateData }: Props) {
   return (
     <form
       action={async () => {

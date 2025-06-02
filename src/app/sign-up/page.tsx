@@ -1,6 +1,6 @@
 import { LoggedIn } from '@/auth/components/logged-in';
 import { ReturnBack } from '@/auth/components/return-back';
-import { ProviderButtons } from '@/components/provider-buttons';
+import { OAuthLoginButtons } from '@/components/oauth/oauth-login-buttons';
 import { SignupForm } from '@/components/signup-form';
 
 export default async function SignupPage() {
@@ -11,7 +11,7 @@ export default async function SignupPage() {
       </LoggedIn>
       <div className='container'>
         <h1 className='title'>Signup</h1>
-        <ProviderButtons />
+        <OAuthLoginButtons />
         <SignupForm />
       </div>
     </>

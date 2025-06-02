@@ -1,7 +1,7 @@
 import { db, UserRoles } from '@/db';
 import { redirectToLogin, currentUser } from '@/auth/session';
 import { Protect } from '@/auth/components/protect';
-import { AccountsManager } from '@/components/accounts-manager';
+import { OAuthAccountsManager } from '@/components/oauth/oauth-accounts-manager';
 import { UserProfile } from '@/components/user-profile';
 import { AddPasswordModal } from '@/components/add-password';
 import { EnableTwoFactorModal } from '@/components/enable-two-factor';
@@ -41,7 +41,7 @@ export default async function ProfilePage() {
         <div className='space-y-8'>
           <section>
             <div className='space-y-3'>
-              <AccountsManager accounts={accounts} redirectUrl='/profile' />
+              <OAuthAccountsManager accounts={accounts} redirectUrl='/profile' />
             </div>
             <p className='pt-2 text-sm text-neutral-400'>View and manage your connected accounts</p>
           </section>
