@@ -1,12 +1,22 @@
-import { getSearchParam } from '@/auth/util';
-import config from '@/auth/config';
-
-export type AuthMessage = {
+type AuthMessage = {
   type: 'success' | 'error';
   message: string;
 };
 
 export type AuthCode = keyof typeof authMessages;
+
+export class AuthError extends Error {
+  authCode: AuthCode;
+  constructor(authCode: AuthCode, message?: string) {
+    super(message);
+    this.name = 'AuthError';
+    this.authCode = authCode;
+  }
+}
+
+export function getAuthMessage(code: AuthCode): AuthMessage {
+  return authMessages[code];
+}
 
 const authMessages = {
   unauthenticated: {
@@ -160,23 +170,3 @@ const authMessages = {
     message: 'Could not use recovery code. Please try again.',
   },
 } satisfies Record<string, AuthMessage>;
-
-export function getAuthMessage(code: AuthCode): AuthMessage {
-  return authMessages[code];
-}
-
-export async function getAuthCode(
-  searchParams: Promise<Record<string, string | undefined>> | undefined,
-): Promise<AuthCode | null> {
-  const authCode = await getSearchParam<AuthCode>(searchParams, config.authCodeKey);
-  return authCode;
-}
-
-export class AuthError extends Error {
-  authCode: AuthCode;
-  constructor(authCode: AuthCode, message?: string) {
-    super(message);
-    this.name = 'AuthError';
-    this.authCode = authCode;
-  }
-}

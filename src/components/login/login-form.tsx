@@ -29,7 +29,7 @@ export function LoginForm() {
           onClick={goBack}
         >
           <span className='sr-only'>Go back to credentials form</span>
-          <span aria-hidden='true'>←</span>
+          <span aria-hidden>←</span>
         </button>
 
         {isRecoveryMode ? (
