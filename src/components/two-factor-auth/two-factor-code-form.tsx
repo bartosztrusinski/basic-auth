@@ -5,7 +5,7 @@ import Image from 'next/image';
 import { enableTwoFactorAuth } from '@/actions';
 import { Alert } from '@/components/ui/alert';
 import { CodeInput } from '@/components/ui/code-input';
-import { type TwoFactorData } from '@/components/enable-two-factor';
+import { type TwoFactorData } from './enable-two-factor-form';
 
 type Props = {
   secret: TwoFactorData['secret'];

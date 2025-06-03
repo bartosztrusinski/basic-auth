@@ -2,9 +2,9 @@ import { type ReactNode } from 'react';
 import { type Metadata } from 'next';
 import { GeistSans } from 'geist/font/sans';
 import '@/globals.css';
+import { AuthProvider } from '@/auth/providers/auth-provider';
 import { Header } from '@/components/header';
 import { AuthToaster } from '@/components/auth-toaster';
-import { AuthProvider } from '@/auth/providers/auth-provider';
 
 export const metadata: Metadata = {
   title: 'Basic Auth',

@@ -1,11 +1,10 @@
 import { db, UserRoles } from '@/db';
 import { redirectToLogin, currentUser } from '@/auth/session';
 import { Protect } from '@/auth/components/protect';
-import { OAuthAccountsManager } from '@/components/oauth/oauth-accounts-manager';
+import { OAuthAccountsManager } from '@/components/oauth';
 import { UserProfile } from '@/components/user-profile';
 import { AddPasswordModal } from '@/components/add-password';
-import { EnableTwoFactorModal } from '@/components/enable-two-factor';
-import { DisableTwoFactorModal } from '@/components/disable-two-factor';
+import { EnableTwoFactorModal, DisableTwoFactorModal } from '@/components/two-factor-auth';
 import { LogoutEverywhereModal } from '@/components/logout-everywhere';
 import { DeleteUserModal } from '@/components/delete-user';
 

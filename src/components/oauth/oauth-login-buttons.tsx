@@ -1,6 +1,6 @@
 import { getProviderName, type StateData } from '@/auth/oauth';
 import { OAuthProviderEnum } from '@/auth/config/providers';
-import { OAuthLoginButton } from '@/components/oauth/oauth-login-button';
+import { OAuthLoginButton } from './oauth-login-button';
 
 type Props = StateData;
 

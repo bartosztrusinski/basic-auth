@@ -4,9 +4,9 @@ import { useEffect, useRef, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { toast } from 'sonner';
 import { getAuthMessage } from '@/auth/message';
-import { type TwoFactorData } from '@/components/enable-two-factor';
 import { ModalCloseButton } from '@/components/ui/modal';
 import { formatCode } from '@/util';
+import { type TwoFactorData } from './enable-two-factor-form';
 
 type Props = {
   recoveryCodes: TwoFactorData['recoveryCodes'];

@@ -3,7 +3,7 @@
 import { useActionState, useEffect } from 'react';
 import { initializeTwoFactorAuth } from '@/actions';
 import { Alert } from '@/components/ui/alert';
-import { type TwoFactorData } from '@/components/enable-two-factor';
+import { type TwoFactorData } from './enable-two-factor-form';
 
 type Props = {
   onSuccess?: (data: Partial<TwoFactorData>) => void;

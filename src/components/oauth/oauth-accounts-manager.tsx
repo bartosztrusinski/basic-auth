@@ -3,7 +3,7 @@ import { getProviderName } from '@/auth/oauth';
 import { OAuthProviderEnum } from '@/auth/config/providers';
 import { type OAuthProvider, type StateData } from '@/auth/oauth';
 import { currentUser } from '@/auth/session';
-import { OAuthAccountManager } from '@/components/oauth/oauth-account-manager';
+import { OAuthAccountManager } from './oauth-account-manager';
 
 type Props = {
   accounts: Account[];
