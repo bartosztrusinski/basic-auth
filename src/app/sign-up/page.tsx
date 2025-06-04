@@ -3,6 +3,11 @@ import { ReturnBack } from '@/auth/components/return-back';
 import { OAuthLoginButtons } from '@/components/oauth';
 import { SignupForm } from '@/components/signup-form';
 
+export const metadata = {
+  title: 'Signup',
+  description: 'Create a new account to access protected resources',
+};
+
 export default async function SignupPage() {
   return (
     <>

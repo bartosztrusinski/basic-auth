@@ -1,6 +1,11 @@
 import { auth } from '@/auth/session';
 import { UsersList } from '@/components/users-list';
 
+export const metadata = {
+  title: 'Admin Dashboard',
+  description: 'Page accessible only to administrators',
+};
+
 export default async function AdminPage() {
   await auth.protect({ role: 'admin', unauthorizedUrl: '/profile', returnBackUrl: '/admin' });
 

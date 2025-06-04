@@ -1,6 +1,11 @@
 import { redirectAuth } from '@/auth/util';
 import { VerifyEmailForm } from '@/components/verify-email-form';
 
+export const metadata = {
+  title: 'Verify Email',
+  description: 'Verify your email address to complete the registration process',
+};
+
 export default async function VerifyEmailPage({
   searchParams,
 }: {

@@ -5,6 +5,11 @@ import config from '@/auth/config';
 import { OAuthLoginButtons } from '@/components/oauth';
 import { LoginForm } from '@/components/login';
 
+export const metadata = {
+  title: 'Login',
+  description: 'Log in to your account to access protected resources',
+};
+
 export default async function LoginPage({
   searchParams,
 }: {

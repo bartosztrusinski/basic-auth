@@ -1,6 +1,11 @@
 import { LoggedOut } from '@/auth/components/logged-out';
 import { RedirectToLogin } from '@/auth/components/redirect-to-login';
 
+export const metadata = {
+  title: 'Private',
+  description: 'Page only accessible to authenticated users',
+};
+
 export default async function PrivatePage() {
   return (
     <>

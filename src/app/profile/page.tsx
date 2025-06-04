@@ -8,6 +8,11 @@ import { EnableTwoFactorModal, DisableTwoFactorModal } from '@/components/two-fa
 import { LogoutEverywhereModal } from '@/components/logout-everywhere';
 import { DeleteUserModal } from '@/components/delete-user';
 
+export const metadata = {
+  title: 'Profile',
+  description: 'Manage your profile and account settings',
+};
+
 export default async function ProfilePage() {
   const user = await currentUser();
 
