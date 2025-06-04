@@ -21,6 +21,19 @@ type ActionFailure = {
   errors?: string | string[];
 };
 
+export async function logOut() {
+  const { isSuccess, errors } = await actions.logOut();
+
+  if (isSuccess) {
+    redirectToLogin({ authCode: null });
+  }
+
+  return {
+    isSuccess,
+    errors,
+  };
+}
+
 export async function editProfile(_: unknown, formData: FormData): Promise<ActionState> {
   const { data: userData, error } = editProfileSchema.safeParse(
     Object.fromEntries(formData.entries()),
