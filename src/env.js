@@ -4,6 +4,7 @@ import { z } from 'zod';
 export const env = createEnv({
   server: {
     NODE_ENV: z.enum(['development', 'test', 'production']),
+    DATABASE_URL: z.string().url(),
     SESSION_EXPIRATION_IN_SECONDS: z.coerce.number().optional(),
     FROM_EMAIL_ADDRESS: z.string().email().optional(),
     ENCRYPTION_KEY: z.string().base64url(),
@@ -23,6 +24,7 @@ export const env = createEnv({
   },
   runtimeEnv: {
     NODE_ENV: process.env.NODE_ENV,
+    DATABASE_URL: process.env.DATABASE_URL,
     SESSION_EXPIRATION_IN_SECONDS: process.env.SESSION_EXPIRATION_IN_SECONDS,
     FROM_EMAIL_ADDRESS: process.env.FROM_EMAIL_ADDRESS,
     ENCRYPTION_KEY: process.env.ENCRYPTION_KEY,
