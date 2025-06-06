@@ -1,7 +1,16 @@
-import { pgEnum, pgTable, uuid, varchar, timestamp, uniqueIndex } from 'drizzle-orm/pg-core';
+import {
+  pgEnum,
+  pgTable,
+  uuid,
+  varchar,
+  primaryKey,
+  unique,
+  timestamp,
+  uniqueIndex,
+} from 'drizzle-orm/pg-core';
+import { OAuthProviderEnum } from '@/auth/config/providers';
 
-export const userRoles = pgEnum('roles', ['user', 'admin']);
-
+export const rolesEnum = pgEnum('roles', ['user', 'admin']);
 export const usersTable = pgTable(
   'users',
   {
@@ -9,9 +18,26 @@ export const usersTable = pgTable(
     email: varchar({ length: 255 }).notNull(),
     emailVerified: timestamp(),
     name: varchar({ length: 255 }).notNull(),
-    role: userRoles().notNull().default('user'),
+    role: rolesEnum().notNull().default('user'),
     password: varchar({ length: 255 }),
     twoFactorSecret: varchar({ length: 255 }),
   },
-  (table) => [uniqueIndex('users_email_index').on(table.email)],
+  (table) => [uniqueIndex('email_index').on(table.email)],
+);
+
+export const providersEnum = pgEnum('providers', OAuthProviderEnum.Values);
+export const accountsTable = pgTable(
+  'accounts',
+  {
+    provider: providersEnum().notNull(),
+    providerAccountId: varchar({ length: 255 }).notNull(),
+    userId: uuid()
+      .notNull()
+      .references(() => usersTable.id, { onDelete: 'cascade' }),
+  },
+  (table) => [
+    primaryKey({ columns: [table.provider, table.providerAccountId] }),
+    unique().on(table.provider, table.providerAccountId),
+    unique().on(table.userId, table.provider),
+  ],
 );
