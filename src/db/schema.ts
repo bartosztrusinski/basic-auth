@@ -41,3 +41,11 @@ export const accountsTable = pgTable(
     unique().on(table.userId, table.provider),
   ],
 );
+
+export const sessionsTable = pgTable('sessions', {
+  id: varchar({ length: 43 }).primaryKey(),
+  expiresAt: timestamp().notNull(),
+  userId: uuid()
+    .notNull()
+    .references(() => usersTable.id, { onDelete: 'cascade' }),
+});

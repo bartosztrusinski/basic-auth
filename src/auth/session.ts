@@ -152,7 +152,7 @@ export async function createUserSession({
   userId,
   userRole,
 }: Omit<BackendSession, 'expirationTime'>) {
-  const sessionId = generateRandomString(512);
+  const sessionId = generateRandomString(32);
 
   const session = await db.createSession({
     id: sessionId,
