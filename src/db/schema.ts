@@ -8,13 +8,14 @@ import {
   timestamp,
   uniqueIndex,
 } from 'drizzle-orm/pg-core';
-import { OAuthProviderEnum } from '@/auth/config/providers';
 
-const userIdReference = uuid()
+export const rolesEnum = pgEnum('roles', ['user', 'admin']);
+export const providersEnum = pgEnum('providers', ['discord', 'github', 'google']);
+export const expiresAt = timestamp({ withTimezone: true }).notNull();
+export const userId = uuid()
   .notNull()
   .references(() => usersTable.id, { onDelete: 'cascade' });
 
-export const rolesEnum = pgEnum('roles', ['user', 'admin']);
 export const usersTable = pgTable(
   'users',
   {
@@ -29,13 +30,12 @@ export const usersTable = pgTable(
   (table) => [uniqueIndex('email_index').on(table.email)],
 );
 
-export const providersEnum = pgEnum('providers', OAuthProviderEnum.Values);
 export const accountsTable = pgTable(
   'accounts',
   {
     provider: providersEnum().notNull(),
     providerAccountId: varchar({ length: 255 }).notNull(),
-    userId: userIdReference,
+    userId,
   },
   (table) => [
     primaryKey({ columns: [table.provider, table.providerAccountId] }),
@@ -45,34 +45,34 @@ export const accountsTable = pgTable(
 
 export const sessionsTable = pgTable('sessions', {
   id: varchar({ length: 43 }).primaryKey(),
-  expiresAt: timestamp().notNull(),
-  userId: userIdReference,
+  expiresAt,
+  userId,
 });
 
 export const verificationTokensTable = pgTable('verification_tokens', {
   token: varchar({ length: 86 }).primaryKey(),
-  expiresAt: timestamp().notNull(),
-  userId: userIdReference,
+  expiresAt,
+  userId,
 });
 
 export const twoFactorAttemptsTable = pgTable('two_factor_attempts', {
   token: varchar({ length: 86 }).primaryKey(),
-  expiresAt: timestamp().notNull(),
-  userId: userIdReference,
+  expiresAt,
+  userId,
 });
 
 export const twoFactorSetupsTable = pgTable('two_factor_setups', {
-  secret: varchar({ length: 64 }).notNull(),
-  expiresAt: timestamp().notNull(),
-  userId: userIdReference,
+  secret: varchar({ length: 64 }).primaryKey(),
+  expiresAt,
+  userId,
 });
 
 export const recoveryCodesTable = pgTable(
   'recovery_codes',
   {
-    code: varchar({ length: 97 }),
+    code: varchar({ length: 97 }).notNull(),
     usedAt: timestamp(),
-    userId: userIdReference,
+    userId,
   },
   (table) => [primaryKey({ columns: [table.code, table.userId] })],
 );
