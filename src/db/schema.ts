@@ -1,13 +1,4 @@
-import {
-  pgEnum,
-  pgTable,
-  uuid,
-  varchar,
-  primaryKey,
-  unique,
-  timestamp,
-  uniqueIndex,
-} from 'drizzle-orm/pg-core';
+import { pgEnum, pgTable, uuid, varchar, primaryKey, unique, timestamp } from 'drizzle-orm/pg-core';
 
 export const rolesEnum = pgEnum('roles', ['user', 'admin']);
 export const providersEnum = pgEnum('providers', ['discord', 'github', 'google']);
@@ -16,19 +7,15 @@ export const userId = uuid()
   .notNull()
   .references(() => usersTable.id, { onDelete: 'cascade' });
 
-export const usersTable = pgTable(
-  'users',
-  {
-    id: uuid().primaryKey().defaultRandom(),
-    email: varchar({ length: 255 }).notNull(),
-    emailVerified: timestamp(),
-    name: varchar({ length: 255 }).notNull(),
-    role: rolesEnum().notNull().default('user'),
-    password: varchar({ length: 255 }),
-    twoFactorSecret: varchar({ length: 255 }),
-  },
-  (table) => [uniqueIndex('email_index').on(table.email)],
-);
+export const usersTable = pgTable('users', {
+  id: uuid().primaryKey().defaultRandom(),
+  email: varchar({ length: 255 }).notNull().unique(),
+  emailVerified: timestamp(),
+  name: varchar({ length: 255 }).notNull(),
+  role: rolesEnum().notNull().default('user'),
+  password: varchar({ length: 255 }),
+  twoFactorSecret: varchar({ length: 255 }),
+});
 
 export const accountsTable = pgTable(
   'accounts',
@@ -52,7 +39,7 @@ export const sessionsTable = pgTable('sessions', {
 export const verificationTokensTable = pgTable('verification_tokens', {
   token: varchar({ length: 86 }).primaryKey(),
   expiresAt,
-  userId,
+  userId: userId.unique(),
 });
 
 export const twoFactorAttemptsTable = pgTable('two_factor_attempts', {
@@ -64,7 +51,7 @@ export const twoFactorAttemptsTable = pgTable('two_factor_attempts', {
 export const twoFactorSetupsTable = pgTable('two_factor_setups', {
   secret: varchar({ length: 64 }).primaryKey(),
   expiresAt,
-  userId,
+  userId: userId.unique(),
 });
 
 export const recoveryCodesTable = pgTable(
