@@ -1,3 +1,4 @@
+import { relations } from 'drizzle-orm';
 import { pgEnum, pgTable, uuid, varchar, primaryKey, unique, timestamp } from 'drizzle-orm/pg-core';
 
 const expiresAt = timestamp({ withTimezone: true }).notNull();
@@ -65,3 +66,54 @@ export const recoveryCodes = pgTable(
   },
   (table) => [primaryKey({ columns: [table.code, table.userId] })],
 );
+
+export const usersRelations = relations(users, ({ one, many }) => ({
+  accounts: many(accounts),
+  sessions: many(sessions),
+  verificationToken: one(verificationTokens),
+  twoFactorSetup: one(twoFactorSetups),
+  twoFactorAttempts: many(twoFactorAttempts),
+  recoveryCodes: many(recoveryCodes),
+}));
+
+export const accountsRelations = relations(accounts, ({ one }) => ({
+  user: one(users, {
+    fields: [accounts.userId],
+    references: [users.id],
+  }),
+}));
+
+export const sessionsRelations = relations(sessions, ({ one }) => ({
+  user: one(users, {
+    fields: [sessions.userId],
+    references: [users.id],
+  }),
+}));
+
+export const verificationTokensRelations = relations(verificationTokens, ({ one }) => ({
+  user: one(users, {
+    fields: [verificationTokens.userId],
+    references: [users.id],
+  }),
+}));
+
+export const twoFactorSetupsRelations = relations(twoFactorSetups, ({ one }) => ({
+  user: one(users, {
+    fields: [twoFactorSetups.userId],
+    references: [users.id],
+  }),
+}));
+
+export const twoFactorAttemptsRelations = relations(twoFactorAttempts, ({ one }) => ({
+  user: one(users, {
+    fields: [twoFactorAttempts.userId],
+    references: [users.id],
+  }),
+}));
+
+export const recoveryCodesRelations = relations(recoveryCodes, ({ one }) => ({
+  user: one(users, {
+    fields: [recoveryCodes.userId],
+    references: [users.id],
+  }),
+}));
