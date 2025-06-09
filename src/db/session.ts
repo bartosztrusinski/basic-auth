@@ -1,78 +1,55 @@
 import 'server-only';
-import { createTable } from '@/db/util';
-import { type User } from '@/db/user';
+import { and, eq, gt, type InferSelectModel } from 'drizzle-orm';
+import { db } from '@/db';
+import { sessions } from '@/db/schema';
+import server from '@/auth/config/server';
 
-type Session = {
-  id: string;
-  userId: User['id'];
-  userRole: User['role'];
-  expirationTime: number;
-};
+type Session = InferSelectModel<typeof sessions>;
 
-const [getSessions, writeSessions] = createTable<Session>('sessions.json');
-
-async function getSessionById(id: Session['id']) {
-  const sessions = await getSessions();
-  const session = sessions.find((session) => session.id === id);
-
-  if (!session) {
-    return null;
-  }
-
-  if (session.expirationTime < Date.now()) {
-    await deleteSession(id);
-    return null;
-  }
-
-  return session;
-}
-
-async function createSession(newSession: Session) {
-  await writeSessions((sessions) => {
-    const now = Date.now();
-    const nonExpiredSessions = sessions.filter((session) => session.expirationTime > now);
-    return [...nonExpiredSessions, newSession];
+async function getSessionById(id: Session['id']): Promise<Session | null> {
+  const session = await db.query.sessions.findFirst({
+    where: and(eq(sessions.id, id), gt(sessions.expiresAt, new Date())),
   });
 
-  return newSession;
+  return session ?? null;
 }
 
-async function updateSession(
-  sessionId: Session['id'],
-  updatedSessionData: Partial<Omit<Session, 'id'>>,
-) {
-  const currentSession = await getSessionById(sessionId);
+async function createSession(newSession: Omit<Session, 'expiresAt'>): Promise<Session | null> {
+  const [session] = await db
+    .insert(sessions)
+    .values({ ...newSession, expiresAt: createSessionExpirationTime() })
+    .returning();
 
-  if (!currentSession) {
-    throw new Error('Session not found');
-  }
-
-  const updatedSession = {
-    ...currentSession,
-    ...updatedSessionData,
-  };
-
-  await writeSessions((sessions) =>
-    sessions.map((session) => (session.id === sessionId ? updatedSession : session)),
-  );
-
-  return updatedSession;
+  return session ?? null;
 }
 
-async function deleteSession(id: Session['id']) {
-  await writeSessions((sessions) => sessions.filter((session) => session.id !== id));
+async function refreshSession(sessionId: Session['id']): Promise<Session | null> {
+  const [session] = await db
+    .update(sessions)
+    .set({ expiresAt: createSessionExpirationTime() })
+    .where(eq(sessions.id, sessionId))
+    .returning();
+
+  return session ?? null;
 }
 
-async function deleteUserSessions(userId: User['id']) {
-  await writeSessions((sessions) => sessions.filter((session) => session.userId !== userId));
+async function deleteSession(sessionId: Session['id']): Promise<void> {
+  await db.delete(sessions).where(eq(sessions.id, sessionId));
+}
+
+async function deleteUserSessions(userId: Session['userId']): Promise<void> {
+  await db.delete(sessions).where(eq(sessions.userId, userId));
+}
+
+function createSessionExpirationTime(): Date {
+  return new Date(Date.now() + server.sessionExpirationInSeconds * 1000);
 }
 
 export {
-  getSessions,
+  type Session,
   getSessionById,
   createSession,
-  updateSession,
+  refreshSession,
   deleteSession,
   deleteUserSessions,
 };
-export type { Session };
