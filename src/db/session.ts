@@ -2,7 +2,8 @@ import 'server-only';
 import { and, eq, gt, type InferSelectModel } from 'drizzle-orm';
 import { db } from '@/db';
 import { sessions } from '@/db/schema';
-import server from '@/auth/config/server';
+import { createExpirationDate } from '@/util';
+import serverConfig from '@/auth/config/server';
 
 type Session = InferSelectModel<typeof sessions>;
 
@@ -17,7 +18,10 @@ async function getSessionById(id: Session['id']): Promise<Session | null> {
 async function createSession(newSession: Omit<Session, 'expiresAt'>): Promise<Session | null> {
   const [session] = await db
     .insert(sessions)
-    .values({ ...newSession, expiresAt: createSessionExpirationTime() })
+    .values({
+      ...newSession,
+      expiresAt: createExpirationDate(serverConfig.sessionExpirationInSeconds),
+    })
     .returning();
 
   return session ?? null;
@@ -26,7 +30,7 @@ async function createSession(newSession: Omit<Session, 'expiresAt'>): Promise<Se
 async function refreshSession(sessionId: Session['id']): Promise<Session | null> {
   const [session] = await db
     .update(sessions)
-    .set({ expiresAt: createSessionExpirationTime() })
+    .set({ expiresAt: createExpirationDate(serverConfig.sessionExpirationInSeconds) })
     .where(eq(sessions.id, sessionId))
     .returning();
 
@@ -39,10 +43,6 @@ async function deleteSession(sessionId: Session['id']): Promise<void> {
 
 async function deleteUserSessions(userId: Session['userId']): Promise<void> {
   await db.delete(sessions).where(eq(sessions.userId, userId));
-}
-
-function createSessionExpirationTime(): Date {
-  return new Date(Date.now() + server.sessionExpirationInSeconds * 1000);
 }
 
 export {
