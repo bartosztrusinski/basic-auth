@@ -1,50 +1,45 @@
 import 'server-only';
-import { createTable } from '@/db/util';
-import { type User } from '@/db/user';
+import { and, eq, gt, type InferSelectModel } from 'drizzle-orm';
+import { db } from '@/db';
+import { verificationTokens } from '@/db/schema';
+import { createExpirationDate } from '@/util';
+import serverConfig from '@/auth/config/server';
 
-type VerificationToken = {
-  email: User['email'];
-  token: string;
-  expirationTime: number;
-};
+type VerificationToken = InferSelectModel<typeof verificationTokens>;
 
-const [getVerificationTokens, writeVerificationTokens] = createTable<VerificationToken>(
-  'verification-tokens.json',
-);
-
-async function getVerificationTokenByEmail(email: VerificationToken['email']) {
-  const verificationTokens = await getVerificationTokens();
-  return verificationTokens.find((token) => token.email === email);
-}
-
-async function getVerificationTokenByToken(token: VerificationToken['token']) {
-  const verificationTokens = await getVerificationTokens();
-  return verificationTokens.find((verificationToken) => verificationToken.token === token);
-}
-
-async function createVerificationToken(newToken: VerificationToken) {
-  await writeVerificationTokens((tokens) => {
-    const isExistingToken = tokens.some(({ token }) => token === newToken.token);
-
-    if (isExistingToken) {
-      throw new Error('Token already exists');
-    }
-
-    return [...tokens, newToken];
+async function getVerificationTokenByToken(
+  token: VerificationToken['token'],
+): Promise<VerificationToken | null> {
+  const verificationToken = await db.query.verificationTokens.findFirst({
+    where: and(eq(verificationTokens.token, token), gt(verificationTokens.expiresAt, new Date())),
   });
 
-  return newToken;
+  return verificationToken ?? null;
 }
 
-async function deleteVerificationToken(email: VerificationToken['email']) {
-  await writeVerificationTokens((tokens) => tokens.filter((token) => token.email !== email));
+async function createVerificationToken(
+  newToken: Omit<VerificationToken, 'expiresAt'>,
+): Promise<VerificationToken | null> {
+  const expiresAt = createExpirationDate(serverConfig.verificationTokenExpirationInSeconds);
+  const [token] = await db
+    .insert(verificationTokens)
+    .values({ ...newToken, expiresAt })
+    .onConflictDoUpdate({
+      target: [verificationTokens.userId],
+      set: { token: newToken.token, expiresAt },
+    })
+    .returning();
+
+  return token ?? null;
+}
+
+async function deleteVerificationToken(userId: VerificationToken['userId']): Promise<void> {
+  await db.delete(verificationTokens).where(eq(verificationTokens.userId, userId));
 }
 
 export {
-  getVerificationTokens,
-  getVerificationTokenByEmail,
+  type VerificationToken,
   getVerificationTokenByToken,
   createVerificationToken,
   deleteVerificationToken,
 };
-export type { VerificationToken };
