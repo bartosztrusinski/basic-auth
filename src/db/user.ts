@@ -1,99 +1,75 @@
 import 'server-only';
-import { randomUUID, type UUID } from 'node:crypto';
-import { createTable } from '@/db/util';
-import { deleteUserAccounts, getAccountByProvider, type Account } from '@/db/account';
+import { and, eq, type InferSelectModel } from 'drizzle-orm';
+import { db } from '@/db';
+import { accounts, roles, users } from '@/db/schema';
+import { type Account } from './account';
 
-const UserRoles = ['user', 'admin'] as const;
+const UserRoles = roles.enumValues;
 
-type User = {
-  id: UUID;
-  email: string;
-  emailVerified?: number;
-  name: string;
-  role: (typeof UserRoles)[number];
-  password?: string;
-  twoFactorSecret?: string;
-};
+type User = InferSelectModel<typeof users>;
 
-const [getUsers, writeUsers] = createTable<User>('users.json');
-
-async function getUserByEmail(email: User['email']) {
-  const users = await getUsers();
-  return users.find((user) => user.email === email);
+async function getUsers(): Promise<User[]> {
+  return await db.query.users.findMany({
+    limit: 20,
+  });
 }
 
-async function getUserById(id: User['id']) {
-  const users = await getUsers();
-  return users.find((user) => user.id === id);
+async function getUserByEmail(email: User['email']): Promise<User | null> {
+  const user = await db.query.users.findFirst({
+    where: eq(users.email, email),
+  });
+
+  return user ?? null;
+}
+
+async function getUserById(id: User['id']): Promise<User | null> {
+  const user = await db.query.users.findFirst({
+    where: eq(users.id, id),
+  });
+
+  return user ?? null;
 }
 
 async function getUserByProvider(
   provider: Account['provider'],
   providerAccountId: Account['providerAccountId'],
-): Promise<(User & { account: Account }) | null> {
-  const account = await getAccountByProvider(provider, providerAccountId);
+): Promise<(User & { accounts: Account[] }) | null> {
+  const user = await db.query.users.findFirst({
+    with: {
+      accounts: {
+        where: and(
+          eq(accounts.provider, provider),
+          eq(accounts.providerAccountId, providerAccountId),
+        ),
+      },
+    },
+  });
 
-  if (!account) {
-    return null;
-  }
-
-  const user = await getUserById(account.userId);
-
-  if (!user) {
-    return null;
-  }
-
-  return { ...user, account };
+  return user ?? null;
 }
 
-async function createUser(newUser: Omit<User, 'id' | 'role' | 'twoFactorSecret'>) {
-  const existingUser = await getUserByEmail(newUser.email);
-
-  if (existingUser) {
-    throw new Error('Email already in use');
-  }
-
-  const user: User = {
-    id: randomUUID(),
-    role: 'user',
-    ...newUser,
-  };
-
-  await writeUsers((users) => [...users, user]);
-
-  return user;
+async function createUser(
+  newUser: Pick<User, 'email' | 'name' | 'password'>,
+): Promise<User | null> {
+  const [user] = await db.insert(users).values(newUser).returning();
+  return user ?? null;
 }
 
-async function updateUser(id: User['id'], updatedUserData: Partial<Omit<User, 'id'>>) {
-  const currentUser = await getUserById(id);
-
-  if (!currentUser) {
-    throw new Error('User not found');
-  }
-
-  const updatedUser = {
-    ...currentUser,
-    ...updatedUserData,
-  };
-
-  await writeUsers((users) => users.map((user) => (user.id === id ? updatedUser : user)));
-
-  return updatedUser;
+async function updateUser(
+  id: User['id'],
+  updatedUser: Partial<Omit<User, 'id'>>,
+): Promise<User | null> {
+  const [user] = await db.update(users).set(updatedUser).where(eq(users.id, id)).returning();
+  return user ?? null;
 }
 
-async function deleteUser(id: User['id']) {
-  const user = await getUserById(id);
-
-  if (!user) {
-    throw new Error('User not found');
-  }
-
-  await deleteUserAccounts(id);
-  await writeUsers((users) => users.filter((user) => user.id !== id));
+async function deleteUser(id: User['id']): Promise<void> {
+  await db.delete(users).where(eq(users.id, id));
 }
 
 export {
   UserRoles,
+  type User,
   getUsers,
   getUserByEmail,
   getUserById,
@@ -102,4 +78,3 @@ export {
   updateUser,
   deleteUser,
 };
-export type { User };
