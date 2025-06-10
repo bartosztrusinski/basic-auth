@@ -1,45 +1,40 @@
 import 'server-only';
-import { createTable } from '@/db/util';
-import { type User } from '@/db/user';
+import { and, eq, gt, type InferSelectModel } from 'drizzle-orm';
+import { db } from '@/db';
+import { twoFactorSetups } from '@/db/schema';
+import { createExpirationDate } from '@/util';
+import serverConfig from '@/auth/config/server';
 
-type TwoFactorSetup = {
-  userId: User['id'];
-  secret: string;
-  expirationTime: number;
-};
+type TwoFactorSetup = InferSelectModel<typeof twoFactorSetups>;
 
-const [getTwoFactorSetups, writeTwoFactorSetups] =
-  createTable<TwoFactorSetup>('two-factor-setups.json');
+async function getUserTwoFactorSetup(
+  userId: TwoFactorSetup['userId'],
+): Promise<TwoFactorSetup | null> {
+  const twoFactorSetup = await db.query.twoFactorSetups.findFirst({
+    where: and(eq(twoFactorSetups.userId, userId), gt(twoFactorSetups.expiresAt, new Date())),
+  });
 
-async function getUserTwoFactorSetup(userId: TwoFactorSetup['userId']) {
-  const twoFactorSetups = await getTwoFactorSetups();
-  return twoFactorSetups.find((token) => token.userId === userId);
+  return twoFactorSetup ?? null;
 }
 
-async function createTwoFactorSetup(newTwoFactorSetup: TwoFactorSetup) {
-  const twoFactorSetups = await getTwoFactorSetups();
-  const existingUserSetup = twoFactorSetups.find(
-    ({ userId }) => userId === newTwoFactorSetup.userId,
-  );
+async function createTwoFactorSetup(
+  newTwoFactorSetup: Omit<TwoFactorSetup, 'expiresAt'>,
+): Promise<TwoFactorSetup | null> {
+  const expiresAt = createExpirationDate(serverConfig.twoFactorSetupExpirationInSeconds);
+  const [twoFactorSetup] = await db
+    .insert(twoFactorSetups)
+    .values({ ...newTwoFactorSetup, expiresAt })
+    .onConflictDoUpdate({
+      target: [twoFactorSetups.userId],
+      set: { secret: newTwoFactorSetup.secret, expiresAt },
+    })
+    .returning();
 
-  if (existingUserSetup) {
-    throw new Error('Two-factor setup already exists for this user');
-  }
-
-  const existingSecret = twoFactorSetups.find(({ secret }) => secret === newTwoFactorSetup.secret);
-
-  if (existingSecret) {
-    throw new Error('Two-factor setup already exists with this secret');
-  }
-
-  await writeTwoFactorSetups((setups) => [...setups, newTwoFactorSetup]);
-
-  return newTwoFactorSetup;
+  return twoFactorSetup ?? null;
 }
 
-async function deleteTwoFactorSetup(userId: TwoFactorSetup['userId']) {
-  await writeTwoFactorSetups((setups) => setups.filter((setup) => setup.userId !== userId));
+async function deleteTwoFactorSetup(userId: TwoFactorSetup['userId']): Promise<void> {
+  await db.delete(twoFactorSetups).where(eq(twoFactorSetups.userId, userId));
 }
 
-export { getTwoFactorSetups, getUserTwoFactorSetup, createTwoFactorSetup, deleteTwoFactorSetup };
-export type { TwoFactorSetup };
+export { type TwoFactorSetup, getUserTwoFactorSetup, createTwoFactorSetup, deleteTwoFactorSetup };
