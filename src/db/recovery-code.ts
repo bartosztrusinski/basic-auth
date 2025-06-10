@@ -1,59 +1,47 @@
-import { type User } from '@/db/user';
-import { createTable } from '@/db/util';
+import 'server-only';
+import { and, eq, isNull, type InferSelectModel } from 'drizzle-orm';
+import { db } from '@/db';
+import { recoveryCodes } from '@/db/schema';
 
-type RecoveryCode = {
-  userId: User['id'];
-  code: string;
-  usedAt?: number;
-};
+type RecoveryCode = InferSelectModel<typeof recoveryCodes>;
 
-const [getRecoveryCodes, writeRecoveryCodes] = createTable<RecoveryCode>('recovery-codes.json');
-
-async function getActiveRecoveryCodes(userId: User['id']) {
-  const codes = await getRecoveryCodes();
-  return codes.filter((code) => code.userId === userId && !code.usedAt);
+async function getActiveRecoveryCodes(userId: RecoveryCode['userId']): Promise<RecoveryCode[]> {
+  return await db.query.recoveryCodes.findMany({
+    where: and(eq(recoveryCodes.userId, userId), isNull(recoveryCodes.usedAt)),
+  });
 }
 
-async function createRecoveryCode(newCode: Omit<RecoveryCode, 'usedAt'>) {
-  const codes = await getRecoveryCodes();
-  const isExistingCode = codes.some(
-    ({ code, userId }) => userId === newCode.userId && code === newCode.code,
-  );
-
-  if (isExistingCode) {
-    throw new Error('Recovery code already exists');
-  }
-
-  await writeRecoveryCodes((codes) => [...codes, newCode]);
-
-  return newCode;
+async function createRecoveryCode(
+  newCode: Omit<RecoveryCode, 'usedAt'>,
+): Promise<RecoveryCode | null> {
+  const [code] = await db.insert(recoveryCodes).values(newCode).returning();
+  return code ?? null;
 }
 
-async function useRecoveryCode(activeCode: RecoveryCode) {
-  await writeRecoveryCodes((codes) =>
-    codes.map((code) => {
-      if (code.code === activeCode.code && code.userId === activeCode.userId) {
-        if (code.usedAt) {
-          throw new Error('Recovery code already used');
-        }
+async function useRecoveryCode(activeRecoveryCode: RecoveryCode): Promise<RecoveryCode | null> {
+  const [updatedCode] = await db
+    .update(recoveryCodes)
+    .set({ usedAt: new Date() })
+    .where(
+      and(
+        eq(recoveryCodes.code, activeRecoveryCode.code),
+        eq(recoveryCodes.userId, activeRecoveryCode.userId),
+        isNull(recoveryCodes.usedAt),
+      ),
+    )
+    .returning();
 
-        return { ...code, usedAt: Date.now() };
-      }
-
-      return code;
-    }),
-  );
+  return updatedCode ?? null;
 }
 
-async function deleteUserRecoveryCodes(userId: User['id']) {
-  await writeRecoveryCodes((codes) => codes.filter((code) => code.userId !== userId));
+async function deleteUserRecoveryCodes(userId: RecoveryCode['userId']): Promise<void> {
+  await db.delete(recoveryCodes).where(eq(recoveryCodes.userId, userId));
 }
 
 export {
-  getRecoveryCodes,
+  type RecoveryCode,
   getActiveRecoveryCodes,
   createRecoveryCode,
   useRecoveryCode,
   deleteUserRecoveryCodes,
 };
-export type { RecoveryCode };
