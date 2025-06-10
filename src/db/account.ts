@@ -1,63 +1,28 @@
 import 'server-only';
-import { createTable } from '@/db/util';
-import { type User } from '@/db/user';
-import { type OAuthProvider } from '@/auth/oauth';
+import { and, eq, type InferSelectModel } from 'drizzle-orm';
+import { db } from '@/db';
+import { accounts } from '@/db/schema';
 
-type Account = {
-  userId: User['id'];
-  provider: OAuthProvider;
-  providerAccountId: string;
-};
+type Account = InferSelectModel<typeof accounts>;
 
-const [getAccounts, writeAccounts] = createTable<Account>('accounts.json');
-
-async function getUserAccounts(userId: User['id']) {
-  const accounts = await getAccounts();
-  return accounts.filter((account) => account.userId === userId);
+async function getUserAccounts(userId: Account['userId']): Promise<Account[]> {
+  return await db.query.accounts.findMany({
+    where: eq(accounts.userId, userId),
+  });
 }
 
-async function getAccountByProvider(
+async function createAccount(newAccount: Account): Promise<Account | null> {
+  const [account] = await db.insert(accounts).values(newAccount).returning();
+  return account ?? null;
+}
+
+async function deleteAccount(
+  userId: Account['userId'],
   provider: Account['provider'],
-  providerAccountId: Account['providerAccountId'],
-) {
-  const accounts = await getAccounts();
-  return accounts.find(
-    (account) => account.provider === provider && account.providerAccountId === providerAccountId,
-  );
+): Promise<void> {
+  await db
+    .delete(accounts)
+    .where(and(eq(accounts.userId, userId), eq(accounts.provider, provider)));
 }
 
-async function createAccount(newAccount: Account) {
-  const accounts = await getAccounts();
-  const isExistingAccount = accounts.some(
-    ({ provider, providerAccountId }) =>
-      provider === newAccount.provider && providerAccountId === newAccount.providerAccountId,
-  );
-
-  if (isExistingAccount) {
-    return null;
-  }
-
-  await writeAccounts((accounts) => [...accounts, newAccount]);
-
-  return newAccount;
-}
-
-async function deleteAccount(userId: User['id'], provider: Account['provider']) {
-  await writeAccounts((accounts) =>
-    accounts.filter((account) => !(account.userId === userId && account.provider === provider)),
-  );
-}
-
-async function deleteUserAccounts(userId: User['id']) {
-  await writeAccounts((accounts) => accounts.filter((account) => account.userId !== userId));
-}
-
-export {
-  getAccounts,
-  getUserAccounts,
-  getAccountByProvider,
-  createAccount,
-  deleteAccount,
-  deleteUserAccounts,
-};
-export type { Account };
+export { type Account, getUserAccounts, createAccount, deleteAccount };
