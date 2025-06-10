@@ -1,45 +1,43 @@
 import 'server-only';
-import { createTable } from '@/db/util';
-import { type User } from '@/db/user';
+import { and, eq, gt, type InferSelectModel } from 'drizzle-orm';
+import { db } from '@/db';
+import { twoFactorAttempts } from '@/db/schema';
+import { createExpirationDate } from '@/util';
+import serverConfig from '@/auth/config/server';
 
-type TwoFactorAttempt = {
-  token: string;
-  userId: User['id'];
-  expirationTime: number;
-};
+type TwoFactorAttempt = InferSelectModel<typeof twoFactorAttempts>;
 
-const [getTwoFactorAttempts, writeTwoFactorAttempts] = createTable<TwoFactorAttempt>(
-  'two-factor-attempts.json',
-);
+async function getTwoFactorAttemptByToken(
+  token: TwoFactorAttempt['token'],
+): Promise<TwoFactorAttempt | null> {
+  const twoFactorAttempt = await db.query.twoFactorAttempts.findFirst({
+    where: and(eq(twoFactorAttempts.token, token), gt(twoFactorAttempts.expiresAt, new Date())),
+  });
 
-async function getTwoFactorAttemptByToken(token: TwoFactorAttempt['token']) {
-  const twoFactorAttempts = await getTwoFactorAttempts();
-  return twoFactorAttempts.find((attempt) => attempt.token === token);
+  return twoFactorAttempt ?? null;
 }
 
-async function createTwoFactorAttempt(newTwoFactorAttempt: TwoFactorAttempt) {
-  const twoFactorAttempts = await getTwoFactorAttempts();
-  const isExistingToken = twoFactorAttempts.some(
-    ({ token }) => token === newTwoFactorAttempt.token,
-  );
+async function createTwoFactorAttempt(
+  newTwoFactorAttempt: Omit<TwoFactorAttempt, 'expiresAt'>,
+): Promise<TwoFactorAttempt | null> {
+  const [twoFactorAttempt] = await db
+    .insert(twoFactorAttempts)
+    .values({
+      ...newTwoFactorAttempt,
+      expiresAt: createExpirationDate(serverConfig.twoFactorAttemptExpirationInSeconds),
+    })
+    .returning();
 
-  if (isExistingToken) {
-    throw new Error('Two-factor attempt already exists with this token');
-  }
-
-  await writeTwoFactorAttempts((attempts) => [...attempts, newTwoFactorAttempt]);
-
-  return newTwoFactorAttempt;
+  return twoFactorAttempt ?? null;
 }
 
-async function deleteTwoFactorAttempt(token: TwoFactorAttempt['token']) {
-  await writeTwoFactorAttempts((attempts) => attempts.filter((attempt) => attempt.token !== token));
+async function deleteTwoFactorAttempt(token: TwoFactorAttempt['token']): Promise<void> {
+  await db.delete(twoFactorAttempts).where(eq(twoFactorAttempts.token, token));
 }
 
 export {
-  getTwoFactorAttempts,
+  type TwoFactorAttempt,
   getTwoFactorAttemptByToken,
   createTwoFactorAttempt,
   deleteTwoFactorAttempt,
 };
-export type { TwoFactorAttempt };
