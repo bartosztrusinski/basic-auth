@@ -1,8 +1,8 @@
-import { db } from '@/db';
+import { getUsers } from '@/db/user';
 import { Protect } from '@/auth/components/protect';
 
 export async function UsersList() {
-  const users = await db.getUsers();
+  const users = await getUsers();
 
   return (
     <Protect

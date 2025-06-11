@@ -1,4 +1,5 @@
-import { db, UserRoles } from '@/db';
+import { getUserAccounts } from '@/db/account';
+import { UserRoles } from '@/db/user';
 import { redirectToLogin, currentUser } from '@/auth/session';
 import { Protect } from '@/auth/components/protect';
 import { OAuthAccountsManager } from '@/components/oauth';
@@ -20,7 +21,7 @@ export default async function ProfilePage() {
     redirectToLogin({ returnBackUrl: '/profile' });
   }
 
-  const accounts = await db.getUserAccounts(user.id);
+  const accounts = await getUserAccounts(user.id);
   const { email, name, role } = user;
 
   return (
