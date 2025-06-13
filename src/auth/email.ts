@@ -1,7 +1,8 @@
 import 'server-only';
 import { Resend } from 'resend';
 import { env } from '@/env';
-import { type User, type VerificationToken } from '@/db';
+import { type User } from '@/db/user';
+import { type VerificationToken } from '@/db/verification-token';
 import {
   VerificationEmail,
   VerificationEmailPlainText,
@@ -17,7 +18,7 @@ import serverConfig from '@/auth/config/server';
 const resend = new Resend(env.RESEND_API_KEY);
 
 export async function sendVerificationEmail(
-  email: VerificationToken['email'],
+  email: User['email'],
   token: VerificationToken['token'],
   name: User['name'],
 ) {

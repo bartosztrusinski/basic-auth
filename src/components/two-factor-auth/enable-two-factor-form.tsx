@@ -1,7 +1,8 @@
 'use client';
 
 import { useState } from 'react';
-import { type RecoveryCode, type TwoFactorSetup } from '@/db';
+import { type TwoFactorSetup } from '@/db/two-factor-setup';
+import { type RecoveryCode } from '@/db/recovery-code';
 import { ModalTitle, ModalDescription } from '@/components/ui/classy-modal';
 import { InitializeTwoFactorForm } from './initialize-two-factor-form';
 import { TwoFactorCodeForm } from './two-factor-code-form';

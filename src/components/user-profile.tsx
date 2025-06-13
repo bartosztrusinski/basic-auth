@@ -2,7 +2,7 @@
 
 import { type FormEvent, useActionState, useId, useState, useTransition } from 'react';
 import { toast } from 'sonner';
-import { type User } from '@/db';
+import { type User } from '@/db/user';
 import { useCurrentUser } from '@/auth/hooks/use-current-user';
 import { editProfile } from '@/actions';
 import { Alert } from '@/components/ui/alert';

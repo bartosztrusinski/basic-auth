@@ -1,7 +1,7 @@
 'use client';
 
 import { useActionState, Fragment, useRef, useId } from 'react';
-import { type TwoFactorAttempt } from '@/db';
+import { type TwoFactorAttempt } from '@/db/two-factor-attempt';
 import { verifyTwoFactorCode } from '@/auth/actions';
 import { Alert } from '@/components/ui/alert';
 import { CodeInput } from '@/components/ui/code-input';

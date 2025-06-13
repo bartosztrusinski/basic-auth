@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import Link from 'next/link';
-import { type TwoFactorAttempt } from '@/db';
+import { type TwoFactorAttempt } from '@/db/two-factor-attempt';
 import { RecoveryCodeForm } from './recovery-code-form';
 import { TwoFactorForm } from './two-factor-form';
 import { CredentialsForm } from './credentials-form';

@@ -1,4 +1,4 @@
-import { type Account } from '@/db';
+import { type Account } from '@/db/account';
 import { getProviderName } from '@/auth/oauth';
 import { OAuthProviderEnum } from '@/auth/config/providers';
 import { type OAuthProvider, type StateData } from '@/auth/oauth';
