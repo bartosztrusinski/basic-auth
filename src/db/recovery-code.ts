@@ -18,7 +18,7 @@ async function createRecoveryCode(
   return code ?? null;
 }
 
-async function useRecoveryCode(activeRecoveryCode: RecoveryCode): Promise<RecoveryCode | null> {
+async function consumeRecoveryCode(activeRecoveryCode: RecoveryCode): Promise<RecoveryCode | null> {
   const [updatedCode] = await db
     .update(recoveryCodes)
     .set({ usedAt: new Date() })
@@ -42,6 +42,6 @@ export {
   type RecoveryCode,
   getActiveRecoveryCodes,
   createRecoveryCode,
-  useRecoveryCode,
+  consumeRecoveryCode,
   deleteUserRecoveryCodes,
 };
