@@ -1,5 +1,5 @@
 import 'server-only';
-import { and, eq, type InferSelectModel } from 'drizzle-orm';
+import { and, eq, type InferInsertModel, type InferSelectModel } from 'drizzle-orm';
 import { db } from '@/db';
 import { accounts, roles, users } from '@/db/schema';
 import { type Account } from './account';
@@ -7,6 +7,7 @@ import { type Account } from './account';
 const UserRoles = roles.enumValues;
 
 type User = InferSelectModel<typeof users>;
+type InsertUser = InferInsertModel<typeof users>;
 
 async function getUsers(): Promise<User[]> {
   return await db.query.users.findMany({
@@ -48,19 +49,17 @@ async function getUserByProvider(
   return user ?? null;
 }
 
-async function createUser(
-  newUser: Pick<User, 'email' | 'name' | 'password'>,
-): Promise<User | null> {
+async function createUser(newUser: Omit<InsertUser, 'id' | 'createdAt'>): Promise<User> {
   const [user] = await db.insert(users).values(newUser).returning();
-  return user ?? null;
+  return user!;
 }
 
 async function updateUser(
   id: User['id'],
-  updatedUser: Partial<Omit<User, 'id'>>,
-): Promise<User | null> {
+  updatedUser: Partial<Omit<InsertUser, 'id'>>,
+): Promise<User> {
   const [user] = await db.update(users).set(updatedUser).where(eq(users.id, id)).returning();
-  return user ?? null;
+  return user!;
 }
 
 async function deleteUser(id: User['id']): Promise<void> {
