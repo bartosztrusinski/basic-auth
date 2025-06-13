@@ -46,8 +46,10 @@ const fetcher = <T>(...args: Parameters<typeof fetch>) =>
 
 /** Shallow object comparison */
 function isSameObject<T extends Record<string, unknown>>(objA: T, objB: T) {
-  for (const key in objA) {
-    if (objA[key as keyof T] !== objB[key as keyof T]) {
+  for (const [key, valueA] of Object.entries(objA)) {
+    const valueB = objB[key];
+
+    if (valueA !== valueB) {
       return false;
     }
   }
