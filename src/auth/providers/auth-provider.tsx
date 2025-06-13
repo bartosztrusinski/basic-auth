@@ -4,15 +4,15 @@ import { SessionProvider } from '@/auth/providers/session-provider';
 import { CurrentUserProvider } from '@/auth/providers/current-user-provider';
 
 export async function AuthProvider({ children }: { children: ReactNode }) {
-  const { userId, userRole, expirationTime } = await auth();
+  const { userId, userRole, expiresAt } = await auth();
   const user = await currentUser();
 
   return (
     <SessionProvider
       initialAuth={
         userId
-          ? { isLoggedIn: true, userId, userRole, expirationTime }
-          : { isLoggedIn: false, userId: null, userRole: null, expirationTime: null }
+          ? { isLoggedIn: true, userId, userRole, expiresAt }
+          : { isLoggedIn: false, userId: null, userRole: null, expiresAt: null }
       }
     >
       <CurrentUserProvider
