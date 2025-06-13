@@ -13,6 +13,7 @@ import {
   Tailwind,
   Text,
 } from '@react-email/components';
+import tailwindConfig from 'tailwind.config';
 import config from '@/auth/config';
 
 type Props = {
@@ -23,7 +24,7 @@ type Props = {
 
 export function Email({ children, previewText, showLogo = true }: Props) {
   return (
-    <Tailwind>
+    <Tailwind config={tailwindConfig}>
       <Html>
         <Head />
         <Body className='bg-neutral-100 p-[8px]'>
