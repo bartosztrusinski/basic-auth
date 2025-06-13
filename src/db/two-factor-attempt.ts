@@ -19,7 +19,7 @@ async function getTwoFactorAttemptByToken(
 
 async function createTwoFactorAttempt(
   newTwoFactorAttempt: Omit<TwoFactorAttempt, 'expiresAt'>,
-): Promise<TwoFactorAttempt | null> {
+): Promise<TwoFactorAttempt> {
   const [twoFactorAttempt] = await db
     .insert(twoFactorAttempts)
     .values({
@@ -28,7 +28,7 @@ async function createTwoFactorAttempt(
     })
     .returning();
 
-  return twoFactorAttempt ?? null;
+  return twoFactorAttempt!;
 }
 
 async function deleteTwoFactorAttempt(token: TwoFactorAttempt['token']): Promise<void> {

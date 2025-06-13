@@ -11,15 +11,13 @@ async function getActiveRecoveryCodes(userId: RecoveryCode['userId']): Promise<R
   });
 }
 
-async function createRecoveryCode(
-  newCode: Omit<RecoveryCode, 'usedAt'>,
-): Promise<RecoveryCode | null> {
+async function createRecoveryCode(newCode: Omit<RecoveryCode, 'usedAt'>): Promise<RecoveryCode> {
   const [code] = await db.insert(recoveryCodes).values(newCode).returning();
-  return code ?? null;
+  return code!;
 }
 
-async function consumeRecoveryCode(activeRecoveryCode: RecoveryCode): Promise<RecoveryCode | null> {
-  const [updatedCode] = await db
+async function consumeRecoveryCode(activeRecoveryCode: RecoveryCode): Promise<void> {
+  await db
     .update(recoveryCodes)
     .set({ usedAt: new Date() })
     .where(
@@ -28,10 +26,7 @@ async function consumeRecoveryCode(activeRecoveryCode: RecoveryCode): Promise<Re
         eq(recoveryCodes.userId, activeRecoveryCode.userId),
         isNull(recoveryCodes.usedAt),
       ),
-    )
-    .returning();
-
-  return updatedCode ?? null;
+    );
 }
 
 async function deleteUserRecoveryCodes(userId: RecoveryCode['userId']): Promise<void> {

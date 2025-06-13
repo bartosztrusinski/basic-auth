@@ -19,7 +19,7 @@ async function getVerificationTokenByToken(
 
 async function createVerificationToken(
   newToken: Omit<VerificationToken, 'expiresAt'>,
-): Promise<VerificationToken | null> {
+): Promise<VerificationToken> {
   const expiresAt = createExpirationDate(serverConfig.verificationTokenExpirationInSeconds);
   const [token] = await db
     .insert(verificationTokens)
@@ -30,7 +30,7 @@ async function createVerificationToken(
     })
     .returning();
 
-  return token ?? null;
+  return token!;
 }
 
 async function deleteVerificationToken(userId: VerificationToken['userId']): Promise<void> {

@@ -57,9 +57,8 @@ async function createUser(newUser: Omit<InsertUser, 'id' | 'createdAt'>): Promis
 async function updateUser(
   id: User['id'],
   updatedUser: Partial<Omit<InsertUser, 'id'>>,
-): Promise<User> {
-  const [user] = await db.update(users).set(updatedUser).where(eq(users.id, id)).returning();
-  return user!;
+): Promise<void> {
+  await db.update(users).set(updatedUser).where(eq(users.id, id));
 }
 
 async function deleteUser(id: User['id']): Promise<void> {

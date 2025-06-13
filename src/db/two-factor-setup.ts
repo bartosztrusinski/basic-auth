@@ -19,7 +19,7 @@ async function getUserTwoFactorSetup(
 
 async function createTwoFactorSetup(
   newTwoFactorSetup: Omit<TwoFactorSetup, 'expiresAt'>,
-): Promise<TwoFactorSetup | null> {
+): Promise<TwoFactorSetup> {
   const expiresAt = createExpirationDate(serverConfig.twoFactorSetupExpirationInSeconds);
   const [twoFactorSetup] = await db
     .insert(twoFactorSetups)
@@ -30,7 +30,7 @@ async function createTwoFactorSetup(
     })
     .returning();
 
-  return twoFactorSetup ?? null;
+  return twoFactorSetup!;
 }
 
 async function deleteTwoFactorSetup(userId: TwoFactorSetup['userId']): Promise<void> {

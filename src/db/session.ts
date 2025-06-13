@@ -19,7 +19,7 @@ async function getSessionById(
   return session ? { ...session, userRole: session.user.role } : null;
 }
 
-async function createSession(newSession: Omit<Session, 'expiresAt'>): Promise<Session | null> {
+async function createSession(newSession: Omit<Session, 'expiresAt'>): Promise<Session> {
   const [session] = await db
     .insert(sessions)
     .values({
@@ -28,17 +28,14 @@ async function createSession(newSession: Omit<Session, 'expiresAt'>): Promise<Se
     })
     .returning();
 
-  return session ?? null;
+  return session!;
 }
 
-async function refreshSession(sessionId: Session['id']): Promise<Session | null> {
-  const [session] = await db
+async function refreshSession(sessionId: Session['id']): Promise<void> {
+  await db
     .update(sessions)
     .set({ expiresAt: createExpirationDate(serverConfig.sessionExpirationInSeconds).toISOString() })
-    .where(eq(sessions.id, sessionId))
-    .returning();
-
-  return session ?? null;
+    .where(eq(sessions.id, sessionId));
 }
 
 async function deleteSession(sessionId: Session['id']): Promise<void> {

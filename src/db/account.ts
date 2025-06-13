@@ -11,9 +11,9 @@ async function getUserAccounts(userId: Account['userId']): Promise<Account[]> {
   });
 }
 
-async function createAccount(newAccount: Account): Promise<Account | null> {
+async function createAccount(newAccount: Account): Promise<Account> {
   const [account] = await db.insert(accounts).values(newAccount).returning();
-  return account ?? null;
+  return account!;
 }
 
 async function deleteAccount(
