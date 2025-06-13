@@ -19,8 +19,10 @@ const defaultAuth: Auth = {
   isLoggedIn: false,
   userId: null,
   userRole: null,
-  expirationTime: null,
+  expiresAt: null,
 };
+
+const MAX_TIMEOUT_DELAY = 2 ** 31 - 1; // Maximum delay for setTimeout in milliseconds
 
 export const SessionContext = createContext<SessionContext>({
   ...defaultAuth,
@@ -61,22 +63,23 @@ export function SessionProvider({ children, initialAuth = defaultAuth }: Props) 
 
   // This effect is for syncing auth when it expires
   useEffect(() => {
-    if (!auth.expirationTime || !auth.isLoggedIn) {
+    if (!auth.expiresAt || !auth.isLoggedIn) {
       return;
     }
 
+    const delay = Math.min(Date.parse(auth.expiresAt) - Date.now(), MAX_TIMEOUT_DELAY);
     const timeout = setTimeout(() => {
       void syncAuth().then(({ isUpdated }) => {
         if (isUpdated) {
           router.refresh();
         }
       });
-    }, auth.expirationTime - Date.now());
+    }, delay);
 
     return () => {
       clearTimeout(timeout);
     };
-  }, [auth.expirationTime, auth.isLoggedIn, syncAuth, router]);
+  }, [auth.expiresAt, auth.isLoggedIn, syncAuth, router]);
 
   // This effect is for syncing auth when the page becomes visible again
   useEffect(() => {
