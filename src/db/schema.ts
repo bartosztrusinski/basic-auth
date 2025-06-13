@@ -35,7 +35,7 @@ export const accounts = pgTable(
 
 export const sessions = pgTable('sessions', {
   id: varchar({ length: 43 }).primaryKey(),
-  expiresAt,
+  expiresAt: timestamp({ withTimezone: true, mode: 'string' }).notNull(),
   userId: userIdRef(),
 });
 
