@@ -34,25 +34,25 @@ export const accounts = pgTable(
 );
 
 export const sessions = pgTable('sessions', {
-  id: varchar({ length: 43 }).primaryKey(),
+  id: varchar({ length: 44 }).primaryKey(),
   expiresAt: timestamp({ withTimezone: true, mode: 'string' }).notNull(),
   userId: userIdRef(),
 });
 
 export const verificationTokens = pgTable('verification_tokens', {
-  token: varchar({ length: 86 }).primaryKey(),
+  token: varchar({ length: 44 }).primaryKey(),
   expiresAt,
   userId: userIdRef().unique(),
 });
 
 export const twoFactorAttempts = pgTable('two_factor_attempts', {
-  token: varchar({ length: 86 }).primaryKey(),
+  token: varchar({ length: 44 }).primaryKey(),
   expiresAt,
   userId: userIdRef(),
 });
 
 export const twoFactorSetups = pgTable('two_factor_setups', {
-  secret: varchar({ length: 64 }).primaryKey(),
+  secret: varchar({ length: 67 }).primaryKey(),
   expiresAt,
   userId: userIdRef().unique(),
 });
@@ -61,7 +61,7 @@ export const recoveryCodes = pgTable(
   'recovery_codes',
   {
     code: varchar({ length: 97 }).notNull(),
-    usedAt: timestamp(),
+    usedAt: timestamp({ withTimezone: true }),
     userId: userIdRef(),
   },
   (table) => [primaryKey({ columns: [table.code, table.userId] })],
