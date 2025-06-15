@@ -1,5 +1,5 @@
 import 'server-only';
-import { and, eq, type InferInsertModel, type InferSelectModel } from 'drizzle-orm';
+import { and, eq, exists, isNull, type InferInsertModel, type InferSelectModel } from 'drizzle-orm';
 import { db } from '@/db';
 import { accounts, roles, users } from '@/db/schema';
 import { type Account } from './account';
@@ -35,15 +35,20 @@ async function getUserByProvider(
   provider: Account['provider'],
   providerAccountId: Account['providerAccountId'],
 ): Promise<(User & { accounts: Account[] }) | null> {
+  const account = db
+    .select()
+    .from(accounts)
+    .where(
+      and(
+        eq(accounts.provider, provider),
+        eq(accounts.providerAccountId, providerAccountId),
+        eq(accounts.userId, users.id),
+      ),
+    );
+
   const user = await db.query.users.findFirst({
-    with: {
-      accounts: {
-        where: and(
-          eq(accounts.provider, provider),
-          eq(accounts.providerAccountId, providerAccountId),
-        ),
-      },
-    },
+    with: { accounts: true },
+    where: exists(account),
   });
 
   return user ?? null;
@@ -52,6 +57,30 @@ async function getUserByProvider(
 async function createUser(newUser: Omit<InsertUser, 'id' | 'createdAt'>): Promise<User> {
   const [user] = await db.insert(users).values(newUser).returning();
   return user!;
+}
+
+/**
+ * Upsert a user with email marked as verified.
+ * Creates a new user or updates an existing unverified user.
+ * If email is already taken (registered and verified) it returns null
+ */
+async function upsertVerifiedUser({
+  email,
+  ...userData
+}: Omit<InsertUser, 'id' | 'createdAt' | 'emailVerified'>): Promise<User | null> {
+  const data = { ...userData, emailVerified: new Date() };
+
+  const [user] = await db
+    .insert(users)
+    .values({ email, ...data })
+    .onConflictDoUpdate({
+      target: users.email,
+      setWhere: isNull(users.emailVerified),
+      set: data,
+    })
+    .returning();
+
+  return user ?? null;
 }
 
 async function updateUser(
@@ -73,6 +102,7 @@ export {
   getUserById,
   getUserByProvider,
   createUser,
+  upsertVerifiedUser,
   updateUser,
   deleteUser,
 };
