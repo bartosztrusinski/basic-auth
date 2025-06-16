@@ -1,6 +1,7 @@
 import 'server-only';
 import { NextResponse, type NextRequest } from 'next/server';
 import { redirect } from 'next/navigation';
+import { createAccount } from '@/db/account';
 import {
   auth,
   redirectToLogin,
@@ -12,7 +13,7 @@ import {
 import { redirectAuth } from '@/auth/util';
 import { deleteSessionCookie } from '@/auth/cookie';
 import { AuthError } from '@/auth/message';
-import { signUpWithProvider, exchangeCodeForOAuthUser, createProviderAccount } from '@/auth/oauth';
+import { signUpWithProvider, exchangeCodeForOAuthUser } from '@/auth/oauth';
 import config from '@/auth/config';
 
 export const handlers = { GET };
@@ -37,7 +38,7 @@ async function GET(request: NextRequest, { params }: { params: Promise<{ endpoin
 }
 
 async function getSession(): Promise<NextResponse> {
-  const { userId, userRole, expirationTime } = await auth();
+  const { userId, userRole, expiresAt } = await auth();
 
   if (!userId) {
     await deleteSessionCookie();
@@ -45,8 +46,8 @@ async function getSession(): Promise<NextResponse> {
 
   return NextResponse.json<Auth>(
     userId
-      ? { isLoggedIn: true, userId, userRole, expirationTime }
-      : { isLoggedIn: false, userId: null, userRole: null, expirationTime: null },
+      ? { isLoggedIn: true, userId, userRole, expiresAt }
+      : { isLoggedIn: false, userId: null, userRole: null, expiresAt: null },
   );
 }
 
@@ -54,13 +55,7 @@ async function getCurrentUser(): Promise<NextResponse> {
   const backendUser = await currentUser();
 
   return NextResponse.json<CurrentUser | null>(
-    backendUser
-      ? {
-          id: backendUser.id,
-          email: backendUser.email,
-          name: backendUser.name,
-        }
-      : null,
+    backendUser ? { id: backendUser.id, email: backendUser.email, name: backendUser.name } : null,
   );
 }
 
@@ -86,7 +81,7 @@ async function handleOAuthAccountLink(
 
   try {
     if (!userId) {
-      throw new Error('User not logged in');
+      throw new AuthError('unauthenticated');
     }
 
     const { provider, oAuthUser, stateData } = await exchangeCodeForOAuthUser(
@@ -99,7 +94,11 @@ async function handleOAuthAccountLink(
       redirectUrl = stateData.redirectUrl;
     }
 
-    await createProviderAccount(provider, oAuthUser.id, userId);
+    const account = await createAccount({ userId, provider, providerAccountId: oAuthUser.id });
+
+    if (!account) {
+      throw new AuthError('oauth-link-existing-account');
+    }
   } catch (error) {
     redirectAuth(redirectUrl, {
       authCode: error instanceof AuthError ? error.authCode : 'oauth-link-failed',
@@ -127,11 +126,8 @@ async function handleOAuthSignup(
       redirectUrl = stateData.redirectUrl;
     }
 
-    const user = await signUpWithProvider(provider, oAuthUser);
-    await createUserSession({
-      userId: user.id,
-      userRole: user.role,
-    });
+    const userId = await signUpWithProvider(provider, oAuthUser);
+    await createUserSession(userId);
   } catch (error) {
     redirectToLogin({
       authCode: error instanceof AuthError ? error.authCode : 'oauth-login-failed',
