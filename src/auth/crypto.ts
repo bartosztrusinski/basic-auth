@@ -71,6 +71,12 @@ function compareHashHighEntropy(value: string, hashedValue: string): boolean {
   return timingSafeEqual(Buffer.from(inputHash, ENCODING), Buffer.from(hashedValue, ENCODING));
 }
 
+function generateToken(length = 64) {
+  const token = generateRandomString(length);
+  const hashedToken = hashHighEntropy(token);
+  return { token, hashedToken };
+}
+
 function generateRandomString(byteLength: number) {
   return randomBytes(byteLength).toString(ENCODING);
 }
@@ -82,5 +88,6 @@ export {
   hashHighEntropy,
   compareHashLowEntropy,
   compareHashHighEntropy,
+  generateToken,
   generateRandomString,
 };
