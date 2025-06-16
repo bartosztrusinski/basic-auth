@@ -28,5 +28,5 @@ export function AuthToaster() {
     }
   }, [params, router]);
 
-  return <Toaster richColors theme='dark' closeButton />;
+  return <Toaster richColors theme='dark' closeButton duration={10000} />;
 }
