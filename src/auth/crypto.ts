@@ -18,7 +18,7 @@ const IV_LENGTH = 12;
 const DELIMITER = ':';
 const PEPPER = Buffer.from(env.PEPPER, ENCODING);
 
-function encrypt(data: string): string {
+function encrypt(data: Buffer): string {
   const iv = randomBytes(IV_LENGTH);
   const cipher = createCipheriv(
     ENCRYPTION_ALGORITHM,
@@ -26,7 +26,7 @@ function encrypt(data: string): string {
     iv,
   );
 
-  let encryptedSecret = cipher.update(data, 'utf8', ENCODING);
+  let encryptedSecret = cipher.update(data, undefined, ENCODING);
   encryptedSecret += cipher.final(ENCODING);
 
   const authTag = cipher.getAuthTag();
@@ -34,7 +34,7 @@ function encrypt(data: string): string {
   return [iv.toString(ENCODING), authTag.toString(ENCODING), encryptedSecret].join(DELIMITER);
 }
 
-function decrypt(data: string): string {
+function decrypt(data: string): Buffer {
   const [iv, authTag, encryptedSecret] = data.split(DELIMITER);
 
   if (!iv || !authTag || !encryptedSecret) {
@@ -48,10 +48,10 @@ function decrypt(data: string): string {
   );
   decipher.setAuthTag(Buffer.from(authTag, ENCODING));
 
-  let decryptedSecret = decipher.update(encryptedSecret, ENCODING, 'utf8');
-  decryptedSecret += decipher.final('utf8');
+  const decryptedPart = decipher.update(encryptedSecret, ENCODING);
+  const finalPart = decipher.final();
 
-  return decryptedSecret;
+  return Buffer.concat([decryptedPart, finalPart]);
 }
 
 function hashLowEntropy(value: string): Promise<string> {
