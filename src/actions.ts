@@ -1,12 +1,15 @@
 'use server';
 
 import { revalidatePath } from 'next/cache';
-import { db, type RecoveryCode, type TwoFactorSetup, type VerificationToken } from '@/db';
-import { editProfileSchema } from '@/schemas';
-import { auth, redirectToLogin, updateUserSession } from '@/auth/session';
+import { updateUser } from '@/db/user';
+import { type RecoveryCode } from '@/db/recovery-code';
+import { type TwoFactorSetup } from '@/db/two-factor-setup';
+import { type VerificationToken } from '@/db/verification-token';
+import { auth, redirectToLogin } from '@/auth/session';
 import { redirectAuth } from '@/auth/util';
 import { type OAuthProvider, type StateData } from '@/auth/oauth';
 import * as actions from '@/auth/actions';
+import { editProfileSchema } from '@/schemas';
 
 // eslint-disable-next-line @typescript-eslint/no-empty-object-type
 type ActionState<T extends Record<string, unknown> = {}> = ActionSuccess<T> | ActionFailure;
@@ -49,8 +52,8 @@ export async function editProfile(_: unknown, formData: FormData): Promise<Actio
   const { userId } = await auth.protect({ returnBackUrl: '/profile' });
 
   try {
-    const { role } = await db.updateUser(userId, userData);
-    await updateUserSession({ userId, userRole: role });
+    await updateUser(userId, userData);
+    revalidatePath('/profile');
 
     return {
       isSuccess: true,
