@@ -55,16 +55,16 @@ function decrypt(data: string): Buffer {
   return Buffer.concat([decryptedPart, finalPart]);
 }
 
-function hashLowEntropy(value: string): Promise<string> {
-  return argon2.hash(value.normalize(), { secret: PEPPER });
+async function hashLowEntropy(value: string): Promise<string> {
+  return await argon2.hash(value.normalize(), { secret: PEPPER });
 }
 
 function hashHighEntropy(value: string): string {
   return createHmac(HASH_ALGORITHM, PEPPER).update(value.normalize()).digest(ENCODING);
 }
 
-function compareHashLowEntropy(value: string, hashedValue: string): Promise<boolean> {
-  return argon2.verify(hashedValue, value, { secret: PEPPER });
+async function compareHashLowEntropy(value: string, hashedValue: string): Promise<boolean> {
+  return await argon2.verify(hashedValue, value, { secret: PEPPER });
 }
 
 function compareHashHighEntropy(value: string, hashedValue: string): boolean {

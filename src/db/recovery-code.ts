@@ -11,9 +11,10 @@ async function getActiveRecoveryCodes(userId: RecoveryCode['userId']): Promise<R
   });
 }
 
-async function createRecoveryCode(newCode: Omit<RecoveryCode, 'usedAt'>): Promise<RecoveryCode> {
-  const [code] = await db.insert(recoveryCodes).values(newCode).returning();
-  return code!;
+async function createRecoveryCodes(
+  newCodes: Omit<RecoveryCode, 'usedAt'>[],
+): Promise<RecoveryCode[]> {
+  return await db.insert(recoveryCodes).values(newCodes).returning();
 }
 
 async function consumeRecoveryCode(activeRecoveryCode: RecoveryCode): Promise<void> {
@@ -36,7 +37,7 @@ async function deleteUserRecoveryCodes(userId: RecoveryCode['userId']): Promise<
 export {
   type RecoveryCode,
   getActiveRecoveryCodes,
-  createRecoveryCode,
+  createRecoveryCodes,
   consumeRecoveryCode,
   deleteUserRecoveryCodes,
 };
