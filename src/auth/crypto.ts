@@ -10,6 +10,7 @@ import {
 } from 'node:crypto';
 import argon2 from 'argon2';
 import { env } from '@/env';
+import config from '@/auth/config';
 
 const ENCODING: BinaryToTextEncoding = 'base64url';
 const ENCRYPTION_ALGORITHM: CipherGCMTypes = 'aes-256-gcm';
@@ -81,6 +82,25 @@ function generateRandomString(byteLength: number) {
   return randomBytes(byteLength).toString(ENCODING);
 }
 
+function generateRandomCodes(count: number, length: number): string[] {
+  const uniqueCodes = new Set<string>();
+
+  while (uniqueCodes.size < count) {
+    uniqueCodes.add(generateRandomCode(length));
+  }
+
+  return [...uniqueCodes];
+}
+
+function generateRandomCode(length: number): string {
+  const bytes = randomBytes(length);
+  const characters = config.codeAllowedCharacters;
+
+  return Array.from(bytes)
+    .map((byte) => characters[byte % characters.length])
+    .join('');
+}
+
 export {
   encrypt,
   decrypt,
@@ -90,4 +110,5 @@ export {
   compareHashHighEntropy,
   generateToken,
   generateRandomString,
+  generateRandomCodes,
 };

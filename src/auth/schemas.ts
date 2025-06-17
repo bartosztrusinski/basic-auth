@@ -55,7 +55,7 @@ const recoveryCodeSchema = z.object({
   code: z
     .string({ message: 'Recovery code is required' })
     .regex(
-      new RegExp(`^[${config.recoveryCodeAllowedCharacters}]{${config.recoveryCodeLength}}$`),
+      new RegExp(`^[${config.codeAllowedCharacters}]{${config.recoveryCodeLength}}$`),
       `Please enter a valid ${config.recoveryCodeLength}-character recovery code`,
     ),
 });
