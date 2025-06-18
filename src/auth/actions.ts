@@ -4,14 +4,32 @@ import * as OTPAuth from 'otpauth';
 import QRCode from 'qrcode';
 import { type ZodSchema, type ZodType, type z } from 'zod';
 import { redirect } from 'next/navigation';
+import { getUserByEmail, createUser, updateUser, deleteUser, getUserById } from '@/db/user';
 import {
-  db,
+  getVerificationTokenByToken,
+  deleteVerificationToken,
   type VerificationToken,
-  type Session,
-  type TwoFactorAttempt,
+  createVerificationToken,
+} from '@/db/verification-token';
+import {
+  deleteUserRecoveryCodes,
+  getActiveRecoveryCodes,
+  consumeRecoveryCode,
   type RecoveryCode,
+} from '@/db/recovery-code';
+import {
+  getTwoFactorAttemptByToken,
+  deleteTwoFactorAttempt,
+  type TwoFactorAttempt,
+  createTwoFactorAttempt,
+} from '@/db/two-factor-attempt';
+import {
+  deleteTwoFactorSetup,
+  createTwoFactorSetup,
+  getUserTwoFactorSetup,
   type TwoFactorSetup,
-} from '@/db';
+} from '@/db/two-factor-setup';
+import { type Session } from '@/db/session';
 import {
   signupSchema,
   loginSchema,
@@ -34,7 +52,6 @@ import {
   type StateData,
 } from '@/auth/oauth';
 import { sendExistingUserLoginGuidanceEmail, sendVerificationEmail } from '@/auth/email';
-import { createEmailVerificationToken } from '@/auth/verification-token';
 import { type AuthCode, AuthError, getAuthMessage } from '@/auth/message';
 import {
   hashLowEntropy,
@@ -42,11 +59,10 @@ import {
   compareHashLowEntropy,
   decrypt,
   encrypt,
+  generateToken,
 } from '@/auth/crypto';
-import { createTwoFactorAttempt } from '@/auth/two-factor-attempt';
-import { createRecoveryCodes } from '@/auth/recovery-code';
+import { generateRecoveryCodes } from '@/auth/recovery-code';
 import config from '@/auth/config';
-import serverConfig from '@/auth/config/server';
 
 type ActionState<T extends ZodSchema = z.ZodAny> = ActionSuccess | ActionFailure<T>;
 
@@ -85,27 +101,24 @@ async function signUp(_: unknown, formData: FormData): Promise<ActionState<typeo
   const { email, name, password } = data;
 
   try {
-    const existingUser = await db.getUserByEmail(email);
+    let user = await getUserByEmail(email);
 
-    if (existingUser?.emailVerified) {
-      await sendExistingUserLoginGuidanceEmail(existingUser.email, existingUser.name);
+    if (user?.emailVerified) {
+      await sendExistingUserLoginGuidanceEmail(user.email, user.name);
 
       return {
         isSuccess: true,
       };
     }
 
-    if (!existingUser) {
+    if (!user) {
       const hashedPassword = await hashLowEntropy(password);
-      await db.createUser({ email, name, password: hashedPassword });
+      user = await createUser({ email, name, password: hashedPassword });
     }
 
-    const verificationToken = await createEmailVerificationToken(email);
-    await sendVerificationEmail(
-      verificationToken.email,
-      verificationToken.token,
-      existingUser?.name ?? name,
-    );
+    const { token, hashedToken } = generateToken();
+    await createVerificationToken({ token: hashedToken, userId: user.id });
+    await sendVerificationEmail(email, token, user.name);
 
     return {
       isSuccess: true,
@@ -120,7 +133,7 @@ async function logIn(
   formData: FormData,
 ): Promise<
   ActionDataState<
-    { session?: Session; twoFactorToken?: TwoFactorAttempt['token'] },
+    Partial<{ session: Session; twoFactorToken: TwoFactorAttempt['token'] }>,
     typeof loginSchema
   >
 > {
@@ -139,7 +152,7 @@ async function logIn(
   const { email, password } = data;
 
   try {
-    const user = await db.getUserByEmail(email);
+    const user = await getUserByEmail(email);
 
     if (!user?.password) {
       throw new AuthError('invalid-credentials');
@@ -152,7 +165,8 @@ async function logIn(
     }
 
     if (user.twoFactorSecret) {
-      const { token } = await createTwoFactorAttempt(user.id);
+      const { token, hashedToken } = generateToken();
+      await createTwoFactorAttempt({ token: hashedToken, userId: user.id });
 
       return {
         isSuccess: true,
@@ -162,7 +176,7 @@ async function logIn(
       };
     }
 
-    const session = await createUserSession({ userId: user.id, userRole: user.role });
+    const session = await createUserSession(user.id);
 
     return {
       isSuccess: true,
@@ -259,24 +273,25 @@ async function logOutEverywhere(): Promise<ActionState> {
 async function verifyEmail(token: VerificationToken['token']): Promise<ActionState> {
   try {
     const hashedToken = hashHighEntropy(token);
-    const verificationToken = await db.getVerificationTokenByToken(hashedToken);
+    // TODO get user
+    const verificationToken = await getVerificationTokenByToken(hashedToken);
 
-    if (!verificationToken || verificationToken.expirationTime < Date.now()) {
+    if (!verificationToken || verificationToken.expiresAt < new Date()) {
       throw new AuthError('email-verification-expired');
     }
 
-    const { email } = verificationToken;
-    const user = await db.getUserByEmail(email);
+    const { userId } = verificationToken;
+    const user = await getUserById(userId);
 
     if (!user) {
       throw new Error('Email does not exist');
     }
 
     if (!user.emailVerified) {
-      await db.updateUser(user.id, { emailVerified: Date.now() });
+      await updateUser(user.id, { emailVerified: new Date() });
     }
 
-    await db.deleteVerificationToken(email);
+    await deleteVerificationToken(user.id);
 
     return {
       isSuccess: true,
@@ -307,15 +322,16 @@ async function resendVerificationEmail(
   const { email } = data;
 
   try {
-    const user = await db.getUserByEmail(email);
+    const user = await getUserByEmail(email);
 
     if (user?.emailVerified) {
       await sendExistingUserLoginGuidanceEmail(user.email, user.name);
     }
 
     if (user && !user.emailVerified) {
-      const verificationToken = await createEmailVerificationToken(user.email);
-      await sendVerificationEmail(verificationToken.email, verificationToken.token, user.name);
+      const { token, hashedToken } = generateToken();
+      await createVerificationToken({ token: hashedToken, userId: user.id });
+      await sendVerificationEmail(user.email, token, user.name);
     }
 
     return {
@@ -348,12 +364,9 @@ async function addPassword(_: unknown, formData: FormData): Promise<ActionState>
     }
 
     const { password } = data;
-
     const hashedPassword = await hashLowEntropy(password);
 
-    await db.updateUser(user.id, {
-      password: hashedPassword,
-    });
+    await updateUser(user.id, { password: hashedPassword });
 
     return {
       isSuccess: true,
@@ -372,7 +385,7 @@ async function deleteCurrentUser(): Promise<ActionState> {
     }
 
     await deleteAllUserSessions(userId);
-    await db.deleteUser(userId);
+    await deleteUser(userId);
 
     return {
       isSuccess: true,
@@ -400,14 +413,12 @@ async function initializeTwoFactorAuth(): Promise<
       throw new AuthError('two-factor-already-enabled');
     }
 
-    const secret = new OTPAuth.Secret({ size: 20 }).base32;
-    const encryptedSecret = encrypt(secret);
+    const secret = new OTPAuth.Secret({ size: 20 });
+    const encryptedSecret = encrypt(Buffer.from(secret.bytes));
 
-    await db.deleteTwoFactorSetup(user.id);
-    await db.createTwoFactorSetup({
+    await createTwoFactorSetup({
       userId: user.id,
       secret: encryptedSecret,
-      expirationTime: Date.now() + serverConfig.twoFactorSetupExpirationInSeconds * 1000,
     });
 
     const totp = new OTPAuth.TOTP({
@@ -422,12 +433,11 @@ async function initializeTwoFactorAuth(): Promise<
     return {
       isSuccess: true,
       data: {
-        secret,
+        secret: secret.base32,
         qrCode,
       },
     };
   } catch (error) {
-    console.log(error);
     return handleError(error, 'two-factor-setup-failed');
   }
 }
@@ -462,22 +472,21 @@ async function enableTwoFactorAuth(
 
     const { code } = data;
 
-    const twoFactorSetup = await db.getUserTwoFactorSetup(user.id);
+    const twoFactorSetup = await getUserTwoFactorSetup(user.id);
 
-    if (!twoFactorSetup) {
-      throw new AuthError('two-factor-setup-failed');
-    }
-
-    if (twoFactorSetup.expirationTime < Date.now()) {
+    if (!twoFactorSetup || twoFactorSetup.expiresAt < new Date()) {
       throw new AuthError('two-factor-expired');
     }
 
     const decryptedSecret = decrypt(twoFactorSetup.secret);
+    const secret = new OTPAuth.Secret({
+      buffer: decryptedSecret,
+    });
 
     const totp = new OTPAuth.TOTP({
       issuer: config.appName,
       label: user.email,
-      secret: decryptedSecret,
+      secret,
     });
 
     const delta = totp.validate({ token: code, window: 0 });
@@ -486,12 +495,10 @@ async function enableTwoFactorAuth(
       throw new AuthError('two-factor-invalid-code');
     }
 
-    await db.deleteTwoFactorSetup(user.id);
-    await db.updateUser(user.id, {
-      twoFactorSecret: twoFactorSetup.secret,
-    });
+    await deleteTwoFactorSetup(user.id);
+    await updateUser(user.id, { twoFactorSecret: twoFactorSetup.secret });
 
-    const recoveryCodes = await createRecoveryCodes(user.id);
+    const recoveryCodes = await generateRecoveryCodes(user.id);
 
     return {
       isSuccess: true,
@@ -516,8 +523,8 @@ async function disableTwoFactorAuth(): Promise<ActionState> {
       throw new AuthError('two-factor-not-enabled');
     }
 
-    await db.updateUser(user.id, { twoFactorSecret: undefined });
-    await db.deleteUserRecoveryCodes(user.id);
+    await updateUser(user.id, { twoFactorSecret: null });
+    await deleteUserRecoveryCodes(user.id);
 
     return {
       isSuccess: true,
@@ -545,17 +552,14 @@ async function verifyTwoFactorCode(
 
   try {
     const hashedToken = hashHighEntropy(token);
-    const twoFactorAttempt = await db.getTwoFactorAttemptByToken(hashedToken);
+    // TODO get user
+    const twoFactorAttempt = await getTwoFactorAttemptByToken(hashedToken);
 
-    if (!twoFactorAttempt) {
-      throw new AuthError('two-factor-invalid-code');
+    if (!twoFactorAttempt || twoFactorAttempt.expiresAt < new Date()) {
+      throw new AuthError('two-factor-login-expired');
     }
 
-    if (twoFactorAttempt.expirationTime < Date.now()) {
-      throw new AuthError('two-factor-expired');
-    }
-
-    const user = await db.getUserById(twoFactorAttempt.userId);
+    const user = await getUserById(twoFactorAttempt.userId);
 
     if (!user) {
       throw new AuthError('two-factor-invalid-code');
@@ -566,11 +570,14 @@ async function verifyTwoFactorCode(
     }
 
     const decryptedSecret = decrypt(user.twoFactorSecret);
+    const secret = new OTPAuth.Secret({
+      buffer: decryptedSecret,
+    });
 
     const totp = new OTPAuth.TOTP({
       issuer: config.appName,
       label: user.email,
-      secret: decryptedSecret,
+      secret,
     });
 
     const delta = totp.validate({ token: code, window: 0 });
@@ -579,12 +586,9 @@ async function verifyTwoFactorCode(
       throw new AuthError('two-factor-invalid-code');
     }
 
-    await db.deleteTwoFactorAttempt(hashedToken);
+    await deleteTwoFactorAttempt(hashedToken);
 
-    const session = await createUserSession({
-      userId: user.id,
-      userRole: user.role,
-    });
+    const session = await createUserSession(user.id);
 
     return {
       isSuccess: true,
@@ -615,17 +619,14 @@ async function useRecoveryCode(
 
   try {
     const hashedToken = hashHighEntropy(token);
-    const twoFactorAttempt = await db.getTwoFactorAttemptByToken(hashedToken);
+    // TODO get user
+    const twoFactorAttempt = await getTwoFactorAttemptByToken(hashedToken);
 
-    if (!twoFactorAttempt) {
-      throw new AuthError('two-factor-invalid-code');
+    if (!twoFactorAttempt || twoFactorAttempt.expiresAt < new Date()) {
+      throw new AuthError('two-factor-login-expired');
     }
 
-    if (twoFactorAttempt.expirationTime < Date.now()) {
-      throw new AuthError('two-factor-expired');
-    }
-
-    const user = await db.getUserById(twoFactorAttempt.userId);
+    const user = await getUserById(twoFactorAttempt.userId);
 
     if (!user) {
       throw new AuthError('two-factor-invalid-code');
@@ -635,7 +636,7 @@ async function useRecoveryCode(
       throw new AuthError('two-factor-not-enabled');
     }
 
-    const activeRecoveryCodes = await db.getActiveRecoveryCodes(user.id);
+    const activeRecoveryCodes = await getActiveRecoveryCodes(user.id);
 
     let correctCode: RecoveryCode | null = null;
     for (const recoveryCode of activeRecoveryCodes) {
@@ -651,13 +652,10 @@ async function useRecoveryCode(
       throw new AuthError('recovery-code-invalid');
     }
 
-    await db.useRecoveryCode(correctCode);
-    await db.deleteTwoFactorAttempt(hashedToken);
+    await consumeRecoveryCode(correctCode);
+    await deleteTwoFactorAttempt(hashedToken);
 
-    const session = await createUserSession({
-      userId: user.id,
-      userRole: user.role,
-    });
+    const session = await createUserSession(user.id);
 
     return {
       isSuccess: true,

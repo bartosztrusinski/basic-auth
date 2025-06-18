@@ -145,6 +145,10 @@ const authMessages = {
     type: 'error',
     message: 'Two-factor authentication code expired. Please try again.',
   },
+  'two-factor-login-expired': {
+    type: 'error',
+    message: 'Two-factor login attempt expired. Please enter credentials again.',
+  },
   'two-factor-password-required': {
     type: 'error',
     message: 'You must set a password before enabling two-factor authentication.',
