@@ -1,7 +1,8 @@
 import 'server-only';
 import { hash } from 'node:crypto';
 import { type z } from 'zod';
-import { db, type User } from '@/db';
+import { createAccount, getUserAccounts, deleteAccount } from '@/db/account';
+import { getUserByProvider, getUserById, type User, upsertVerifiedUser } from '@/db/user';
 import {
   getStateCookie,
   setStateCookie,
@@ -167,77 +168,43 @@ async function fetchOAuthUser(
 async function signUpWithProvider(
   provider: OAuthProvider,
   { id, email, ...oAuthData }: OAuthUser,
-): Promise<Pick<User, 'id' | 'role'>> {
-  const existingUser = await db.getUserByProvider(provider, id);
+): Promise<User['id']> {
+  const existingUser = await getUserByProvider(provider, id);
 
   if (existingUser) {
-    return {
-      id: existingUser.id,
-      role: existingUser.role,
-    };
+    return existingUser.id;
   }
 
-  const existingEmailUser = await db.getUserByEmail(email);
+  const user = await upsertVerifiedUser({ email, ...oAuthData });
 
-  if (existingEmailUser?.emailVerified) {
+  if (!user) {
     throw new AuthError('oauth-login-email-taken');
   }
 
-  if (existingEmailUser) {
-    await db.updateUser(existingEmailUser.id, { emailVerified: Date.now() });
+  const account = await createAccount({ userId: user.id, provider, providerAccountId: id });
+
+  if (!account) {
+    throw new AuthError('oauth-login-failed');
   }
 
-  const user =
-    existingEmailUser ?? (await db.createUser({ email, ...oAuthData, emailVerified: Date.now() }));
-
-  await db.createAccount({
-    userId: user.id,
-    provider,
-    providerAccountId: id,
-  });
-
-  return {
-    id: user.id,
-    role: user.role,
-  };
-}
-
-async function createProviderAccount(
-  provider: OAuthProvider,
-  accountId: OAuthUser['id'],
-  userId: User['id'],
-) {
-  const existingAccount = await db.getAccountByProvider(provider, accountId);
-  const isAccountLinkedToAnotherUser = existingAccount && existingAccount.userId !== userId;
-
-  if (isAccountLinkedToAnotherUser) {
-    throw new AuthError('oauth-link-existing-account');
-  }
-
-  if (!existingAccount) {
-    await db.createAccount({
-      userId: userId,
-      provider,
-      providerAccountId: accountId,
-    });
-  }
+  return user.id;
 }
 
 async function deleteProviderAccount(provider: OAuthProvider, userId: User['id']) {
-  const user = await db.getUserById(userId);
+  const user = await getUserById(userId);
 
   if (!user) {
     throw new Error('Could not find user');
   }
 
-  const accounts = await db.getUserAccounts(userId);
+  const accounts = await getUserAccounts(userId);
   const hasOtherAccounts = accounts.some((account) => account.provider !== provider);
 
   if (!hasOtherAccounts && !user.password) {
     throw new AuthError('oauth-unlink-only-account');
   }
 
-  await db.deleteAccount(userId, provider);
+  await deleteAccount(userId, provider);
 }
 
 function getProviderName(provider: OAuthProvider) {
@@ -284,7 +251,6 @@ export {
   generateAuthorizationUrl,
   exchangeCodeForOAuthUser,
   signUpWithProvider,
-  createProviderAccount,
   deleteProviderAccount,
   getProviderName,
   getRedirectUrl,
