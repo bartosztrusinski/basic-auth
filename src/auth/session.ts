@@ -2,7 +2,15 @@ import 'server-only';
 import { cache } from 'react';
 import { RedirectType } from 'next/navigation';
 import { type NextRequest } from 'next/server';
-import { db, type Session, type User } from '@/db';
+import { getUserById, type User } from '@/db/user';
+import {
+  createSession,
+  deleteSession,
+  deleteUserSessions,
+  getSessionById,
+  refreshSession,
+  type Session,
+} from '@/db/session';
 import { redirectAuth, type FullOrNull, type Null, type RedirectOptions } from '@/auth/util';
 import {
   getSessionCookie,
@@ -12,9 +20,10 @@ import {
 } from '@/auth/cookie';
 import { generateRandomString } from '@/auth/crypto';
 import config from '@/auth/config';
-import serverConfig from '@/auth/config/server';
 
-export type BackendSession = Pick<Session, 'userId' | 'userRole' | 'expirationTime'>;
+export type BackendSession = Omit<Session, 'id'> & {
+  userRole: User['role'];
+};
 
 export type Auth =
   | ({
@@ -52,25 +61,25 @@ async function authFn(): Promise<FullOrNull<BackendSession>> {
   const auth: Null<BackendSession> = {
     userId: null,
     userRole: null,
-    expirationTime: null,
+    expiresAt: null,
   };
 
   if (!sessionId) {
     return auth;
   }
 
-  const session = await db.getSessionById(sessionId);
+  const session = await getSessionById(sessionId);
 
   if (!session) {
     return auth;
   }
 
-  const { userId, userRole, expirationTime } = session;
+  const { userId, userRole, expiresAt } = session;
 
   return {
     userId,
     userRole,
-    expirationTime,
+    expiresAt,
   };
 }
 
@@ -132,7 +141,7 @@ export const currentUser = cache<() => Promise<BackendUser | null>>(async () => 
     return null;
   }
 
-  const user = await db.getUserById(userId);
+  const user = await getUserById(userId);
 
   if (!user) {
     return null;
@@ -148,18 +157,9 @@ export const currentUser = cache<() => Promise<BackendUser | null>>(async () => 
   } satisfies BackendUser;
 });
 
-export async function createUserSession({
-  userId,
-  userRole,
-}: Omit<BackendSession, 'expirationTime'>) {
+export async function createUserSession(userId: BackendSession['userId']): Promise<Session> {
   const sessionId = generateRandomString(32);
-
-  const session = await db.createSession({
-    id: sessionId,
-    userId,
-    userRole,
-    expirationTime: createSessionExpirationTime(),
-  });
+  const session = await createSession({ id: sessionId, userId });
 
   await setSessionCookie(sessionId);
   await setAuthSyncCookie();
@@ -174,34 +174,14 @@ export async function deleteUserSession() {
     return;
   }
 
-  await db.deleteSession(sessionId);
+  await deleteSession(sessionId);
   await deleteSessionCookie();
   await setAuthSyncCookie();
 }
 
 export async function deleteAllUserSessions(userId: User['id']) {
-  await db.deleteUserSessions(userId);
+  await deleteUserSessions(userId);
   await deleteSessionCookie();
-  await setAuthSyncCookie();
-}
-
-export async function updateUserSession({
-  userId,
-  userRole,
-}: Omit<BackendSession, 'expirationTime'>) {
-  const sessionId = await getSessionCookie();
-
-  if (!sessionId) {
-    return;
-  }
-
-  await db.updateSession(sessionId, {
-    userId,
-    userRole,
-    expirationTime: createSessionExpirationTime(),
-  });
-
-  await setSessionCookie(sessionId);
   await setAuthSyncCookie();
 }
 
@@ -212,15 +192,7 @@ export async function refreshUserSession(request?: NextRequest) {
     return;
   }
 
-  try {
-    await db.updateSession(sessionId, {
-      expirationTime: createSessionExpirationTime(),
-    });
-
-    await setSessionCookie(sessionId, request);
-  } catch {}
-}
-
-function createSessionExpirationTime() {
-  return Date.now() + serverConfig.sessionExpirationInSeconds * 1000;
+  await refreshSession(sessionId);
+  await setSessionCookie(sessionId, request);
+  await setAuthSyncCookie();
 }
