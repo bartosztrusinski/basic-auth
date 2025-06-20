@@ -2,6 +2,7 @@ import 'server-only';
 import { and, eq, gt, type InferSelectModel } from 'drizzle-orm';
 import { db } from '@/db';
 import { twoFactorAttempts } from '@/db/schema';
+import { type User } from '@/db/user';
 import { createExpirationDate } from '@/util';
 import serverConfig from '@/auth/config/server';
 
@@ -9,9 +10,10 @@ type TwoFactorAttempt = InferSelectModel<typeof twoFactorAttempts>;
 
 async function getTwoFactorAttemptByToken(
   token: TwoFactorAttempt['token'],
-): Promise<TwoFactorAttempt | null> {
+): Promise<(TwoFactorAttempt & { user: User }) | null> {
   const twoFactorAttempt = await db.query.twoFactorAttempts.findFirst({
     where: and(eq(twoFactorAttempts.token, token), gt(twoFactorAttempts.expiresAt, new Date())),
+    with: { user: true },
   });
 
   return twoFactorAttempt ?? null;

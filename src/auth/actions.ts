@@ -4,7 +4,7 @@ import * as OTPAuth from 'otpauth';
 import QRCode from 'qrcode';
 import { type ZodSchema, type ZodType, type z } from 'zod';
 import { redirect } from 'next/navigation';
-import { getUserByEmail, createUser, updateUser, deleteUser, getUserById } from '@/db/user';
+import { getUserByEmail, createUser, updateUser, deleteUser } from '@/db/user';
 import {
   getVerificationTokenByToken,
   deleteVerificationToken,
@@ -273,19 +273,13 @@ async function logOutEverywhere(): Promise<ActionState> {
 async function verifyEmail(token: VerificationToken['token']): Promise<ActionState> {
   try {
     const hashedToken = hashHighEntropy(token);
-    // TODO get user
     const verificationToken = await getVerificationTokenByToken(hashedToken);
 
     if (!verificationToken || verificationToken.expiresAt < new Date()) {
       throw new AuthError('email-verification-expired');
     }
 
-    const { userId } = verificationToken;
-    const user = await getUserById(userId);
-
-    if (!user) {
-      throw new Error('Email does not exist');
-    }
+    const { user } = verificationToken;
 
     if (!user.emailVerified) {
       await updateUser(user.id, { emailVerified: new Date() });
@@ -552,18 +546,13 @@ async function verifyTwoFactorCode(
 
   try {
     const hashedToken = hashHighEntropy(token);
-    // TODO get user
     const twoFactorAttempt = await getTwoFactorAttemptByToken(hashedToken);
 
     if (!twoFactorAttempt || twoFactorAttempt.expiresAt < new Date()) {
       throw new AuthError('two-factor-login-expired');
     }
 
-    const user = await getUserById(twoFactorAttempt.userId);
-
-    if (!user) {
-      throw new AuthError('two-factor-invalid-code');
-    }
+    const { user } = twoFactorAttempt;
 
     if (!user.twoFactorSecret) {
       throw new AuthError('two-factor-not-enabled');
@@ -619,18 +608,13 @@ async function useRecoveryCode(
 
   try {
     const hashedToken = hashHighEntropy(token);
-    // TODO get user
     const twoFactorAttempt = await getTwoFactorAttemptByToken(hashedToken);
 
     if (!twoFactorAttempt || twoFactorAttempt.expiresAt < new Date()) {
       throw new AuthError('two-factor-login-expired');
     }
 
-    const user = await getUserById(twoFactorAttempt.userId);
-
-    if (!user) {
-      throw new AuthError('two-factor-invalid-code');
-    }
+    const { user } = twoFactorAttempt;
 
     if (!user.twoFactorSecret) {
       throw new AuthError('two-factor-not-enabled');
