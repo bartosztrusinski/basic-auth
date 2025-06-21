@@ -35,6 +35,13 @@ const config = {
         },
       },
     ],
+    'import/no-cycle': [
+      'error',
+      {
+        maxDepth: 1,
+        ignoreExternal: true,
+      },
+    ],
   },
 };
 module.exports = config;
