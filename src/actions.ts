@@ -8,7 +8,24 @@ import { type VerificationToken } from '@/db/verification-token';
 import { auth, redirectToLogin } from '@/auth/session';
 import { redirectAuth } from '@/auth/util';
 import { type OAuthProvider, type StateData } from '@/auth/oauth';
-import * as actions from '@/auth/actions';
+import {
+  logOut as authLogOut,
+  logOutEverywhere as authLogOutEverywhere,
+} from '@/auth/actions/session';
+import { verifyEmail as authVerifyEmail } from '@/auth/actions/email';
+import {
+  linkAccount as authLinkAccount,
+  unlinkAccount as authUnlinkAccount,
+} from '@/auth/actions/oauth';
+import {
+  initializeTwoFactorAuth as authInitializeTwoFactorAuth,
+  disableTwoFactorAuth as authDisableTwoFactorAuth,
+  enableTwoFactorAuth as authEnableTwoFactorAuth,
+} from '@/auth/actions/two-factor';
+import {
+  deleteCurrentUser as authDeleteCurrentUser,
+  addPassword as authAddPassword,
+} from '@/auth/actions/user';
 import { editProfileSchema } from '@/schemas';
 
 // eslint-disable-next-line @typescript-eslint/no-empty-object-type
@@ -25,7 +42,7 @@ type ActionFailure = {
 };
 
 export async function logOut() {
-  const { isSuccess, errors } = await actions.logOut();
+  const { isSuccess, errors } = await authLogOut();
 
   if (isSuccess) {
     redirectToLogin({ authCode: null });
@@ -67,7 +84,7 @@ export async function editProfile(_: unknown, formData: FormData): Promise<Actio
 }
 
 export async function verifyEmail(token: VerificationToken['token']): Promise<ActionState> {
-  const { isSuccess, authCode } = await actions.verifyEmail(token);
+  const { isSuccess, authCode } = await authVerifyEmail(token);
 
   if (isSuccess) {
     redirectToLogin({ authCode: 'email-verified' });
@@ -80,7 +97,7 @@ export async function linkAccount(
   provider: OAuthProvider,
   stateData: StateData = {},
 ): Promise<ActionState> {
-  const { isSuccess, errors, authCode } = await actions.linkAccount(provider, stateData);
+  const { isSuccess, errors, authCode } = await authLinkAccount(provider, stateData);
 
   await auth.protect({ returnBackUrl: '/profile', authCode });
 
@@ -88,7 +105,7 @@ export async function linkAccount(
 }
 
 export async function unlinkAccount(provider: OAuthProvider): Promise<ActionState> {
-  const { isSuccess, errors, authCode } = await actions.unlinkAccount(provider);
+  const { isSuccess, errors, authCode } = await authUnlinkAccount(provider);
 
   await auth.protect({ returnBackUrl: '/profile', authCode });
 
@@ -107,7 +124,7 @@ export async function unlinkAccount(provider: OAuthProvider): Promise<ActionStat
 export async function logOutEverywhere(): Promise<ActionState> {
   await auth.protect({ returnBackUrl: '/profile' });
 
-  const { isSuccess, errors } = await actions.logOutEverywhere();
+  const { isSuccess, errors } = await authLogOutEverywhere();
 
   if (isSuccess) {
     redirectToLogin({ authCode: 'logout-everywhere', syncAuth: true });
@@ -120,7 +137,7 @@ export async function logOutEverywhere(): Promise<ActionState> {
 }
 
 export async function addPassword(_: unknown, formData: FormData): Promise<ActionState> {
-  const { isSuccess, errors, authCode } = await actions.addPassword(null, formData);
+  const { isSuccess, errors, authCode } = await authAddPassword(null, formData);
 
   await auth.protect({ returnBackUrl: '/profile', authCode });
 
@@ -139,7 +156,7 @@ export async function addPassword(_: unknown, formData: FormData): Promise<Actio
 export async function deleteCurrentUser(): Promise<ActionState> {
   await auth.protect({ returnBackUrl: '/profile' });
 
-  const { isSuccess, errors } = await actions.deleteCurrentUser();
+  const { isSuccess, errors } = await authDeleteCurrentUser();
 
   if (isSuccess) {
     redirectToLogin({ authCode: 'account-deleted', syncAuth: true });
@@ -154,7 +171,7 @@ export async function deleteCurrentUser(): Promise<ActionState> {
 export async function initializeTwoFactorAuth(): Promise<
   ActionState<{ qrCode: string; secret: TwoFactorSetup['secret'] }>
 > {
-  const { isSuccess, errors, authCode, data } = await actions.initializeTwoFactorAuth();
+  const { isSuccess, errors, authCode, data } = await authInitializeTwoFactorAuth();
 
   await auth.protect({ returnBackUrl: '/profile', authCode });
 
@@ -178,7 +195,7 @@ export async function enableTwoFactorAuth(
   _: unknown,
   formData: FormData,
 ): Promise<ActionState<{ recoveryCodes: RecoveryCode['code'][] }>> {
-  const { isSuccess, errors, authCode, data } = await actions.enableTwoFactorAuth(null, formData);
+  const { isSuccess, errors, authCode, data } = await authEnableTwoFactorAuth(null, formData);
 
   await auth.protect({ returnBackUrl: '/profile', authCode });
 
@@ -195,7 +212,7 @@ export async function enableTwoFactorAuth(
 }
 
 export async function disableTwoFactorAuth(): Promise<ActionState> {
-  const { isSuccess, errors, authCode } = await actions.disableTwoFactorAuth();
+  const { isSuccess, errors, authCode } = await authDisableTwoFactorAuth();
 
   await auth.protect({ returnBackUrl: '/profile', authCode });
 

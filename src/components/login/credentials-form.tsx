@@ -1,7 +1,7 @@
 'use client';
 
 import { useActionState, useEffect, useId } from 'react';
-import { logIn } from '@/auth/actions';
+import { logIn } from '@/auth/actions/session';
 import { Alert } from '@/components/ui/alert';
 
 type Props = {

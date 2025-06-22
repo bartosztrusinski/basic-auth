@@ -1,4 +1,4 @@
-import { logInWithProvider } from '@/auth/actions';
+import { logInWithProvider } from '@/auth/actions/oauth';
 import { type OAuthProvider, type StateData } from '@/auth/oauth';
 
 type Props = {

@@ -1,7 +1,7 @@
 'use client';
 
 import { useActionState, useId } from 'react';
-import { resendVerificationEmail } from '@/auth/actions';
+import { resendVerificationEmail } from '@/auth/actions/email';
 import { Alert } from '@/components/ui/alert';
 import { AuthAlert } from '@/components/auth-alert';
 

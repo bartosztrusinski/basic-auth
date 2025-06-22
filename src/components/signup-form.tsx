@@ -2,7 +2,7 @@
 
 import { useActionState, useId } from 'react';
 import Link from 'next/link';
-import { signUp } from '@/auth/actions';
+import { signUp } from '@/auth/actions/session';
 import config from '@/auth/config';
 import { Alert } from '@/components/ui/alert';
 import { AuthAlert } from '@/components/auth-alert';
