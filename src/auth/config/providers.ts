@@ -2,7 +2,22 @@ import 'server-only';
 import { z } from 'zod';
 import { env } from '@/env';
 import { discordUserSchema, githubUserSchema, googleUserSchema } from '@/auth/schemas';
-import { createProvider, type OAuthProviderConfig } from '@/auth/oauth';
+import { type OAuthUser } from '@/auth/oauth';
+
+type OAuthProviderConfig<Schema extends z.ZodSchema = z.ZodSchema> = {
+  name: string;
+  clientId: string;
+  clientSecret: string;
+  authorizationUrl: URL;
+  tokenUrl: URL;
+  userUrl: URL;
+  scope: string[];
+} & OAuthProviderUser<Schema>;
+
+type OAuthProviderUser<Schema extends z.ZodSchema> = {
+  userSchema: Schema;
+  userMapper: (providerUser: z.infer<Schema>) => OAuthUser;
+};
 
 const providerConfig = {
   discord: createProvider({
@@ -57,6 +72,10 @@ const providerConfig = {
 } satisfies Record<string, OAuthProviderConfig>;
 
 const OAuthProviderEnum = z.enum(Object.keys(providerConfig) as [keyof typeof providerConfig]);
+
+function createProvider<Schema extends z.ZodSchema>(providerConfig: OAuthProviderConfig<Schema>) {
+  return providerConfig;
+}
 
 export default Object.freeze(providerConfig);
 export { OAuthProviderEnum };

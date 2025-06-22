@@ -37,6 +37,7 @@ export type BackendUser = Pick<User, 'id' | 'email' | 'name' | 'role'> & {
   hasPassword: boolean;
   isTwoFactorEnabled: boolean;
 };
+
 export type CurrentUser = Pick<BackendUser, 'id' | 'email' | 'name'>;
 
 interface AuthUtil {

@@ -23,21 +23,6 @@ type OAuthUser = {
   id: string;
 } & Pick<User, 'email' | 'name'>;
 
-type OAuthProviderConfig<Schema extends z.ZodSchema = z.ZodSchema> = {
-  name: string;
-  clientId: string;
-  clientSecret: string;
-  authorizationUrl: URL;
-  tokenUrl: URL;
-  userUrl: URL;
-  scope: string[];
-} & OAuthProviderUser<Schema>;
-
-type OAuthProviderUser<Schema extends z.ZodSchema> = {
-  userSchema: Schema;
-  userMapper: (providerUser: z.infer<Schema>) => OAuthUser;
-};
-
 type StateData = {
   redirectUrl?: string | null;
 };
@@ -243,17 +228,14 @@ async function generateCodeChallenge(codeVerifier: string) {
   return hash('sha256', codeVerifier, 'base64url');
 }
 
-function createProvider<Schema extends z.ZodSchema>(providerConfig: OAuthProviderConfig<Schema>) {
-  return providerConfig;
-}
-
 export {
+  type OAuthUser,
+  type OAuthProvider,
+  type StateData,
   generateAuthorizationUrl,
   exchangeCodeForOAuthUser,
   signUpWithProvider,
   deleteProviderAccount,
   getProviderName,
   getRedirectUrl,
-  createProvider,
 };
-export type { OAuthUser, OAuthProvider, OAuthProviderConfig, OAuthProviderUser, StateData };
