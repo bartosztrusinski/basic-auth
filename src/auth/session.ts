@@ -2,7 +2,7 @@ import 'server-only';
 import { cache } from 'react';
 import { RedirectType } from 'next/navigation';
 import { type NextRequest } from 'next/server';
-import { getUserById, type User } from '@/db/user';
+import { getUserById, type User } from '@/data/user';
 import {
   createSession,
   deleteSession,
@@ -10,7 +10,7 @@ import {
   getSessionById,
   refreshSession,
   type Session,
-} from '@/db/session';
+} from '@/data/session';
 import { redirectAuth, type FullOrNull, type Null, type RedirectOptions } from '@/auth/util';
 import {
   getSessionCookie,

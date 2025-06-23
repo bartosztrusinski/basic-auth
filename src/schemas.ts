@@ -1,5 +1,5 @@
 import { z } from 'zod';
-import { UserRoles } from '@/db/user';
+import { UserRoles } from '@/data/user';
 
 export const editProfileSchema = z.object({
   name: z.string().min(1, 'Please enter your name'),

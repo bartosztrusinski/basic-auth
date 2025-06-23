@@ -1,10 +1,10 @@
 'use server';
 
 import { revalidatePath } from 'next/cache';
-import { updateUser } from '@/db/user';
-import { type RecoveryCode } from '@/db/recovery-code';
-import { type TwoFactorSetup } from '@/db/two-factor-setup';
-import { type VerificationToken } from '@/db/verification-token';
+import { updateUser } from '@/data/user';
+import { type RecoveryCode } from '@/data/recovery-code';
+import { type TwoFactorSetup } from '@/data/two-factor-setup';
+import { type VerificationToken } from '@/data/verification-token';
 import { auth, redirectToLogin } from '@/auth/session';
 import { redirectAuth } from '@/auth/util';
 import { type OAuthProvider, type StateData } from '@/auth/oauth';

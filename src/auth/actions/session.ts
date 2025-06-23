@@ -1,7 +1,7 @@
-import { type Session } from '@/db/session';
-import { getUserByEmail, createUser } from '@/db/user';
-import { type TwoFactorAttempt, createTwoFactorAttempt } from '@/db/two-factor-attempt';
-import { createVerificationToken } from '@/db/verification-token';
+import { type Session } from '@/data/session';
+import { getUserByEmail, createUser } from '@/data/user';
+import { type TwoFactorAttempt, createTwoFactorAttempt } from '@/data/two-factor-attempt';
+import { createVerificationToken } from '@/data/verification-token';
 import { createUserSession, deleteUserSession, auth, deleteAllUserSessions } from '@/auth/session';
 import { hashLowEntropy, generateToken, compareHashLowEntropy } from '@/auth/crypto';
 import { sendExistingUserLoginGuidanceEmail, sendVerificationEmail } from '@/auth/email';

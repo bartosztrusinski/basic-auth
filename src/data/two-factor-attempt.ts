@@ -2,7 +2,7 @@ import 'server-only';
 import { and, eq, gt, type InferSelectModel } from 'drizzle-orm';
 import { db } from '@/db';
 import { twoFactorAttempts } from '@/db/schema';
-import { type User } from '@/db/user';
+import { type User } from '@/data/user';
 import { createExpirationDate } from '@/util';
 import serverConfig from '@/auth/config/server';
 

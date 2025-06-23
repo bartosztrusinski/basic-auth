@@ -1,8 +1,8 @@
 import 'server-only';
 import { hash } from 'node:crypto';
 import { type z } from 'zod';
-import { createAccount, getUserAccounts, deleteAccount } from '@/db/account';
-import { getUserByProvider, getUserById, type User, upsertVerifiedUser } from '@/db/user';
+import { createAccount, getUserAccounts, deleteAccount } from '@/data/account';
+import { getUserByProvider, getUserById, type User, upsertVerifiedUser } from '@/data/user';
 import {
   getStateCookie,
   setStateCookie,

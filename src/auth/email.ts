@@ -1,8 +1,8 @@
 import 'server-only';
 import { Resend } from 'resend';
 import { env } from '@/env';
-import { type User } from '@/db/user';
-import { type VerificationToken } from '@/db/verification-token';
+import { type User } from '@/data/user';
+import { type VerificationToken } from '@/data/verification-token';
 import {
   VerificationEmail,
   VerificationEmailPlainText,

@@ -1,7 +1,7 @@
 'use client';
 
 import { useActionState } from 'react';
-import { type VerificationToken } from '@/db/verification-token';
+import { type VerificationToken } from '@/data/verification-token';
 import { verifyEmail } from '@/actions';
 
 type Props = {

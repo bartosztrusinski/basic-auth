@@ -1,7 +1,7 @@
 import 'server-only';
 import { NextResponse, type NextRequest } from 'next/server';
 import { redirect } from 'next/navigation';
-import { createAccount } from '@/db/account';
+import { createAccount } from '@/data/account';
 import {
   auth,
   redirectToLogin,

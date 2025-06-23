@@ -1,4 +1,4 @@
-import { getUsers } from '@/db/user';
+import { getUsers } from '@/data/user';
 import { Protect } from '@/auth/components/protect';
 
 export async function UsersList() {

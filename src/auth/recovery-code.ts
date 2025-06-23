@@ -1,5 +1,5 @@
 import 'server-only';
-import { createRecoveryCodes, type RecoveryCode } from '@/db/recovery-code';
+import { createRecoveryCodes, type RecoveryCode } from '@/data/recovery-code';
 import { generateRandomCodes, hashLowEntropy } from '@/auth/crypto';
 import config from '@/auth/config';
 

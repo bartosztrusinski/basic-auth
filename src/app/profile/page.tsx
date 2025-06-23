@@ -1,5 +1,5 @@
-import { getUserAccounts } from '@/db/account';
-import { UserRoles } from '@/db/user';
+import { getUserAccounts } from '@/data/account';
+import { UserRoles } from '@/data/user';
 import { redirectToLogin, currentUser } from '@/auth/session';
 import { Protect } from '@/auth/components/protect';
 import { OAuthAccountsManager } from '@/components/oauth';

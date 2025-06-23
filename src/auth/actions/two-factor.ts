@@ -1,24 +1,24 @@
 import * as OTPAuth from 'otpauth';
 import QRCode from 'qrcode';
-import { updateUser } from '@/db/user';
-import { type Session } from '@/db/session';
+import { updateUser } from '@/data/user';
+import { type Session } from '@/data/session';
 import {
   type RecoveryCode,
   deleteUserRecoveryCodes,
   getActiveRecoveryCodes,
   consumeRecoveryCode,
-} from '@/db/recovery-code';
+} from '@/data/recovery-code';
 import {
   type TwoFactorAttempt,
   getTwoFactorAttemptByToken,
   deleteTwoFactorAttempt,
-} from '@/db/two-factor-attempt';
+} from '@/data/two-factor-attempt';
 import {
   type TwoFactorSetup,
   createTwoFactorSetup,
   getUserTwoFactorSetup,
   deleteTwoFactorSetup,
-} from '@/db/two-factor-setup';
+} from '@/data/two-factor-setup';
 import { encrypt, decrypt, hashHighEntropy, compareHashLowEntropy } from '@/auth/crypto';
 import { AuthError } from '@/auth/message';
 import { generateRecoveryCodes } from '@/auth/recovery-code';

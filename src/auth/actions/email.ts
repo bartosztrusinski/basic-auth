@@ -1,10 +1,10 @@
-import { updateUser, getUserByEmail } from '@/db/user';
+import { updateUser, getUserByEmail } from '@/data/user';
 import {
   type VerificationToken,
   getVerificationTokenByToken,
   deleteVerificationToken,
   createVerificationToken,
-} from '@/db/verification-token';
+} from '@/data/verification-token';
 import { hashHighEntropy, generateToken } from '@/auth/crypto';
 import { sendExistingUserLoginGuidanceEmail, sendVerificationEmail } from '@/auth/email';
 import { AuthError } from '@/auth/message';
