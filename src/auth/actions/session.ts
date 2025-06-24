@@ -34,10 +34,7 @@ export async function signUp(
 
     if (user?.emailVerified) {
       await sendExistingUserLoginGuidanceEmail(user.email, user.name);
-
-      return {
-        isSuccess: true,
-      };
+      return { isSuccess: true };
     }
 
     if (!user) {
@@ -46,12 +43,11 @@ export async function signUp(
     }
 
     const { token, hashedToken } = generateToken();
+
     await createVerificationToken({ token: hashedToken, userId: user.id });
     await sendVerificationEmail(email, token, user.name);
 
-    return {
-      isSuccess: true,
-    };
+    return { isSuccess: true };
   } catch (error) {
     return handleError(error, 'signup-failed', { email, name });
   }
@@ -72,9 +68,7 @@ export async function logIn(
     return {
       isSuccess: false,
       errors: error.errors.map((err) => err.message),
-      fields: {
-        email: formData.get('email') as string,
-      },
+      fields: { email: formData.get('email') as string },
     };
   }
 
@@ -99,9 +93,7 @@ export async function logIn(
 
       return {
         isSuccess: true,
-        data: {
-          twoFactorToken: token,
-        },
+        data: { twoFactorToken: token },
       };
     }
 
@@ -120,9 +112,7 @@ export async function logOut(): Promise<ActionState> {
   try {
     await deleteUserSession();
 
-    return {
-      isSuccess: true,
-    };
+    return { isSuccess: true };
   } catch (error) {
     return handleError(error, 'logout-failed');
   }
@@ -138,9 +128,7 @@ export async function logOutEverywhere(): Promise<ActionState> {
 
     await deleteAllUserSessions(userId);
 
-    return {
-      isSuccess: true,
-    };
+    return { isSuccess: true };
   } catch (error) {
     return handleError(error, 'logout-everywhere-failed');
   }

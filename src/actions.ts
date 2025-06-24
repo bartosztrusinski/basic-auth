@@ -48,10 +48,7 @@ export async function logOut() {
     redirectToLogin({ authCode: null });
   }
 
-  return {
-    isSuccess,
-    errors,
-  };
+  return { isSuccess, errors };
 }
 
 export async function editProfile(_: unknown, formData: FormData): Promise<ActionState> {
@@ -60,10 +57,7 @@ export async function editProfile(_: unknown, formData: FormData): Promise<Actio
   );
 
   if (error) {
-    return {
-      isSuccess: false,
-      errors: error.errors.map((err) => err.message),
-    };
+    return { isSuccess: false, errors: error.errors.map((err) => err.message) };
   }
 
   const { userId } = await auth.protect({ returnBackUrl: '/profile' });
@@ -72,9 +66,7 @@ export async function editProfile(_: unknown, formData: FormData): Promise<Actio
     await updateUser(userId, userData);
     revalidatePath('/profile');
 
-    return {
-      isSuccess: true,
-    };
+    return { isSuccess: true };
   } catch {
     return {
       isSuccess: false,
@@ -110,10 +102,7 @@ export async function unlinkAccount(provider: OAuthProvider): Promise<ActionStat
   await auth.protect({ returnBackUrl: '/profile', authCode });
 
   if (!isSuccess) {
-    return {
-      isSuccess,
-      errors,
-    };
+    return { isSuccess, errors };
   }
 
   revalidatePath('/profile');
@@ -130,10 +119,7 @@ export async function logOutEverywhere(): Promise<ActionState> {
     redirectToLogin({ authCode: 'logout-everywhere', syncAuth: true });
   }
 
-  return {
-    isSuccess,
-    errors,
-  };
+  return { isSuccess, errors };
 }
 
 export async function addPassword(_: unknown, formData: FormData): Promise<ActionState> {
@@ -142,10 +128,7 @@ export async function addPassword(_: unknown, formData: FormData): Promise<Actio
   await auth.protect({ returnBackUrl: '/profile', authCode });
 
   if (!isSuccess) {
-    return {
-      isSuccess,
-      errors,
-    };
+    return { isSuccess, errors };
   }
 
   revalidatePath('/profile');
@@ -162,10 +145,7 @@ export async function deleteCurrentUser(): Promise<ActionState> {
     redirectToLogin({ authCode: 'account-deleted', syncAuth: true });
   }
 
-  return {
-    isSuccess,
-    errors,
-  };
+  return { isSuccess, errors };
 }
 
 export async function initializeTwoFactorAuth(): Promise<
@@ -176,19 +156,10 @@ export async function initializeTwoFactorAuth(): Promise<
   await auth.protect({ returnBackUrl: '/profile', authCode });
 
   if (!isSuccess) {
-    return {
-      isSuccess,
-      errors,
-    };
+    return { isSuccess, errors };
   }
 
-  const { qrCode, secret } = data;
-
-  return {
-    isSuccess,
-    qrCode,
-    secret,
-  };
+  return { isSuccess, ...data };
 }
 
 export async function enableTwoFactorAuth(
@@ -200,15 +171,10 @@ export async function enableTwoFactorAuth(
   await auth.protect({ returnBackUrl: '/profile', authCode });
 
   if (!isSuccess) {
-    return {
-      isSuccess,
-      errors,
-    };
+    return { isSuccess, errors };
   }
 
-  const { recoveryCodes } = data;
-
-  return { isSuccess, recoveryCodes };
+  return { isSuccess, ...data };
 }
 
 export async function disableTwoFactorAuth(): Promise<ActionState> {
@@ -217,10 +183,7 @@ export async function disableTwoFactorAuth(): Promise<ActionState> {
   await auth.protect({ returnBackUrl: '/profile', authCode });
 
   if (!isSuccess) {
-    return {
-      isSuccess,
-      errors,
-    };
+    return { isSuccess, errors };
   }
 
   revalidatePath('/profile');

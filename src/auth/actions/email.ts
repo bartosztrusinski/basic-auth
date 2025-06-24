@@ -29,9 +29,7 @@ export async function verifyEmail(token: VerificationToken['token']): Promise<Ac
 
     await deleteVerificationToken(user.id);
 
-    return {
-      isSuccess: true,
-    };
+    return { isSuccess: true };
   } catch (error) {
     return handleError(error, 'email-verification-failed');
   }
@@ -49,9 +47,7 @@ export async function resendVerificationEmail(
     return {
       isSuccess: false,
       errors: error.errors.map((err) => err.message),
-      fields: {
-        email: formData.get('email') as string,
-      },
+      fields: { email: formData.get('email') as string },
     };
   }
 
@@ -70,9 +66,7 @@ export async function resendVerificationEmail(
       await sendVerificationEmail(user.email, token, user.name);
     }
 
-    return {
-      isSuccess: true,
-    };
+    return { isSuccess: true };
   } catch (error) {
     return handleError(error, 'verification-email-not-sent', { email });
   }

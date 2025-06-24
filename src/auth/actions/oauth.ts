@@ -55,9 +55,7 @@ export async function unlinkAccount(provider: OAuthProvider): Promise<ActionStat
 
     await deleteProviderAccount(provider, userId);
 
-    return {
-      isSuccess: true,
-    };
+    return { isSuccess: true };
   } catch (error) {
     return handleError(error, 'oauth-unlink-failed');
   }

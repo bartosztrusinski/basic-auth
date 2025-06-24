@@ -21,10 +21,7 @@ export async function addPassword(_: unknown, formData: FormData): Promise<Actio
     const { data, error } = addPasswordSchema.safeParse(Object.fromEntries(formData.entries()));
 
     if (error) {
-      return {
-        isSuccess: false,
-        errors: error.errors.map((err) => err.message),
-      };
+      return { isSuccess: false, errors: error.errors.map((err) => err.message) };
     }
 
     const { password } = data;
@@ -32,9 +29,7 @@ export async function addPassword(_: unknown, formData: FormData): Promise<Actio
 
     await updateUser(user.id, { password: hashedPassword });
 
-    return {
-      isSuccess: true,
-    };
+    return { isSuccess: true };
   } catch (error) {
     return handleError(error, 'password-not-set');
   }
@@ -51,9 +46,7 @@ export async function deleteCurrentUser(): Promise<ActionState> {
     await deleteAllUserSessions(userId);
     await deleteUser(userId);
 
-    return {
-      isSuccess: true,
-    };
+    return { isSuccess: true };
   } catch (error) {
     return handleError(error, 'account-deletion-failed');
   }

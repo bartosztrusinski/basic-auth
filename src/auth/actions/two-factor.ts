@@ -49,26 +49,15 @@ export async function initializeTwoFactorAuth(): Promise<
     const secret = new OTPAuth.Secret({ size: 20 });
     const encryptedSecret = encrypt(Buffer.from(secret.bytes));
 
-    await createTwoFactorSetup({
-      userId: user.id,
-      secret: encryptedSecret,
-    });
+    await createTwoFactorSetup({ userId: user.id, secret: encryptedSecret });
 
-    const totp = new OTPAuth.TOTP({
-      issuer: config.appName,
-      label: user.email,
-      secret,
-    });
-
+    const totp = new OTPAuth.TOTP({ issuer: config.appName, label: user.email, secret });
     const url = totp.toString();
     const qrCode = await QRCode.toDataURL(url);
 
     return {
       isSuccess: true,
-      data: {
-        secret: secret.base32,
-        qrCode,
-      },
+      data: { secret: secret.base32, qrCode },
     };
   } catch (error) {
     return handleError(error, 'two-factor-setup-failed');
@@ -97,14 +86,10 @@ export async function enableTwoFactorAuth(
     const { data, error } = twoFactorCodeSchema.safeParse(Object.fromEntries(formData.entries()));
 
     if (error) {
-      return {
-        isSuccess: false,
-        errors: error.errors.map((err) => err.message),
-      };
+      return { isSuccess: false, errors: error.errors.map((err) => err.message) };
     }
 
     const { code } = data;
-
     const twoFactorSetup = await getUserTwoFactorSetup(user.id);
 
     if (!twoFactorSetup || twoFactorSetup.expiresAt < new Date()) {
@@ -112,16 +97,8 @@ export async function enableTwoFactorAuth(
     }
 
     const decryptedSecret = decrypt(twoFactorSetup.secret);
-    const secret = new OTPAuth.Secret({
-      buffer: decryptedSecret,
-    });
-
-    const totp = new OTPAuth.TOTP({
-      issuer: config.appName,
-      label: user.email,
-      secret,
-    });
-
+    const secret = new OTPAuth.Secret({ buffer: decryptedSecret });
+    const totp = new OTPAuth.TOTP({ issuer: config.appName, label: user.email, secret });
     const delta = totp.validate({ token: code, window: 0 });
 
     if (delta !== 0) {
@@ -135,9 +112,7 @@ export async function enableTwoFactorAuth(
 
     return {
       isSuccess: true,
-      data: {
-        recoveryCodes,
-      },
+      data: { recoveryCodes },
     };
   } catch (error) {
     return handleError(error, 'two-factor-setup-failed');
@@ -159,9 +134,7 @@ export async function disableTwoFactorAuth(): Promise<ActionState> {
     await updateUser(user.id, { twoFactorSecret: null });
     await deleteUserRecoveryCodes(user.id);
 
-    return {
-      isSuccess: true,
-    };
+    return { isSuccess: true };
   } catch (error) {
     return handleError(error, 'two-factor-disable-failed');
   }
@@ -175,10 +148,7 @@ export async function verifyTwoFactorCode(
   const { data, error } = twoFactorCodeSchema.safeParse(Object.fromEntries(formData.entries()));
 
   if (error) {
-    return {
-      isSuccess: false,
-      errors: error.errors.map((err) => err.message),
-    };
+    return { isSuccess: false, errors: error.errors.map((err) => err.message) };
   }
 
   const { code } = data;
@@ -198,16 +168,8 @@ export async function verifyTwoFactorCode(
     }
 
     const decryptedSecret = decrypt(user.twoFactorSecret);
-    const secret = new OTPAuth.Secret({
-      buffer: decryptedSecret,
-    });
-
-    const totp = new OTPAuth.TOTP({
-      issuer: config.appName,
-      label: user.email,
-      secret,
-    });
-
+    const secret = new OTPAuth.Secret({ buffer: decryptedSecret });
+    const totp = new OTPAuth.TOTP({ issuer: config.appName, label: user.email, secret });
     const delta = totp.validate({ token: code, window: 0 });
 
     if (delta !== 0) {
@@ -220,9 +182,7 @@ export async function verifyTwoFactorCode(
 
     return {
       isSuccess: true,
-      data: {
-        session,
-      },
+      data: { session },
     };
   } catch (error) {
     return handleError(error, 'two-factor-setup-failed');
@@ -237,10 +197,7 @@ export async function useRecoveryCode(
   const { data, error } = recoveryCodeSchema.safeParse(Object.fromEntries(formData.entries()));
 
   if (error) {
-    return {
-      isSuccess: false,
-      errors: error.errors.map((err) => err.message),
-    };
+    return { isSuccess: false, errors: error.errors.map((err) => err.message) };
   }
 
   const { code } = data;
@@ -282,9 +239,7 @@ export async function useRecoveryCode(
 
     return {
       isSuccess: true,
-      data: {
-        session,
-      },
+      data: { session },
     };
   } catch (error) {
     return handleError(error, 'recovery-code-failed');
