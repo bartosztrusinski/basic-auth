@@ -1,5 +1,5 @@
 import { redirectAuth } from '@/auth/util';
-import { VerifyEmailForm } from '@/components/verify-email-form';
+import { VerifyEmailForm } from '@/components/email/verify-email-form';
 
 export const metadata = {
   title: 'Verify Email',

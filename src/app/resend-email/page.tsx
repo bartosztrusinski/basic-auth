@@ -1,6 +1,6 @@
 import { LoggedIn } from '@/auth/components/logged-in';
 import { ReturnBack } from '@/auth/components/return-back';
-import { ResendEmailForm } from '@/components/resend-email-form';
+import { ResendEmailForm } from '@/components/email/resend-email-form';
 
 export const metadata = {
   title: 'Resend Email',
