@@ -2,8 +2,8 @@ import { LoggedIn } from '@/auth/components/logged-in';
 import { ReturnBack } from '@/auth/components/return-back';
 import { getSearchParam } from '@/auth/util';
 import config from '@/auth/config';
-import { OAuthLoginButtons } from '@/components/oauth';
-import { LoginForm } from '@/components/login';
+import { OAuthLoginButtons } from '@/components/oauth/oauth-login-buttons';
+import { LoginForm } from '@/components/login/login-form';
 
 export const metadata = {
   title: 'Login',

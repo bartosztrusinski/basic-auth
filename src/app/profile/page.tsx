@@ -2,12 +2,13 @@ import { getUserAccounts } from '@/data/account';
 import { UserRoles } from '@/data/user';
 import { redirectToLogin, currentUser } from '@/auth/session';
 import { Protect } from '@/auth/components/protect';
-import { OAuthAccountsManager } from '@/components/oauth';
+import { OAuthAccountsManager } from '@/components/oauth/oauth-accounts-manager';
 import { UserProfile } from '@/components/user-profile';
-import { AddPasswordModal } from '@/components/add-password';
-import { EnableTwoFactorModal, DisableTwoFactorModal } from '@/components/two-factor-auth';
-import { LogoutEverywhereModal } from '@/components/logout-everywhere';
-import { DeleteUserModal } from '@/components/delete-user';
+import { AddPasswordModal } from '@/components/add-password/add-password-modal';
+import { EnableTwoFactorModal } from '@/components/two-factor-auth/enable-two-factor-modal';
+import { DisableTwoFactorModal } from '@/components/two-factor-auth/disable-two-factor-modal';
+import { LogoutEverywhereModal } from '@/components/logout-everywhere/logout-everywhere-modal';
+import { DeleteUserModal } from '@/components/delete-user/delete-user-modal';
 
 export const metadata = {
   title: 'Profile',

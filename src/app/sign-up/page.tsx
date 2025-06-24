@@ -1,6 +1,6 @@
 import { LoggedIn } from '@/auth/components/logged-in';
 import { ReturnBack } from '@/auth/components/return-back';
-import { OAuthLoginButtons } from '@/components/oauth';
+import { OAuthLoginButtons } from '@/components/oauth/oauth-login-buttons';
 import { SignupForm } from '@/components/signup-form';
 
 export const metadata = {
