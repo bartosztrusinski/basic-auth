@@ -3,7 +3,7 @@
 import { useAuth } from '@/auth/hooks/use-auth';
 import config from '@/auth/config';
 import { NavLink } from '@/components/ui/nav-link';
-import { LogoutButton } from '@/components/logout-button';
+import { LogoutButton } from '@/components/logout/logout-button';
 
 export function AuthNav() {
   const { isLoggedIn } = useAuth();
