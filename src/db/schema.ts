@@ -1,5 +1,20 @@
 import { relations } from 'drizzle-orm';
-import { pgEnum, pgTable, uuid, varchar, primaryKey, unique, timestamp } from 'drizzle-orm/pg-core';
+import {
+  pgEnum,
+  pgTable,
+  uuid,
+  varchar,
+  primaryKey,
+  unique,
+  timestamp,
+  customType,
+} from 'drizzle-orm/pg-core';
+
+const binary = customType<{ data: Buffer; default: false }>({
+  dataType() {
+    return 'bytea';
+  },
+});
 
 const expiresAt = timestamp({ withTimezone: true }).notNull();
 const userIdRef = () =>
@@ -15,7 +30,7 @@ export const users = pgTable('users', {
   name: varchar({ length: 255 }).notNull(),
   role: roles().notNull().default('user'),
   password: varchar({ length: 255 }),
-  twoFactorSecret: varchar({ length: 255 }),
+  twoFactorSecret: binary(),
   createdAt: timestamp({ withTimezone: true }).notNull().defaultNow(),
 });
 
@@ -40,19 +55,19 @@ export const sessions = pgTable('sessions', {
 });
 
 export const verificationTokens = pgTable('verification_tokens', {
-  token: varchar({ length: 44 }).primaryKey(),
+  token: binary().primaryKey(),
   expiresAt,
   userId: userIdRef().unique(),
 });
 
 export const twoFactorAttempts = pgTable('two_factor_attempts', {
-  token: varchar({ length: 44 }).primaryKey(),
+  token: binary().primaryKey(),
   expiresAt,
   userId: userIdRef(),
 });
 
 export const twoFactorSetups = pgTable('two_factor_setups', {
-  secret: varchar({ length: 67 }).primaryKey(),
+  secret: binary().primaryKey(),
   expiresAt,
   userId: userIdRef().unique(),
 });
