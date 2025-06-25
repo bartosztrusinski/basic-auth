@@ -43,7 +43,6 @@ export async function signUp(
     }
 
     const { token, hashedToken } = generateToken();
-
     await createVerificationToken({ token: hashedToken, userId: user.id });
     await sendVerificationEmail(email, token, user.name);
 

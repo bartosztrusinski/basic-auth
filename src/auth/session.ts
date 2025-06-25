@@ -18,7 +18,7 @@ import {
   deleteSessionCookie,
   setAuthSyncCookie,
 } from '@/auth/cookie';
-import { generateRandomString } from '@/auth/crypto';
+import { generateToken } from '@/auth/crypto';
 import config from '@/auth/config';
 
 export type BackendSession = Omit<Session, 'id'> & {
@@ -159,10 +159,10 @@ export const currentUser = cache<() => Promise<BackendUser | null>>(async () => 
 });
 
 export async function createUserSession(userId: BackendSession['userId']): Promise<Session> {
-  const sessionId = generateRandomString(32);
-  const session = await createSession({ id: sessionId, userId });
+  const { token, hashedToken } = generateToken(32);
+  const session = await createSession({ token: hashedToken, userId });
 
-  await setSessionCookie(sessionId);
+  await setSessionCookie(token);
   await setAuthSyncCookie();
 
   return session;
