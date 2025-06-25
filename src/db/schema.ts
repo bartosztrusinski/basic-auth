@@ -49,7 +49,7 @@ export const accounts = pgTable(
 );
 
 export const sessions = pgTable('sessions', {
-  id: varchar({ length: 44 }).primaryKey(),
+  token: binary().primaryKey(),
   expiresAt: timestamp({ withTimezone: true, mode: 'string' }).notNull(),
   userId: userIdRef(),
 });
