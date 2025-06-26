@@ -16,40 +16,30 @@ const ENCODING: BinaryToTextEncoding = 'base64url';
 const ENCRYPTION_ALGORITHM: CipherGCMTypes = 'aes-256-gcm';
 const HASH_ALGORITHM = 'sha256';
 const IV_LENGTH = 12;
-const DELIMITER = ':';
 const PEPPER = Buffer.from(env.PEPPER, ENCODING);
+const ENCRYPTION_KEY = Buffer.from(env.ENCRYPTION_KEY, ENCODING);
 
-function encrypt(data: Buffer): string {
+function encrypt(data: Buffer) {
   const iv = randomBytes(IV_LENGTH);
-  const cipher = createCipheriv(
-    ENCRYPTION_ALGORITHM,
-    Buffer.from(env.ENCRYPTION_KEY, ENCODING),
-    iv,
-  );
-
-  let encryptedSecret = cipher.update(data, undefined, ENCODING);
-  encryptedSecret += cipher.final(ENCODING);
+  const cipher = createCipheriv(ENCRYPTION_ALGORITHM, ENCRYPTION_KEY, iv);
+  const encryptedPart = cipher.update(data);
+  const finalPart = cipher.final();
 
   const authTag = cipher.getAuthTag();
 
-  return [iv.toString(ENCODING), authTag.toString(ENCODING), encryptedSecret].join(DELIMITER);
+  return {
+    encryptedData: Buffer.concat([encryptedPart, finalPart]),
+    iv,
+    authTag,
+  };
 }
 
-function decrypt(data: string): Buffer {
-  const [iv, authTag, encryptedSecret] = data.split(DELIMITER);
+function decrypt(encryptedData: Buffer, iv: Buffer, authTag: Buffer): Buffer {
+  const decipher = createDecipheriv(ENCRYPTION_ALGORITHM, ENCRYPTION_KEY, iv);
 
-  if (!iv || !authTag || !encryptedSecret) {
-    throw new Error('Invalid data format');
-  }
+  decipher.setAuthTag(authTag);
 
-  const decipher = createDecipheriv(
-    ENCRYPTION_ALGORITHM,
-    Buffer.from(env.ENCRYPTION_KEY, ENCODING),
-    Buffer.from(iv, ENCODING),
-  );
-  decipher.setAuthTag(Buffer.from(authTag, ENCODING));
-
-  const decryptedPart = decipher.update(encryptedSecret, ENCODING);
+  const decryptedPart = decipher.update(encryptedData);
   const finalPart = decipher.final();
 
   return Buffer.concat([decryptedPart, finalPart]);
