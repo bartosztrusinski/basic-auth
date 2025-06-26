@@ -45,21 +45,21 @@ function decrypt(encryptedData: Buffer, iv: Buffer, authTag: Buffer): Buffer {
   return Buffer.concat([decryptedPart, finalPart]);
 }
 
+function hashHighEntropy(value: string): Buffer {
+  return createHmac(HASH_ALGORITHM, PEPPER).update(value.normalize()).digest();
+}
+
+function compareHashHighEntropy(value: string, hashedValue: Buffer): boolean {
+  const inputHash = hashHighEntropy(value);
+  return timingSafeEqual(inputHash, hashedValue);
+}
+
 async function hashLowEntropy(value: string): Promise<string> {
   return await argon2.hash(value.normalize(), { secret: PEPPER });
 }
 
-function hashHighEntropy(value: string): string {
-  return createHmac(HASH_ALGORITHM, PEPPER).update(value.normalize()).digest(ENCODING);
-}
-
 async function compareHashLowEntropy(value: string, hashedValue: string): Promise<boolean> {
   return await argon2.verify(hashedValue, value, { secret: PEPPER });
-}
-
-function compareHashHighEntropy(value: string, hashedValue: string): boolean {
-  const inputHash = hashHighEntropy(value);
-  return timingSafeEqual(Buffer.from(inputHash, ENCODING), Buffer.from(hashedValue, ENCODING));
 }
 
 function generateToken(length = 64) {
