@@ -16,30 +16,34 @@ const ENCODING: BinaryToTextEncoding = 'base64url';
 const ENCRYPTION_ALGORITHM: CipherGCMTypes = 'aes-256-gcm';
 const HASH_ALGORITHM = 'sha256';
 const IV_LENGTH = 12;
+const AUTH_TAG_LENGTH = 16;
 const PEPPER = Buffer.from(env.PEPPER, ENCODING);
 const ENCRYPTION_KEY = Buffer.from(env.ENCRYPTION_KEY, ENCODING);
 
 function encrypt(data: Buffer) {
   const iv = randomBytes(IV_LENGTH);
-  const cipher = createCipheriv(ENCRYPTION_ALGORITHM, ENCRYPTION_KEY, iv);
+  const cipher = createCipheriv(ENCRYPTION_ALGORITHM, ENCRYPTION_KEY, iv, {
+    authTagLength: AUTH_TAG_LENGTH,
+  });
   const encryptedPart = cipher.update(data);
   const finalPart = cipher.final();
-
   const authTag = cipher.getAuthTag();
+  const encryptedData = Buffer.concat([encryptedPart, finalPart]);
 
-  return {
-    encryptedData: Buffer.concat([encryptedPart, finalPart]),
-    iv,
-    authTag,
-  };
+  return Buffer.concat([iv, authTag, encryptedData]);
 }
 
-function decrypt(encryptedData: Buffer, iv: Buffer, authTag: Buffer): Buffer {
-  const decipher = createDecipheriv(ENCRYPTION_ALGORITHM, ENCRYPTION_KEY, iv);
+function decrypt(encryptedData: Buffer): Buffer {
+  const iv = encryptedData.subarray(0, IV_LENGTH);
+  const authTag = encryptedData.subarray(IV_LENGTH, IV_LENGTH + AUTH_TAG_LENGTH);
+  const data = encryptedData.subarray(IV_LENGTH + AUTH_TAG_LENGTH);
+  const decipher = createDecipheriv(ENCRYPTION_ALGORITHM, ENCRYPTION_KEY, iv, {
+    authTagLength: AUTH_TAG_LENGTH,
+  });
 
   decipher.setAuthTag(authTag);
 
-  const decryptedPart = decipher.update(encryptedData);
+  const decryptedPart = decipher.update(data);
   const finalPart = decipher.final();
 
   return Buffer.concat([decryptedPart, finalPart]);
