@@ -8,12 +8,12 @@ import serverConfig from '@/auth/config/server';
 
 type Session = InferSelectModel<typeof sessions>;
 
-async function getSessionById(
-  id: Session['id'],
+async function getSessionByToken(
+  token: Session['token'],
 ): Promise<(Session & { userRole: User['role'] }) | null> {
   const session = await db.query.sessions.findFirst({
     with: { user: { columns: { role: true } } },
-    where: and(eq(sessions.id, id), gt(sessions.expiresAt, new Date().toISOString())),
+    where: and(eq(sessions.token, token), gt(sessions.expiresAt, new Date().toISOString())),
   });
 
   return session ? { ...session, userRole: session.user.role } : null;
@@ -31,15 +31,15 @@ async function createSession(newSession: Omit<Session, 'expiresAt'>): Promise<Se
   return session!;
 }
 
-async function refreshSession(sessionId: Session['id']): Promise<void> {
+async function refreshSession(token: Session['token']): Promise<void> {
   await db
     .update(sessions)
     .set({ expiresAt: createExpirationDate(serverConfig.sessionExpirationInSeconds).toISOString() })
-    .where(eq(sessions.id, sessionId));
+    .where(eq(sessions.token, token));
 }
 
-async function deleteSession(sessionId: Session['id']): Promise<void> {
-  await db.delete(sessions).where(eq(sessions.id, sessionId));
+async function deleteSession(token: Session['token']): Promise<void> {
+  await db.delete(sessions).where(eq(sessions.token, token));
 }
 
 async function deleteUserSessions(userId: Session['userId']): Promise<void> {
@@ -48,7 +48,7 @@ async function deleteUserSessions(userId: Session['userId']): Promise<void> {
 
 export {
   type Session,
-  getSessionById,
+  getSessionByToken,
   createSession,
   refreshSession,
   deleteSession,

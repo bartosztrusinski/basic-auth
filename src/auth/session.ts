@@ -7,7 +7,7 @@ import {
   createSession,
   deleteSession,
   deleteUserSessions,
-  getSessionById,
+  getSessionByToken,
   refreshSession,
   type Session,
 } from '@/data/session';
@@ -18,10 +18,10 @@ import {
   deleteSessionCookie,
   setAuthSyncCookie,
 } from '@/auth/cookie';
-import { generateToken } from '@/auth/crypto';
+import { generateToken, hashHighEntropy } from '@/auth/crypto';
 import config from '@/auth/config';
 
-export type BackendSession = Omit<Session, 'id'> & {
+export type BackendSession = Omit<Session, 'token'> & {
   userRole: User['role'];
 };
 
@@ -58,18 +58,19 @@ export type RedirectToLoginOptions = Omit<RedirectOptions, 'type'> & {
 export const auth: AuthUtil = Object.assign(cache(authFn), { protect });
 
 async function authFn(): Promise<FullOrNull<BackendSession>> {
-  const sessionId = await getSessionCookie();
+  const sessionToken = await getSessionCookie();
   const auth: Null<BackendSession> = {
     userId: null,
     userRole: null,
     expiresAt: null,
   };
 
-  if (!sessionId) {
+  if (!sessionToken) {
     return auth;
   }
 
-  const session = await getSessionById(sessionId);
+  const hashedToken = hashHighEntropy(sessionToken);
+  const session = await getSessionByToken(hashedToken);
 
   if (!session) {
     return auth;
@@ -158,24 +159,22 @@ export const currentUser = cache<() => Promise<BackendUser | null>>(async () => 
   } satisfies BackendUser;
 });
 
-export async function createUserSession(userId: BackendSession['userId']): Promise<Session> {
+export async function createUserSession(userId: BackendSession['userId']) {
   const { token, hashedToken } = generateToken(32);
-  const session = await createSession({ token: hashedToken, userId });
-
+  await createSession({ token: hashedToken, userId });
   await setSessionCookie(token);
   await setAuthSyncCookie();
-
-  return session;
 }
 
 export async function deleteUserSession() {
-  const sessionId = await getSessionCookie();
+  const sessionToken = await getSessionCookie();
 
-  if (!sessionId) {
+  if (!sessionToken) {
     return;
   }
 
-  await deleteSession(sessionId);
+  const hashedToken = hashHighEntropy(sessionToken);
+  await deleteSession(hashedToken);
   await deleteSessionCookie();
   await setAuthSyncCookie();
 }
@@ -187,13 +186,14 @@ export async function deleteAllUserSessions(userId: User['id']) {
 }
 
 export async function refreshUserSession(request?: NextRequest) {
-  const sessionId = await getSessionCookie(request);
+  const sessionToken = await getSessionCookie(request);
 
-  if (!sessionId) {
+  if (!sessionToken) {
     return;
   }
 
-  await refreshSession(sessionId);
-  await setSessionCookie(sessionId, request);
+  const hashedToken = hashHighEntropy(sessionToken);
+  await refreshSession(hashedToken);
+  await setSessionCookie(sessionToken, request);
   await setAuthSyncCookie();
 }
