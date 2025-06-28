@@ -1,13 +1,12 @@
 'use client';
 
 import { useActionState, Fragment, useRef, useId } from 'react';
-import { type TwoFactorAttempt } from '@/data/two-factor-attempt';
 import { verifyTwoFactorCode } from '@/auth/actions/two-factor';
 import { Alert } from '@/components/ui/alert';
 import { CodeInput } from '@/components/ui/code-input';
 
 type Props = {
-  token: TwoFactorAttempt['token'];
+  token: string;
 };
 
 export function TwoFactorForm({ token }: Props) {

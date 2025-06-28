@@ -1,6 +1,5 @@
-import { type Session } from '@/data/session';
 import { getUserByEmail, createUser } from '@/data/user';
-import { type TwoFactorAttempt, createTwoFactorAttempt } from '@/data/two-factor-attempt';
+import { createTwoFactorAttempt } from '@/data/two-factor-attempt';
 import { createVerificationToken } from '@/data/verification-token';
 import { createUserSession, deleteUserSession, auth, deleteAllUserSessions } from '@/auth/session';
 import { hashLowEntropy, generateToken, compareHashLowEntropy } from '@/auth/crypto';
@@ -55,12 +54,7 @@ export async function signUp(
 export async function logIn(
   _: unknown,
   formData: FormData,
-): Promise<
-  ActionDataState<
-    Partial<{ session: Session; twoFactorToken: TwoFactorAttempt['token'] }>,
-    typeof loginSchema
-  >
-> {
+): Promise<ActionDataState<{ twoFactorToken?: string }, typeof loginSchema>> {
   const { data, error } = loginSchema.safeParse(Object.fromEntries(formData.entries()));
 
   if (error) {
@@ -96,12 +90,9 @@ export async function logIn(
       };
     }
 
-    const session = await createUserSession(user.id);
+    await createUserSession(user.id);
 
-    return {
-      isSuccess: true,
-      data: { session },
-    };
+    return { isSuccess: true, data: {} };
   } catch (error) {
     return handleError(error, 'login-failed', { email });
   }

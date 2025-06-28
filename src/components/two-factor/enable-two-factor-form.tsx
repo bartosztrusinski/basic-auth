@@ -1,8 +1,6 @@
 'use client';
 
 import { useState } from 'react';
-import { type TwoFactorSetup } from '@/data/two-factor-setup';
-import { type RecoveryCode } from '@/data/recovery-code';
 import { ModalTitle, ModalDescription } from '@/components/ui/classy-modal';
 import { InitializeTwoFactorForm } from './initialize-two-factor-form';
 import { TwoFactorCodeForm } from './two-factor-code-form';
@@ -10,8 +8,8 @@ import { RecoveryCodes } from './recovery-codes';
 
 export type TwoFactorData = {
   qrCode: string;
-  secret: TwoFactorSetup['secret'];
-  recoveryCodes: RecoveryCode['code'][];
+  secret: string;
+  recoveryCodes: string[];
 };
 
 const formSteps = [

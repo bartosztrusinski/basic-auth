@@ -1,11 +1,10 @@
 'use client';
 
 import { useActionState } from 'react';
-import { type VerificationToken } from '@/data/verification-token';
 import { verifyEmail } from '@/actions';
 
 type Props = {
-  token: VerificationToken['token'];
+  token: string;
 };
 
 export function VerifyEmailForm({ token }: Props) {

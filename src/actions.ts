@@ -3,8 +3,6 @@
 import { revalidatePath } from 'next/cache';
 import { updateUser } from '@/data/user';
 import { type RecoveryCode } from '@/data/recovery-code';
-import { type TwoFactorSetup } from '@/data/two-factor-setup';
-import { type VerificationToken } from '@/data/verification-token';
 import { auth, redirectToLogin } from '@/auth/session';
 import { redirectAuth } from '@/auth/util';
 import { type OAuthProvider, type StateData } from '@/auth/oauth';
@@ -75,7 +73,7 @@ export async function editProfile(_: unknown, formData: FormData): Promise<Actio
   }
 }
 
-export async function verifyEmail(token: VerificationToken['token']): Promise<ActionState> {
+export async function verifyEmail(token: string): Promise<ActionState> {
   const { isSuccess, authCode } = await authVerifyEmail(token);
 
   if (isSuccess) {
@@ -149,7 +147,7 @@ export async function deleteCurrentUser(): Promise<ActionState> {
 }
 
 export async function initializeTwoFactorAuth(): Promise<
-  ActionState<{ qrCode: string; secret: TwoFactorSetup['secret'] }>
+  ActionState<{ qrCode: string; secret: string }>
 > {
   const { isSuccess, errors, authCode, data } = await authInitializeTwoFactorAuth();
 

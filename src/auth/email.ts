@@ -2,7 +2,6 @@ import 'server-only';
 import { Resend } from 'resend';
 import { env } from '@/env';
 import { type User } from '@/data/user';
-import { type VerificationToken } from '@/data/verification-token';
 import {
   VerificationEmail,
   VerificationEmailPlainText,
@@ -19,7 +18,7 @@ const resend = new Resend(env.RESEND_API_KEY);
 
 export async function sendVerificationEmail(
   email: User['email'],
-  token: VerificationToken['token'],
+  token: string,
   name: User['name'],
 ) {
   const expirationTimeHours = serverConfig.verificationTokenExpirationInSeconds / 60 / 60;

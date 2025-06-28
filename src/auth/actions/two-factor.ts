@@ -1,20 +1,14 @@
 import * as OTPAuth from 'otpauth';
 import QRCode from 'qrcode';
 import { updateUser } from '@/data/user';
-import { type Session } from '@/data/session';
 import {
   type RecoveryCode,
   deleteUserRecoveryCodes,
   getActiveRecoveryCodes,
   consumeRecoveryCode,
 } from '@/data/recovery-code';
+import { getTwoFactorAttemptByToken, deleteTwoFactorAttempt } from '@/data/two-factor-attempt';
 import {
-  type TwoFactorAttempt,
-  getTwoFactorAttemptByToken,
-  deleteTwoFactorAttempt,
-} from '@/data/two-factor-attempt';
-import {
-  type TwoFactorSetup,
   createTwoFactorSetup,
   getUserTwoFactorSetup,
   deleteTwoFactorSetup,
@@ -29,7 +23,7 @@ import { handleError } from './util';
 import { type ActionDataState, type ActionState } from './types';
 
 export async function initializeTwoFactorAuth(): Promise<
-  ActionDataState<{ secret: TwoFactorSetup['secret']; qrCode: string }>
+  ActionDataState<{ secret: string; qrCode: string }>
 > {
   const user = await currentUser();
 
@@ -141,10 +135,10 @@ export async function disableTwoFactorAuth(): Promise<ActionState> {
 }
 
 export async function verifyTwoFactorCode(
-  token: TwoFactorAttempt['token'],
+  token: string,
   _: unknown,
   formData: FormData,
-): Promise<ActionDataState<{ session: Session }>> {
+): Promise<ActionState> {
   const { data, error } = twoFactorCodeSchema.safeParse(Object.fromEntries(formData.entries()));
 
   if (error) {
@@ -177,23 +171,19 @@ export async function verifyTwoFactorCode(
     }
 
     await deleteTwoFactorAttempt(hashedToken);
+    await createUserSession(user.id);
 
-    const session = await createUserSession(user.id);
-
-    return {
-      isSuccess: true,
-      data: { session },
-    };
+    return { isSuccess: true };
   } catch (error) {
     return handleError(error, 'two-factor-setup-failed');
   }
 }
 
 export async function useRecoveryCode(
-  token: TwoFactorAttempt['token'],
+  token: string,
   _: unknown,
   formData: FormData,
-): Promise<ActionDataState<{ session: Session }>> {
+): Promise<ActionState> {
   const { data, error } = recoveryCodeSchema.safeParse(Object.fromEntries(formData.entries()));
 
   if (error) {
@@ -234,13 +224,9 @@ export async function useRecoveryCode(
 
     await consumeRecoveryCode(correctCode);
     await deleteTwoFactorAttempt(hashedToken);
+    await createUserSession(user.id);
 
-    const session = await createUserSession(user.id);
-
-    return {
-      isSuccess: true,
-      data: { session },
-    };
+    return { isSuccess: true };
   } catch (error) {
     return handleError(error, 'recovery-code-failed');
   }

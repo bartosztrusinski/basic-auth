@@ -19,18 +19,22 @@ export async function deleteSessionCookie() {
   cookieStore.delete(serverConfig.sessionCookieKey);
 }
 
-export async function setSessionCookie(sessionId: string, request?: NextRequest) {
+export async function setSessionCookie(sessionToken: string, request?: NextRequest) {
   if (request) {
     request.cookies.set({
       name: serverConfig.sessionCookieKey,
-      value: sessionId,
+      value: sessionToken,
       ...serverConfig.sessionCookieAttributes,
     });
     return;
   }
 
   const cookieStore = await cookies();
-  cookieStore.set(serverConfig.sessionCookieKey, sessionId, serverConfig.sessionCookieAttributes);
+  cookieStore.set(
+    serverConfig.sessionCookieKey,
+    sessionToken,
+    serverConfig.sessionCookieAttributes,
+  );
 }
 
 export async function setAuthSyncCookie(response?: NextResponse) {

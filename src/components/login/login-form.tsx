@@ -2,13 +2,12 @@
 
 import { useState } from 'react';
 import Link from 'next/link';
-import { type TwoFactorAttempt } from '@/data/two-factor-attempt';
 import { RecoveryCodeForm } from './recovery-code-form';
 import { TwoFactorForm } from './two-factor-form';
 import { CredentialsForm } from './credentials-form';
 
 export function LoginForm() {
-  const [twoFactorToken, setTwoFactorToken] = useState<TwoFactorAttempt['token'] | null>(null);
+  const [twoFactorToken, setTwoFactorToken] = useState<string | null>(null);
   const [isRecoveryMode, setIsRecoveryMode] = useState(false);
 
   function goBack() {

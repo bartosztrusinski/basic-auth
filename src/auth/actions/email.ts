@@ -1,6 +1,5 @@
 import { updateUser, getUserByEmail } from '@/data/user';
 import {
-  type VerificationToken,
   getVerificationTokenByToken,
   deleteVerificationToken,
   createVerificationToken,
@@ -12,7 +11,7 @@ import { resendVerificationEmailSchema } from '@/auth/schemas';
 import { handleError } from './util';
 import { type ActionState } from './types';
 
-export async function verifyEmail(token: VerificationToken['token']): Promise<ActionState> {
+export async function verifyEmail(token: string): Promise<ActionState> {
   try {
     const hashedToken = hashHighEntropy(token);
     const verificationToken = await getVerificationTokenByToken(hashedToken);
