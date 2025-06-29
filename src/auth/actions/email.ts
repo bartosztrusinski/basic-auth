@@ -1,3 +1,5 @@
+'use server';
+
 import { updateUser, getUserByEmail } from '@/data/user';
 import {
   getVerificationTokenByToken,

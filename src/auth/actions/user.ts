@@ -1,3 +1,5 @@
+'use server';
+
 import { updateUser, deleteUser } from '@/data/user';
 import { hashLowEntropy } from '@/auth/crypto';
 import { AuthError } from '@/auth/message';

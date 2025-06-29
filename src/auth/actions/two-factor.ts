@@ -1,3 +1,5 @@
+'use server';
+
 import * as OTPAuth from 'otpauth';
 import QRCode from 'qrcode';
 import { updateUser } from '@/data/user';

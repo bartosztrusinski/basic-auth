@@ -1,3 +1,5 @@
+'use server';
+
 import { getUserByEmail, createUser } from '@/data/user';
 import { createTwoFactorAttempt } from '@/data/two-factor-attempt';
 import { createVerificationToken } from '@/data/verification-token';
