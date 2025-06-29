@@ -13,7 +13,7 @@ type Props = {
   onSuccess?: (data: Partial<TwoFactorData>) => void;
 };
 
-export function TwoFactorCodeForm({ secret, qrCode, onSuccess }: Props) {
+export function TwoFactorConfirmationForm({ secret, qrCode, onSuccess }: Props) {
   const id = useId();
   const formRef = useRef<HTMLFormElement>(null);
   const [state, action, isPending] = useActionState(enableTwoFactorAuth, {

@@ -9,7 +9,7 @@ type Props = {
   onSuccess?: (data: Partial<TwoFactorData>) => void;
 };
 
-export function InitializeTwoFactorForm({ onSuccess }: Props) {
+export function TwoFactorInitializationForm({ onSuccess }: Props) {
   const [state, action, isPending] = useActionState(initializeTwoFactorAuth, {
     isSuccess: false,
   });

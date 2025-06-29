@@ -12,7 +12,7 @@ type Props = {
   recoveryCodes: TwoFactorData['recoveryCodes'];
 };
 
-export function RecoveryCodes({ recoveryCodes }: Props) {
+export function TwoFactorRecoveryCodes({ recoveryCodes }: Props) {
   const [isCopied, setIsCopied] = useState(false);
   const timeoutId = useRef<number>();
   const router = useRouter();

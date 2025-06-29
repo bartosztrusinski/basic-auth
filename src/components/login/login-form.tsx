@@ -2,8 +2,8 @@
 
 import { useState } from 'react';
 import Link from 'next/link';
-import { RecoveryCodeForm } from './recovery-code-form';
-import { TwoFactorForm } from './two-factor-form';
+import { TwoFactorRecoveryForm } from './two-factor-recovery-form';
+import { TwoFactorVerificationForm } from './two-factor-verification-form';
 import { CredentialsForm } from './credentials-form';
 
 export function LoginForm() {
@@ -32,9 +32,9 @@ export function LoginForm() {
         </button>
 
         {isRecoveryMode ? (
-          <RecoveryCodeForm token={twoFactorToken} />
+          <TwoFactorRecoveryForm token={twoFactorToken} />
         ) : (
-          <TwoFactorForm token={twoFactorToken} />
+          <TwoFactorVerificationForm token={twoFactorToken} />
         )}
 
         <p className='text-neutral-400'>

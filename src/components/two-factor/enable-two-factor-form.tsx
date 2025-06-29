@@ -2,9 +2,9 @@
 
 import { useState } from 'react';
 import { ModalTitle, ModalDescription } from '@/components/ui/classy-modal';
-import { InitializeTwoFactorForm } from './initialize-two-factor-form';
-import { TwoFactorCodeForm } from './two-factor-code-form';
-import { RecoveryCodes } from './recovery-codes';
+import { TwoFactorInitializationForm } from './two-factor-initialization-form';
+import { TwoFactorConfirmationForm } from './two-factor-confirmation-form';
+import { TwoFactorRecoveryCodes } from './two-factor-recovery-codes';
 
 export type TwoFactorData = {
   qrCode: string;
@@ -17,19 +17,19 @@ const formSteps = [
     title: 'Enable Two-Factor Authentication',
     description:
       'To enhance your account security, it is recommended to enable 2FA authentication. This will require a second form of verification in addition to your password. You will need an authenticator app.',
-    Component: InitializeTwoFactorForm,
+    Component: TwoFactorInitializationForm,
   },
   {
     title: 'Enable Two-Factor Authentication',
     description:
       'Scan the QR code below with your authenticator app or enter the code manually to set up two-factor authentication.',
-    Component: TwoFactorCodeForm,
+    Component: TwoFactorConfirmationForm,
   },
   {
     title: 'Two-Factor Authentication Enabled',
     description:
       'Two-Factor Authentication has been enabled! Please save your recovery codes in a safe place. You will need them to access your account if you lose access to your authenticator app.',
-    Component: RecoveryCodes,
+    Component: TwoFactorRecoveryCodes,
   },
 ];
 
