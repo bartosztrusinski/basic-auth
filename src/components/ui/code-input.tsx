@@ -100,7 +100,7 @@ export function CodeInput({
         maxLength={maxLength}
         aria-placeholder={placeholder}
         value={value}
-        className={`absolute inset-0 flex h-full w-full appearance-none border-none bg-transparent leading-none -tracking-[0.5em] text-transparent caret-transparent opacity-100 shadow-none outline-none selection:bg-inherit selection:text-inherit placeholder:text-inherit ${isFocused && isComplete && isNoSlotSelected ? focusClassName : ''} ${className}`}
+        className={`absolute inset-0 flex h-full w-full appearance-none border-none bg-transparent leading-none -tracking-[0.5em] text-transparent caret-transparent opacity-100 shadow-none outline-none selection:bg-transparent selection:text-transparent placeholder:text-inherit ${isFocused && isComplete && isNoSlotSelected ? focusClassName : ''} ${className}`}
         onChange={(event) => {
           const newValue = event.target.value;
 
