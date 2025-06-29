@@ -10,9 +10,13 @@ import {
   customType,
 } from 'drizzle-orm/pg-core';
 
-const binary = customType<{ data: Buffer; default: false }>({
+const binary = customType<{ data: Buffer; default: false; driverData: Buffer | string }>({
   dataType() {
     return 'bytea';
+  },
+  // workaround for bug where data from related table in 'with' query is returned as string
+  fromDriver(value) {
+    return typeof value === 'string' ? Buffer.from(value.substring(2), 'hex') : value;
   },
 });
 

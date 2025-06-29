@@ -25,10 +25,8 @@ function encrypt(data: Buffer) {
   const cipher = createCipheriv(ENCRYPTION_ALGORITHM, ENCRYPTION_KEY, iv, {
     authTagLength: AUTH_TAG_LENGTH,
   });
-  const encryptedPart = cipher.update(data);
-  const finalPart = cipher.final();
+  const encryptedData = Buffer.concat([cipher.update(data), cipher.final()]);
   const authTag = cipher.getAuthTag();
-  const encryptedData = Buffer.concat([encryptedPart, finalPart]);
 
   return Buffer.concat([iv, authTag, encryptedData]);
 }
@@ -43,10 +41,7 @@ function decrypt(encryptedData: Buffer): Buffer {
 
   decipher.setAuthTag(authTag);
 
-  const decryptedPart = decipher.update(data);
-  const finalPart = decipher.final();
-
-  return Buffer.concat([decryptedPart, finalPart]);
+  return Buffer.concat([decipher.update(data), decipher.final()]);
 }
 
 function hashHighEntropy(value: string): Buffer {
