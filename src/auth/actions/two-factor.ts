@@ -177,7 +177,7 @@ export async function verifyTwoFactorCode(
 
     return { isSuccess: true };
   } catch (error) {
-    return handleError(error, 'two-factor-setup-failed');
+    return handleError(error, 'two-factor-login-failed');
   }
 }
 

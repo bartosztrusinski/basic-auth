@@ -133,6 +133,10 @@ const authMessages = {
     type: 'error',
     message: 'Could not set up two-factor authentication. Please try again.',
   },
+  'two-factor-login-failed': {
+    type: 'error',
+    message: 'Could not log in with two-factor authentication. Please try again.',
+  },
   'two-factor-already-enabled': {
     type: 'error',
     message: 'Two-factor authentication is already enabled.',
