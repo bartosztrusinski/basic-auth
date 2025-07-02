@@ -1,6 +1,6 @@
 import 'server-only';
 import { and, eq, gt, type InferSelectModel } from 'drizzle-orm';
-import { db } from '@/db';
+import { db, type DbInstance } from '@/db';
 import { verificationTokens } from '@/db/schema';
 import { type User } from '@/data/user';
 import { createExpirationDate } from '@/util';
@@ -21,22 +21,23 @@ async function getVerificationTokenByToken(
 
 async function createVerificationToken(
   newToken: Omit<VerificationToken, 'expiresAt'>,
-): Promise<VerificationToken> {
+  dbInstance: DbInstance = db,
+): Promise<void> {
   const expiresAt = createExpirationDate(serverConfig.verificationTokenExpirationInSeconds);
-  const [token] = await db
+  await dbInstance
     .insert(verificationTokens)
     .values({ ...newToken, expiresAt })
     .onConflictDoUpdate({
       target: [verificationTokens.userId],
       set: { token: newToken.token, expiresAt },
-    })
-    .returning();
-
-  return token!;
+    });
 }
 
-async function deleteVerificationToken(userId: VerificationToken['userId']): Promise<void> {
-  await db.delete(verificationTokens).where(eq(verificationTokens.userId, userId));
+async function deleteVerificationToken(
+  userId: VerificationToken['userId'],
+  dbInstance: DbInstance = db,
+): Promise<void> {
+  await dbInstance.delete(verificationTokens).where(eq(verificationTokens.userId, userId));
 }
 
 export {

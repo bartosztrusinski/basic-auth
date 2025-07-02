@@ -1,6 +1,6 @@
 import 'server-only';
 import { and, eq, gt, type InferSelectModel } from 'drizzle-orm';
-import { db } from '@/db';
+import { db, type DbInstance } from '@/db';
 import { type User } from '@/data/user';
 import { sessions } from '@/db/schema';
 import { createExpirationDate } from '@/util';
@@ -19,31 +19,32 @@ async function getSessionByToken(
   return session ? { ...session, userRole: session.user.role } : null;
 }
 
-async function createSession(newSession: Omit<Session, 'expiresAt'>): Promise<Session> {
-  const [session] = await db
-    .insert(sessions)
-    .values({
-      ...newSession,
-      expiresAt: createExpirationDate(serverConfig.sessionExpirationInSeconds).toISOString(),
-    })
-    .returning();
-
-  return session!;
+async function createSession(
+  newSession: Omit<Session, 'expiresAt'>,
+  dbInstance: DbInstance = db,
+): Promise<void> {
+  await dbInstance.insert(sessions).values({
+    ...newSession,
+    expiresAt: createExpirationDate(serverConfig.sessionExpirationInSeconds).toISOString(),
+  });
 }
 
-async function refreshSession(token: Session['token']): Promise<void> {
-  await db
+async function refreshSession(token: Session['token'], dbInstance: DbInstance = db): Promise<void> {
+  await dbInstance
     .update(sessions)
     .set({ expiresAt: createExpirationDate(serverConfig.sessionExpirationInSeconds).toISOString() })
     .where(eq(sessions.token, token));
 }
 
-async function deleteSession(token: Session['token']): Promise<void> {
-  await db.delete(sessions).where(eq(sessions.token, token));
+async function deleteSession(token: Session['token'], dbInstance: DbInstance = db): Promise<void> {
+  await dbInstance.delete(sessions).where(eq(sessions.token, token));
 }
 
-async function deleteUserSessions(userId: Session['userId']): Promise<void> {
-  await db.delete(sessions).where(eq(sessions.userId, userId));
+async function deleteUserSessions(
+  userId: Session['userId'],
+  dbInstance: DbInstance = db,
+): Promise<void> {
+  await dbInstance.delete(sessions).where(eq(sessions.userId, userId));
 }
 
 export {

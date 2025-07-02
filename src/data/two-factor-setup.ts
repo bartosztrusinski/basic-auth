@@ -1,6 +1,6 @@
 import 'server-only';
 import { and, eq, gt, type InferSelectModel } from 'drizzle-orm';
-import { db } from '@/db';
+import { db, type DbInstance } from '@/db';
 import { twoFactorSetups } from '@/db/schema';
 import { createExpirationDate } from '@/util';
 import serverConfig from '@/auth/config/server';
@@ -19,22 +19,24 @@ async function getUserTwoFactorSetup(
 
 async function createTwoFactorSetup(
   newTwoFactorSetup: Omit<TwoFactorSetup, 'expiresAt'>,
-): Promise<TwoFactorSetup> {
+  dbInstance: DbInstance = db,
+): Promise<void> {
   const expiresAt = createExpirationDate(serverConfig.twoFactorSetupExpirationInSeconds);
-  const [twoFactorSetup] = await db
+
+  await dbInstance
     .insert(twoFactorSetups)
     .values({ ...newTwoFactorSetup, expiresAt })
     .onConflictDoUpdate({
       target: [twoFactorSetups.userId],
       set: { secret: newTwoFactorSetup.secret, expiresAt },
-    })
-    .returning();
-
-  return twoFactorSetup!;
+    });
 }
 
-async function deleteTwoFactorSetup(userId: TwoFactorSetup['userId']): Promise<void> {
-  await db.delete(twoFactorSetups).where(eq(twoFactorSetups.userId, userId));
+async function deleteTwoFactorSetup(
+  userId: TwoFactorSetup['userId'],
+  dbInstance: DbInstance = db,
+): Promise<void> {
+  await dbInstance.delete(twoFactorSetups).where(eq(twoFactorSetups.userId, userId));
 }
 
 export { type TwoFactorSetup, getUserTwoFactorSetup, createTwoFactorSetup, deleteTwoFactorSetup };

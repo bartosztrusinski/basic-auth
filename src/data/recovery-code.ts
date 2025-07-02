@@ -1,6 +1,6 @@
 import 'server-only';
 import { and, eq, isNull, type InferSelectModel } from 'drizzle-orm';
-import { db } from '@/db';
+import { db, type DbInstance } from '@/db';
 import { recoveryCodes } from '@/db/schema';
 
 type RecoveryCode = InferSelectModel<typeof recoveryCodes>;
@@ -13,12 +13,16 @@ async function getActiveRecoveryCodes(userId: RecoveryCode['userId']): Promise<R
 
 async function createRecoveryCodes(
   newCodes: Omit<RecoveryCode, 'usedAt'>[],
-): Promise<RecoveryCode[]> {
-  return await db.insert(recoveryCodes).values(newCodes).returning();
+  dbInstance: DbInstance = db,
+): Promise<void> {
+  await dbInstance.insert(recoveryCodes).values(newCodes);
 }
 
-async function consumeRecoveryCode(activeRecoveryCode: RecoveryCode): Promise<void> {
-  await db
+async function consumeRecoveryCode(
+  activeRecoveryCode: RecoveryCode,
+  dbInstance: DbInstance = db,
+): Promise<void> {
+  await dbInstance
     .update(recoveryCodes)
     .set({ usedAt: new Date() })
     .where(
@@ -30,8 +34,11 @@ async function consumeRecoveryCode(activeRecoveryCode: RecoveryCode): Promise<vo
     );
 }
 
-async function deleteUserRecoveryCodes(userId: RecoveryCode['userId']): Promise<void> {
-  await db.delete(recoveryCodes).where(eq(recoveryCodes.userId, userId));
+async function deleteUserRecoveryCodes(
+  userId: RecoveryCode['userId'],
+  dbInstance: DbInstance = db,
+): Promise<void> {
+  await dbInstance.delete(recoveryCodes).where(eq(recoveryCodes.userId, userId));
 }
 
 export {

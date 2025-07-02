@@ -1,6 +1,6 @@
 import 'server-only';
 import { and, eq, gt, type InferSelectModel } from 'drizzle-orm';
-import { db } from '@/db';
+import { db, type DbInstance } from '@/db';
 import { twoFactorAttempts } from '@/db/schema';
 import { type User } from '@/data/user';
 import { createExpirationDate } from '@/util';
@@ -21,20 +21,19 @@ async function getTwoFactorAttemptByToken(
 
 async function createTwoFactorAttempt(
   newTwoFactorAttempt: Omit<TwoFactorAttempt, 'expiresAt'>,
-): Promise<TwoFactorAttempt> {
-  const [twoFactorAttempt] = await db
-    .insert(twoFactorAttempts)
-    .values({
-      ...newTwoFactorAttempt,
-      expiresAt: createExpirationDate(serverConfig.twoFactorAttemptExpirationInSeconds),
-    })
-    .returning();
-
-  return twoFactorAttempt!;
+  dbInstance: DbInstance = db,
+): Promise<void> {
+  await dbInstance.insert(twoFactorAttempts).values({
+    ...newTwoFactorAttempt,
+    expiresAt: createExpirationDate(serverConfig.twoFactorAttemptExpirationInSeconds),
+  });
 }
 
-async function deleteTwoFactorAttempt(token: TwoFactorAttempt['token']): Promise<void> {
-  await db.delete(twoFactorAttempts).where(eq(twoFactorAttempts.token, token));
+async function deleteTwoFactorAttempt(
+  token: TwoFactorAttempt['token'],
+  dbInstance: DbInstance = db,
+): Promise<void> {
+  await dbInstance.delete(twoFactorAttempts).where(eq(twoFactorAttempts.token, token));
 }
 
 export {

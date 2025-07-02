@@ -1,6 +1,6 @@
 import 'server-only';
 import { and, eq, exists, isNull, type InferInsertModel, type InferSelectModel } from 'drizzle-orm';
-import { db } from '@/db';
+import { db, type DbInstance } from '@/db';
 import { accounts, roles, users } from '@/db/schema';
 import { type Account } from './account';
 
@@ -54,9 +54,12 @@ async function getUserByProvider(
   return user ?? null;
 }
 
-async function createUser(newUser: Omit<InsertUser, 'id' | 'createdAt'>): Promise<User> {
-  const [user] = await db.insert(users).values(newUser).returning();
-  return user!;
+async function createUser(
+  newUser: Omit<InsertUser, 'id' | 'createdAt'>,
+  dbInstance: DbInstance = db,
+): Promise<User['id'] | null> {
+  const [user] = await dbInstance.insert(users).values(newUser).returning({ id: users.id });
+  return user?.id ?? null;
 }
 
 /**
@@ -64,13 +67,13 @@ async function createUser(newUser: Omit<InsertUser, 'id' | 'createdAt'>): Promis
  * Creates a new user or updates an existing unverified user.
  * If email is already taken (registered and verified) it returns null
  */
-async function upsertVerifiedUser({
-  email,
-  ...userData
-}: Omit<InsertUser, 'id' | 'createdAt' | 'emailVerified'>): Promise<User | null> {
+async function upsertVerifiedUser(
+  { email, ...userData }: Omit<InsertUser, 'id' | 'createdAt' | 'emailVerified'>,
+  dbInstance: DbInstance = db,
+): Promise<User['id'] | null> {
   const data = { ...userData, emailVerified: new Date() };
 
-  const [user] = await db
+  const [user] = await dbInstance
     .insert(users)
     .values({ email, ...data })
     .onConflictDoUpdate({
@@ -78,20 +81,21 @@ async function upsertVerifiedUser({
       setWhere: isNull(users.emailVerified),
       set: data,
     })
-    .returning();
+    .returning({ id: users.id });
 
-  return user ?? null;
+  return user?.id ?? null;
 }
 
 async function updateUser(
   id: User['id'],
   updatedUser: Partial<Omit<InsertUser, 'id'>>,
+  dbInstance: DbInstance = db,
 ): Promise<void> {
-  await db.update(users).set(updatedUser).where(eq(users.id, id));
+  await dbInstance.update(users).set(updatedUser).where(eq(users.id, id));
 }
 
-async function deleteUser(id: User['id']): Promise<void> {
-  await db.delete(users).where(eq(users.id, id));
+async function deleteUser(id: User['id'], dbInstance: DbInstance = db): Promise<void> {
+  await dbInstance.delete(users).where(eq(users.id, id));
 }
 
 export {
