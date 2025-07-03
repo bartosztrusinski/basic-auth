@@ -65,12 +65,20 @@ export function SignupForm() {
           {isPending ? 'Submitting...' : 'Sign Up'}
         </button>
       </form>
-      <p className='text-neutral-400'>
-        Already have an account?{' '}
-        <Link href={config.loginRoute} className='link'>
-          Log in
-        </Link>
-      </p>
+      <div className='text-neutral-400'>
+        <p>
+          Already have an account?{' '}
+          <Link href={config.loginRoute} className='link'>
+            Log in
+          </Link>
+        </p>
+        <p>
+          Didn&apos;t get verification email?{' '}
+          <Link href='/resend-email' className='link'>
+            Resend email
+          </Link>
+        </p>
+      </div>
     </>
   );
 }
