@@ -71,14 +71,17 @@ function generateRandomString(byteLength: number) {
   return randomBytes(byteLength).toString(ENCODING);
 }
 
-function generateRandomCodes(count: number, length: number): string[] {
+async function generateCodes(count: number, length: number) {
   const uniqueCodes = new Set<string>();
 
   while (uniqueCodes.size < count) {
     uniqueCodes.add(generateRandomCode(length));
   }
 
-  return [...uniqueCodes];
+  const codes = [...uniqueCodes];
+  const hashedCodes = await Promise.all(codes.map((code) => hashLowEntropy(code)));
+
+  return { codes, hashedCodes };
 }
 
 function generateRandomCode(length: number): string {
@@ -90,6 +93,18 @@ function generateRandomCode(length: number): string {
     .join('');
 }
 
+async function findCode(inputCode: string, codes: string[]): Promise<string | null> {
+  for (const code of codes) {
+    const isMatch = await compareHashLowEntropy(inputCode, code);
+
+    if (isMatch) {
+      return code;
+    }
+  }
+
+  return null;
+}
+
 export {
   encrypt,
   decrypt,
@@ -99,5 +114,7 @@ export {
   compareHashHighEntropy,
   generateToken,
   generateRandomString,
-  generateRandomCodes,
+  generateCodes,
+  generateRandomCode,
+  findCode,
 };
