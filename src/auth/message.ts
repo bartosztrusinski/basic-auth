@@ -69,7 +69,7 @@ const authMessages = {
   },
   'verification-email-not-sent': {
     type: 'error',
-    message: 'Could not send verification email. Please try again.',
+    message: 'Could not send verification email. Please try resending it.',
   },
   'oauth-login-failed': {
     type: 'error',
