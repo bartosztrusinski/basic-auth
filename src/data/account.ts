@@ -16,9 +16,9 @@ async function getUserAccounts(userId: Account['userId']): Promise<Account[]> {
  * @returns Boolean indicating whether the account was created successfully
  */
 async function createAccount(newAccount: Account, dbInstance: DbInstance = db): Promise<boolean> {
-  const result = await dbInstance.insert(accounts).values(newAccount).onConflictDoNothing();
+  const { rowCount } = await dbInstance.insert(accounts).values(newAccount).onConflictDoNothing();
 
-  return result.rowCount > 0;
+  return (rowCount ?? 0) > 0;
 }
 
 async function deleteAccount(

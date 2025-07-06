@@ -7,16 +7,6 @@ import serverConfig from '@/auth/config/server';
 
 type TwoFactorSetup = InferSelectModel<typeof twoFactorSetups>;
 
-async function getUserTwoFactorSetup(
-  userId: TwoFactorSetup['userId'],
-): Promise<TwoFactorSetup | null> {
-  const twoFactorSetup = await db.query.twoFactorSetups.findFirst({
-    where: and(eq(twoFactorSetups.userId, userId), gt(twoFactorSetups.expiresAt, new Date())),
-  });
-
-  return twoFactorSetup ?? null;
-}
-
 async function createTwoFactorSetup(
   newTwoFactorSetup: Omit<TwoFactorSetup, 'expiresAt'>,
   dbInstance: DbInstance = db,
@@ -35,8 +25,13 @@ async function createTwoFactorSetup(
 async function deleteTwoFactorSetup(
   userId: TwoFactorSetup['userId'],
   dbInstance: DbInstance = db,
-): Promise<void> {
-  await dbInstance.delete(twoFactorSetups).where(eq(twoFactorSetups.userId, userId));
+): Promise<TwoFactorSetup | null> {
+  const [setup] = await dbInstance
+    .delete(twoFactorSetups)
+    .where(and(eq(twoFactorSetups.userId, userId), gt(twoFactorSetups.expiresAt, new Date())))
+    .returning();
+
+  return setup ?? null;
 }
 
-export { type TwoFactorSetup, getUserTwoFactorSetup, createTwoFactorSetup, deleteTwoFactorSetup };
+export { type TwoFactorSetup, createTwoFactorSetup, deleteTwoFactorSetup };

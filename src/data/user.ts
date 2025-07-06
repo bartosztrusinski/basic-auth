@@ -31,6 +31,17 @@ async function getUserById(id: User['id']): Promise<User | null> {
   return user ?? null;
 }
 
+async function getUserWithAccounts(
+  id: User['id'],
+): Promise<(User & { accounts: Account[] }) | null> {
+  const user = await db.query.users.findFirst({
+    with: { accounts: true },
+    where: eq(users.id, id),
+  });
+
+  return user ?? null;
+}
+
 async function getUserByProvider(
   provider: Account['provider'],
   providerAccountId: Account['providerAccountId'],
@@ -58,7 +69,7 @@ async function createUser(
   newUser: Omit<InsertUser, 'id' | 'createdAt'>,
   dbInstance: DbInstance = db,
 ): Promise<User['id'] | null> {
-  const [user] = await dbInstance.insert(users).values(newUser).returning({ id: users.id });
+  const [user] = await dbInstance.insert(users).values(newUser).returning();
   return user?.id ?? null;
 }
 
@@ -81,7 +92,7 @@ async function upsertVerifiedUser(
       setWhere: isNull(users.emailVerified),
       set: data,
     })
-    .returning({ id: users.id });
+    .returning();
 
   return user?.id ?? null;
 }
@@ -104,6 +115,7 @@ export {
   getUsers,
   getUserByEmail,
   getUserById,
+  getUserWithAccounts,
   getUserByProvider,
   createUser,
   upsertVerifiedUser,

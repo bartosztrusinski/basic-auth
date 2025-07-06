@@ -5,10 +5,15 @@ import { recoveryCodes } from '@/db/schema';
 
 type RecoveryCode = InferSelectModel<typeof recoveryCodes>;
 
-async function getActiveRecoveryCodes(userId: RecoveryCode['userId']): Promise<RecoveryCode[]> {
-  return await db.query.recoveryCodes.findMany({
+async function getActiveRecoveryCodes(
+  userId: RecoveryCode['userId'],
+): Promise<RecoveryCode['code'][]> {
+  const codes = await db.query.recoveryCodes.findMany({
     where: and(eq(recoveryCodes.userId, userId), isNull(recoveryCodes.usedAt)),
+    columns: { code: true },
   });
+
+  return codes.map(({ code }) => code);
 }
 
 async function createRecoveryCodes(
@@ -19,19 +24,21 @@ async function createRecoveryCodes(
 }
 
 async function consumeRecoveryCode(
-  activeRecoveryCode: RecoveryCode,
+  { code, userId }: Omit<RecoveryCode, 'usedAt'>,
   dbInstance: DbInstance = db,
-): Promise<void> {
-  await dbInstance
+): Promise<boolean> {
+  const { rowCount } = await dbInstance
     .update(recoveryCodes)
     .set({ usedAt: new Date() })
     .where(
       and(
-        eq(recoveryCodes.code, activeRecoveryCode.code),
-        eq(recoveryCodes.userId, activeRecoveryCode.userId),
+        eq(recoveryCodes.code, code),
+        eq(recoveryCodes.userId, userId),
         isNull(recoveryCodes.usedAt),
       ),
     );
+
+  return (rowCount ?? 0) > 0;
 }
 
 async function deleteUserRecoveryCodes(

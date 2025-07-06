@@ -1,23 +1,11 @@
 import 'server-only';
-import { and, eq, gt, type InferSelectModel } from 'drizzle-orm';
+import { eq, gt, and, type InferInsertModel } from 'drizzle-orm';
 import { db, type DbInstance } from '@/db';
 import { verificationTokens } from '@/db/schema';
-import { type User } from '@/data/user';
 import { createExpirationDate } from '@/util';
 import serverConfig from '@/auth/config/server';
 
-type VerificationToken = InferSelectModel<typeof verificationTokens>;
-
-async function getVerificationTokenByToken(
-  token: VerificationToken['token'],
-): Promise<(VerificationToken & { user: User }) | null> {
-  const verificationToken = await db.query.verificationTokens.findFirst({
-    where: and(eq(verificationTokens.token, token), gt(verificationTokens.expiresAt, new Date())),
-    with: { user: true },
-  });
-
-  return verificationToken ?? null;
-}
+type VerificationToken = InferInsertModel<typeof verificationTokens>;
 
 async function createVerificationToken(
   newToken: Omit<VerificationToken, 'expiresAt'>,
@@ -34,15 +22,15 @@ async function createVerificationToken(
 }
 
 async function deleteVerificationToken(
-  userId: VerificationToken['userId'],
+  token: VerificationToken['token'],
   dbInstance: DbInstance = db,
-): Promise<void> {
-  await dbInstance.delete(verificationTokens).where(eq(verificationTokens.userId, userId));
+): Promise<VerificationToken | null> {
+  const [verificationToken] = await dbInstance
+    .delete(verificationTokens)
+    .where(and(eq(verificationTokens.token, token), gt(verificationTokens.expiresAt, new Date())))
+    .returning();
+
+  return verificationToken ?? null;
 }
 
-export {
-  type VerificationToken,
-  getVerificationTokenByToken,
-  createVerificationToken,
-  deleteVerificationToken,
-};
+export { type VerificationToken, createVerificationToken, deleteVerificationToken };
