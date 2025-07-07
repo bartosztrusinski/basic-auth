@@ -1,11 +1,8 @@
 'use server';
 
+import { transaction } from '@/db';
 import { updateUser, getUserByEmail } from '@/data/user';
-import {
-  getVerificationTokenByToken,
-  deleteVerificationToken,
-  createVerificationToken,
-} from '@/data/verification-token';
+import { deleteVerificationToken, createVerificationToken } from '@/data/verification-token';
 import { hashHighEntropy, generateToken } from '@/auth/crypto';
 import { sendExistingUserLoginGuidanceEmail, sendVerificationEmail } from '@/auth/email';
 import { AuthError } from '@/auth/message';
@@ -16,19 +13,17 @@ import { type ActionState } from './types';
 export async function verifyEmail(token: string): Promise<ActionState> {
   try {
     const hashedToken = hashHighEntropy(token);
-    const verificationToken = await getVerificationTokenByToken(hashedToken);
+    const now = new Date();
 
-    if (!verificationToken || verificationToken.expiresAt < new Date()) {
-      throw new AuthError('email-verification-expired');
-    }
+    await transaction(async (tx) => {
+      const verificationToken = await deleteVerificationToken(hashedToken, tx);
 
-    const { user } = verificationToken;
+      if (!verificationToken || verificationToken.expiresAt < now) {
+        throw new AuthError('email-verification-expired');
+      }
 
-    if (!user.emailVerified) {
-      await updateUser(user.id, { emailVerified: new Date() });
-    }
-
-    await deleteVerificationToken(user.id);
+      await updateUser(verificationToken.userId, { emailVerified: now }, tx);
+    });
 
     return { isSuccess: true };
   } catch (error) {

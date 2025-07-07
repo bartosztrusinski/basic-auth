@@ -2,6 +2,7 @@ import 'server-only';
 import { cache } from 'react';
 import { RedirectType } from 'next/navigation';
 import { type NextRequest } from 'next/server';
+import { type Transaction } from '@/db';
 import { getUserById, type User } from '@/data/user';
 import {
   createSession,
@@ -159,9 +160,9 @@ export const currentUser = cache<() => Promise<BackendUser | null>>(async () => 
   } satisfies BackendUser;
 });
 
-export async function createUserSession(userId: BackendSession['userId']) {
+export async function createUserSession(userId: BackendSession['userId'], tx?: Transaction) {
   const { token, hashedToken } = generateToken(32);
-  await createSession({ token: hashedToken, userId });
+  await createSession({ token: hashedToken, userId }, tx);
   await setSessionCookie(token);
   await setAuthSyncCookie();
 }

@@ -7,8 +7,9 @@ type RecoveryCode = InferSelectModel<typeof recoveryCodes>;
 
 async function getActiveRecoveryCodes(
   userId: RecoveryCode['userId'],
+  dbInstance: DbInstance = db,
 ): Promise<RecoveryCode['code'][]> {
-  const codes = await db.query.recoveryCodes.findMany({
+  const codes = await dbInstance.query.recoveryCodes.findMany({
     where: and(eq(recoveryCodes.userId, userId), isNull(recoveryCodes.usedAt)),
     columns: { code: true },
   });

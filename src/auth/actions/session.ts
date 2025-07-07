@@ -1,5 +1,6 @@
 'use server';
 
+import { transaction } from '@/db';
 import { getUserByEmail, createUser } from '@/data/user';
 import { createTwoFactorAttempt } from '@/data/two-factor-attempt';
 import { createVerificationToken } from '@/data/verification-token';
@@ -31,21 +32,34 @@ export async function signUp(
   const { email, name, password } = data;
 
   try {
-    let user = await getUserByEmail(email);
+    const existingUser = await getUserByEmail(email);
 
-    if (user?.emailVerified) {
-      await sendExistingUserLoginGuidanceEmail(user.email, user.name);
+    if (existingUser?.emailVerified) {
+      await sendExistingUserLoginGuidanceEmail(existingUser.email, existingUser.name);
       return { isSuccess: true };
     }
 
-    if (!user) {
-      const hashedPassword = await hashLowEntropy(password);
-      user = await createUser({ email, name, password: hashedPassword });
+    const { token, hashedToken } = generateToken();
+
+    if (existingUser) {
+      await createVerificationToken({ token: hashedToken, userId: existingUser.id });
+      await sendVerificationEmail(existingUser.email, token, existingUser.name);
+      return { isSuccess: true };
     }
 
-    const { token, hashedToken } = generateToken();
-    await createVerificationToken({ token: hashedToken, userId: user.id });
-    await sendVerificationEmail(email, token, user.name);
+    const hashedPassword = await hashLowEntropy(password);
+
+    await transaction(async (tx) => {
+      const userId = await createUser({ email, name, password: hashedPassword }, tx);
+
+      if (!userId) {
+        throw new AuthError('signup-failed');
+      }
+
+      await createVerificationToken({ token: hashedToken, userId }, tx);
+    });
+
+    await sendVerificationEmail(email, token, name);
 
     return { isSuccess: true };
   } catch (error) {

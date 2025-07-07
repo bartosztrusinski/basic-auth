@@ -2,14 +2,7 @@ import 'server-only';
 import { NextResponse, type NextRequest } from 'next/server';
 import { redirect } from 'next/navigation';
 import { createAccount } from '@/data/account';
-import {
-  auth,
-  redirectToLogin,
-  createUserSession,
-  currentUser,
-  type CurrentUser,
-  type Auth,
-} from '@/auth/session';
+import { auth, redirectToLogin, currentUser, type CurrentUser, type Auth } from '@/auth/session';
 import { redirectAuth } from '@/auth/util';
 import { deleteSessionCookie } from '@/auth/cookie';
 import { AuthError } from '@/auth/message';
@@ -94,9 +87,13 @@ async function handleOAuthAccountLink(
       redirectUrl = stateData.redirectUrl;
     }
 
-    const account = await createAccount({ userId, provider, providerAccountId: oAuthUser.id });
+    const wasAccountCreated = await createAccount({
+      userId,
+      provider,
+      providerAccountId: oAuthUser.id,
+    });
 
-    if (!account) {
+    if (!wasAccountCreated) {
       throw new AuthError('oauth-link-existing-account');
     }
   } catch (error) {
@@ -126,8 +123,7 @@ async function handleOAuthSignup(
       redirectUrl = stateData.redirectUrl;
     }
 
-    const userId = await signUpWithProvider(provider, oAuthUser);
-    await createUserSession(userId);
+    await signUpWithProvider(provider, oAuthUser);
   } catch (error) {
     redirectToLogin({
       authCode: error instanceof AuthError ? error.authCode : 'oauth-login-failed',

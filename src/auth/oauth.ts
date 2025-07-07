@@ -1,8 +1,9 @@
 import 'server-only';
 import { hash } from 'node:crypto';
 import { type z } from 'zod';
-import { createAccount, getUserAccounts, deleteAccount } from '@/data/account';
-import { getUserByProvider, getUserById, type User, upsertVerifiedUser } from '@/data/user';
+import { transaction } from '@/db';
+import { createAccount, deleteAccount } from '@/data/account';
+import { type User, getUserByProvider, upsertVerifiedUser, getUserWithAccounts } from '@/data/user';
 import {
   getStateCookie,
   setStateCookie,
@@ -14,6 +15,7 @@ import { fetcher } from '@/auth/util';
 import { AuthError } from '@/auth/message';
 import { oAuthTokenSchema } from '@/auth/schemas';
 import { generateRandomString } from '@/auth/crypto';
+import { createUserSession } from '@/auth/session';
 import config from '@/auth/config';
 import providers, { OAuthProviderEnum } from '@/auth/config/providers';
 
@@ -153,39 +155,41 @@ async function fetchOAuthUser(
 async function signUpWithProvider(
   provider: OAuthProvider,
   { id, email, ...oAuthData }: OAuthUser,
-): Promise<User['id']> {
+): Promise<void> {
   const existingUser = await getUserByProvider(provider, id);
 
   if (existingUser) {
-    return existingUser.id;
+    await createUserSession(existingUser.id);
+    return;
   }
 
-  const user = await upsertVerifiedUser({ email, ...oAuthData });
+  await transaction(async (tx) => {
+    const userId = await upsertVerifiedUser({ email, ...oAuthData }, tx);
 
-  if (!user) {
-    throw new AuthError('oauth-login-email-taken');
-  }
+    if (!userId) {
+      throw new AuthError('oauth-login-email-taken');
+    }
 
-  const account = await createAccount({ userId: user.id, provider, providerAccountId: id });
+    const wasAccountCreated = await createAccount({ userId, provider, providerAccountId: id }, tx);
 
-  if (!account) {
-    throw new AuthError('oauth-login-failed');
-  }
+    if (!wasAccountCreated) {
+      throw new AuthError('oauth-login-failed');
+    }
 
-  return user.id;
+    await createUserSession(userId, tx);
+  });
 }
 
 async function deleteProviderAccount(provider: OAuthProvider, userId: User['id']) {
-  const user = await getUserById(userId);
+  const user = await getUserWithAccounts(userId);
 
   if (!user) {
     throw new Error('Could not find user');
   }
 
-  const accounts = await getUserAccounts(userId);
-  const hasOtherAccounts = accounts.some((account) => account.provider !== provider);
+  const isOnlyAccount = user.accounts.length === 1;
 
-  if (!hasOtherAccounts && !user.password) {
+  if (isOnlyAccount && !user.password) {
     throw new AuthError('oauth-unlink-only-account');
   }
 

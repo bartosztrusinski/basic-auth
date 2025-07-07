@@ -4,7 +4,7 @@ import { updateUser, deleteUser } from '@/data/user';
 import { hashLowEntropy } from '@/auth/crypto';
 import { AuthError } from '@/auth/message';
 import { addPasswordSchema } from '@/auth/schemas';
-import { currentUser, auth, deleteAllUserSessions } from '@/auth/session';
+import { currentUser, auth } from '@/auth/session';
 import { handleError } from './util';
 import { type ActionState } from './types';
 
@@ -45,7 +45,6 @@ export async function deleteCurrentUser(): Promise<ActionState> {
       throw new AuthError('unauthenticated');
     }
 
-    await deleteAllUserSessions(userId);
     await deleteUser(userId);
 
     return { isSuccess: true };
