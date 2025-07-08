@@ -4,6 +4,7 @@ import { type FormEvent, useActionState, useId, useState, useTransition } from '
 import { toast } from 'sonner';
 import { type User } from '@/data/user';
 import { useCurrentUser } from '@/auth/hooks/use-current-user';
+import { isSameObject } from '@/auth/util';
 import { editProfile } from '@/actions';
 import { Alert } from '@/components/ui/alert';
 
@@ -31,9 +32,16 @@ export function UserProfile({ user, roles }: Props) {
 
   function handleSubmit(event: FormEvent<HTMLFormElement>) {
     const formData = new FormData(event.currentTarget);
+    const updatedUserData = Object.fromEntries(formData.entries());
 
     event.preventDefault();
     setErrors(null);
+
+    if (isSameObject(updatedUserData, user)) {
+      toast.info('No changes made to profile');
+      setIsEditing(false);
+      return;
+    }
 
     startTransition(async () => {
       const { isSuccess, errors } = await editProfile(null, formData);
