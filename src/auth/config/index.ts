@@ -22,6 +22,7 @@ const authCodeKey = 'auth-code';
 
 const codeAllowedCharacters = 'ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz23456789';
 const recoveryCodeLength = 12;
+const recoveryCodeCount = 10;
 
 const logoFilename = 'logo.png';
 
@@ -43,5 +44,6 @@ export default Object.freeze({
   authCodeKey,
   codeAllowedCharacters,
   recoveryCodeLength,
+  recoveryCodeCount,
   logoFilename,
 });
