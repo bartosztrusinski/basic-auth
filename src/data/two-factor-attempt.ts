@@ -11,10 +11,14 @@ type TwoFactorAttempt = InferSelectModel<typeof twoFactorAttempts>;
 async function getTwoFactorAttemptByToken(
   token: TwoFactorAttempt['token'],
   dbInstance: DbInstance = db,
-): Promise<(TwoFactorAttempt & { user: User }) | null> {
+): Promise<
+  | (Pick<TwoFactorAttempt, 'expiresAt'> & { user: Pick<User, 'id' | 'email' | 'twoFactorSecret'> })
+  | null
+> {
   const twoFactorAttempt = await dbInstance.query.twoFactorAttempts.findFirst({
     where: and(eq(twoFactorAttempts.token, token), gt(twoFactorAttempts.expiresAt, new Date())),
-    with: { user: true },
+    with: { user: { columns: { id: true, email: true, twoFactorSecret: true } } },
+    columns: { expiresAt: true },
   });
 
   return twoFactorAttempt ?? null;

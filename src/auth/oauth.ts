@@ -156,10 +156,10 @@ async function signUpWithProvider(
   provider: OAuthProvider,
   { id, email, ...oAuthData }: OAuthUser,
 ): Promise<void> {
-  const existingUser = await getUserByProvider(provider, id);
+  const existingUserId = await getUserByProvider(provider, id);
 
-  if (existingUser) {
-    await createUserSession(existingUser.id);
+  if (existingUserId) {
+    await createUserSession(existingUserId);
     return;
   }
 

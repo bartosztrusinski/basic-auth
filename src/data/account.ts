@@ -5,10 +5,13 @@ import { accounts } from '@/db/schema';
 
 type Account = InferSelectModel<typeof accounts>;
 
-async function getUserAccounts(userId: Account['userId']): Promise<Account[]> {
-  return await db.query.accounts.findMany({
+async function getUserLinkedProviders(userId: Account['userId']): Promise<Account['provider'][]> {
+  const providers = await db.query.accounts.findMany({
     where: eq(accounts.userId, userId),
+    columns: { provider: true },
   });
+
+  return providers.map(({ provider }) => provider);
 }
 
 /**
@@ -31,4 +34,4 @@ async function deleteAccount(
     .where(and(eq(accounts.userId, userId), eq(accounts.provider, provider)));
 }
 
-export { type Account, getUserAccounts, createAccount, deleteAccount };
+export { type Account, getUserLinkedProviders, createAccount, deleteAccount };

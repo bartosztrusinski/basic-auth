@@ -1,4 +1,4 @@
-import { getUserAccounts } from '@/data/account';
+import { getUserLinkedProviders } from '@/data/account';
 import { UserRoles } from '@/data/user';
 import { redirectToLogin, currentUser } from '@/auth/session';
 import { Protect } from '@/auth/components/protect';
@@ -22,7 +22,7 @@ export default async function ProfilePage() {
     redirectToLogin({ returnBackUrl: '/profile' });
   }
 
-  const accounts = await getUserAccounts(user.id);
+  const linkedProviders = await getUserLinkedProviders(user.id);
   const { email, name, role } = user;
 
   return (
@@ -47,7 +47,7 @@ export default async function ProfilePage() {
         <div className='space-y-8'>
           <section>
             <div className='space-y-3'>
-              <OAuthAccountsManager accounts={accounts} redirectUrl='/profile' />
+              <OAuthAccountsManager linkedProviders={linkedProviders} redirectUrl='/profile' />
             </div>
             <p className='pt-2 text-sm text-neutral-400'>View and manage your connected accounts</p>
           </section>

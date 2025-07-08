@@ -9,9 +9,10 @@ const UserRoles = roles.enumValues;
 type User = InferSelectModel<typeof users>;
 type InsertUser = InferInsertModel<typeof users>;
 
-async function getUsers(): Promise<User[]> {
+async function getUsers(): Promise<Pick<User, 'id' | 'name' | 'role' | 'createdAt'>[]> {
   return await db.query.users.findMany({
     limit: 20,
+    columns: { id: true, name: true, role: true, createdAt: true },
   });
 }
 
@@ -33,10 +34,11 @@ async function getUserById(id: User['id']): Promise<User | null> {
 
 async function getUserWithAccounts(
   id: User['id'],
-): Promise<(User & { accounts: Account[] }) | null> {
+): Promise<(Pick<User, 'id' | 'password'> & { accounts: Pick<Account, 'provider'>[] }) | null> {
   const user = await db.query.users.findFirst({
-    with: { accounts: true },
     where: eq(users.id, id),
+    columns: { id: true, password: true },
+    with: { accounts: { columns: { provider: true } } },
   });
 
   return user ?? null;
@@ -45,7 +47,7 @@ async function getUserWithAccounts(
 async function getUserByProvider(
   provider: Account['provider'],
   providerAccountId: Account['providerAccountId'],
-): Promise<(User & { accounts: Account[] }) | null> {
+): Promise<User['id'] | null> {
   const account = db
     .select()
     .from(accounts)
@@ -58,11 +60,11 @@ async function getUserByProvider(
     );
 
   const user = await db.query.users.findFirst({
-    with: { accounts: true },
     where: exists(account),
+    columns: { id: true },
   });
 
-  return user ?? null;
+  return user?.id ?? null;
 }
 
 async function createUser(
