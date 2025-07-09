@@ -3,21 +3,27 @@
 import { AuthError, signIn } from '@/auth';
 import { db } from '@/db';
 
-type SuccessResponse = {
+type SuccessResponse<T extends Record<string, unknown>> = {
   success: string;
   error?: null;
-  accessToken?: string;
-};
+} & T;
 
 type ErrorResponse = {
   success?: null;
   error: string;
-  accessToken?: string;
 };
 
-type ActionResponse = Promise<SuccessResponse | ErrorResponse>;
+// eslint-disable-next-line @typescript-eslint/no-empty-object-type
+type ActionResponse<T extends Record<string, unknown> = {}> = Promise<
+  SuccessResponse<T> | ErrorResponse
+>;
 
-export async function logIn(_: unknown, formData: FormData): ActionResponse {
+export async function logIn(
+  _: unknown,
+  formData: FormData,
+): ActionResponse<{
+  accessToken: string;
+}> {
   const email = formData.get('email') as string;
   const password = formData.get('password') as string;
 

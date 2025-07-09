@@ -5,9 +5,8 @@ import { jwtVerify, SignJWT, type JWTPayload } from 'jose';
 import { db, type RefreshToken, type User } from '@/db';
 import { env } from '@/env';
 
-// TODO move to env
 const ALG = 'HS256';
-const REFRESH_TOKEN_COOKIE_NAME = 'refresh';
+export const REFRESH_TOKEN_COOKIE_NAME = 'refresh';
 const REFRESH_COOKIE_PATH = '/api/auth';
 const ACCESS_TOKEN_SECRET_KEY = new TextEncoder().encode(env.ACCESS_TOKEN_SECRET);
 const REFRESH_TOKEN_SECRET_KEY = new TextEncoder().encode(env.REFRESH_TOKEN_SECRET);

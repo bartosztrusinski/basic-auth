@@ -17,13 +17,15 @@ export function LoginForm() {
 
     startTransition(async () => {
       try {
-        const { error, accessToken } = await logIn(null, new FormData(form));
+        const response = await logIn(null, new FormData(form));
 
-        if (error) {
-          throw new Error(error);
+        if (response.error) {
+          throw new Error(response.error);
         }
 
-        setAccessToken(accessToken!);
+        if (response.success) {
+          setAccessToken(response.accessToken);
+        }
       } catch {
         setError('Failed to log in. Please try again.');
         form.reset();

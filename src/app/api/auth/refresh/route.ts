@@ -1,19 +1,23 @@
 import { cookies } from 'next/headers';
-import { generateTokens, setRefreshTokenCookie, verifyRefreshToken } from '@/auth';
+import {
+  generateTokens,
+  REFRESH_TOKEN_COOKIE_NAME,
+  setRefreshTokenCookie,
+  verifyRefreshToken,
+} from '@/auth';
 import { db } from '@/db';
 
 export async function POST() {
   const cookieStore = await cookies();
 
   try {
-    const refreshTokenCookie = cookieStore.get('refresh')?.value;
+    const refreshTokenCookie = cookieStore.get(REFRESH_TOKEN_COOKIE_NAME)?.value;
 
     if (!refreshTokenCookie) {
       throw new Error('No refresh token');
     }
 
     const { refreshTokenId, userId } = await verifyRefreshToken(refreshTokenCookie);
-
     const refreshToken = await db.getRefreshTokenById(refreshTokenId);
 
     if (!refreshToken) {
@@ -35,7 +39,7 @@ export async function POST() {
 
     return Response.json({ accessToken }, { status: 200 });
   } catch (error) {
-    cookieStore.delete('refresh');
+    cookieStore.delete(REFRESH_TOKEN_COOKIE_NAME);
 
     return Response.json(
       { error: error instanceof Error ? error.message : 'Invalid refresh token' },

@@ -3,9 +3,7 @@ import { type ExtendedRequestInit } from '@/hooks/use-auth';
 export async function refreshAccessToken() {
   const response = await fetch('/api/auth/refresh', {
     method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-    },
+    headers: { 'Content-Type': 'application/json' },
     credentials: 'include',
     _shouldRetry: false,
   } as ExtendedRequestInit);

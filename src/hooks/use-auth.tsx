@@ -4,12 +4,14 @@ import {
   createContext,
   useContext,
   useEffect,
+  useRef,
   useState,
   type Dispatch,
   type ReactNode,
   type SetStateAction,
 } from 'react';
 import { refreshAccessToken } from '@/refresh-access-token';
+import { useRouter } from 'next/navigation';
 
 type AccessToken = string | null;
 
@@ -28,6 +30,8 @@ const AuthContext = createContext<{
 export function AuthProvider({ children }: { children: ReactNode }) {
   const [accessToken, setAccessToken] = useState<AccessToken>(null);
   const [isInitializing, setIsInitializing] = useState(true);
+  const router = useRouter();
+  const previousAccessTokenRef = useRef<AccessToken>(null);
 
   useEffect(() => {
     const originalFetch = window.fetch;
@@ -50,22 +54,28 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       const shouldRetry = (config as ExtendedRequestInit)?._shouldRetry ?? true;
 
       if ([401, 403].includes(response.status) && shouldRetry) {
-        const newAccessToken = await refreshAccessToken();
-        setAccessToken(newAccessToken);
+        try {
+          const newAccessToken = await refreshAccessToken();
+          setAccessToken(newAccessToken);
 
-        const retryHeaders = new Headers(config?.headers);
-        retryHeaders.set('Authorization', `Bearer ${newAccessToken}`);
+          const retryHeaders = new Headers(config?.headers);
+          retryHeaders.set('Authorization', `Bearer ${newAccessToken}`);
 
-        const retryResponse = await originalFetch(resource, {
-          ...config,
-          headers: retryHeaders,
-        });
+          const retryResponse = await originalFetch(resource, {
+            ...config,
+            headers: retryHeaders,
+          });
 
-        if (!retryResponse.ok) {
+          if (!retryResponse.ok) {
+            setAccessToken(null);
+          }
+
+          return retryResponse;
+        } catch (error) {
+          console.error('Failed to refresh access token:', error);
           setAccessToken(null);
+          return response;
         }
-
-        return retryResponse;
       }
 
       return response;
@@ -74,7 +84,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     return () => {
       window.fetch = originalFetch;
     };
-  }, [accessToken]);
+  }, [accessToken, router]);
 
   useEffect(() => {
     const getNewToken = async () => {
@@ -82,7 +92,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         const newToken = await refreshAccessToken();
         setAccessToken(newToken);
       } catch {
-        console.error('Failed to refresh token');
+        console.warn('Failed to refresh token');
       } finally {
         setIsInitializing(false);
       }
@@ -90,6 +100,14 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
     void getNewToken();
   }, []);
+
+  useEffect(() => {
+    if (previousAccessTokenRef.current !== accessToken) {
+      router.refresh();
+    }
+
+    previousAccessTokenRef.current = accessToken;
+  }, [accessToken, router]);
 
   if (isInitializing) {
     return null;

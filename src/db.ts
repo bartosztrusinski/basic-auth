@@ -76,7 +76,6 @@ async function getUserById(id: User['id']) {
 
 // ======== REFRESH TOKEN =========
 
-// TODO HASH TOKENS FOR SECURITY ?
 type RefreshToken = {
   id: UUID;
   userId: User['id'];
@@ -90,8 +89,6 @@ async function readRefreshTokens() {
 
 async function writeRefreshTokens(refreshTokens: RefreshToken[]) {
   await fs.writeFile(`${DATA_PATH}/refresh-tokens.json`, JSON.stringify(refreshTokens, null, 2));
-  // TODO remove
-  console.table(await readRefreshTokens());
 }
 
 async function createRefreshToken(newRefreshToken: Omit<RefreshToken, 'id'>) {
