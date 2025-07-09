@@ -1,5 +1,13 @@
 import 'server-only';
-import { and, eq, exists, isNull, type InferInsertModel, type InferSelectModel } from 'drizzle-orm';
+import {
+  and,
+  eq,
+  exists,
+  isNull,
+  sql,
+  type InferInsertModel,
+  type InferSelectModel,
+} from 'drizzle-orm';
 import { db, type DbInstance } from '@/db';
 import { accounts, roles, users } from '@/db/schema';
 import { type Account } from './account';
@@ -16,19 +24,21 @@ async function getUsers(): Promise<Pick<User, 'id' | 'name' | 'role' | 'createdA
   });
 }
 
-async function getUserByEmail(email: User['email']): Promise<User | null> {
-  const user = await db.query.users.findFirst({
-    where: eq(users.email, email),
-  });
+const preparedGetUserByEmail = db.query.users
+  .findFirst({ where: eq(users.email, sql.placeholder('email')) })
+  .prepare('get_user_by_email');
 
+async function getUserByEmail(email: User['email']): Promise<User | null> {
+  const user = await preparedGetUserByEmail.execute({ email });
   return user ?? null;
 }
 
-async function getUserById(id: User['id']): Promise<User | null> {
-  const user = await db.query.users.findFirst({
-    where: eq(users.id, id),
-  });
+const preparedGetUserById = db.query.users
+  .findFirst({ where: eq(users.id, sql.placeholder('id')) })
+  .prepare('get_user_by_id');
 
+async function getUserById(id: User['id']): Promise<User | null> {
+  const user = await preparedGetUserById.execute({ id });
   return user ?? null;
 }
 
@@ -44,26 +54,29 @@ async function getUserWithAccounts(
   return user ?? null;
 }
 
+const getUserByProviderSubquery = db
+  .select()
+  .from(accounts)
+  .where(
+    and(
+      eq(accounts.provider, sql.placeholder('provider')),
+      eq(accounts.providerAccountId, sql.placeholder('providerAccountId')),
+      eq(accounts.userId, users.id),
+    ),
+  );
+
+const preparedGetUserByProvider = db.query.users
+  .findFirst({
+    where: exists(getUserByProviderSubquery),
+    columns: { id: true },
+  })
+  .prepare('get_user_by_provider');
+
 async function getUserByProvider(
   provider: Account['provider'],
   providerAccountId: Account['providerAccountId'],
 ): Promise<User['id'] | null> {
-  const account = db
-    .select()
-    .from(accounts)
-    .where(
-      and(
-        eq(accounts.provider, provider),
-        eq(accounts.providerAccountId, providerAccountId),
-        eq(accounts.userId, users.id),
-      ),
-    );
-
-  const user = await db.query.users.findFirst({
-    where: exists(account),
-    columns: { id: true },
-  });
-
+  const user = await preparedGetUserByProvider.execute({ provider, providerAccountId });
   return user?.id ?? null;
 }
 

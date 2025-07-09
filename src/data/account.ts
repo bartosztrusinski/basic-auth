@@ -1,15 +1,19 @@
 import 'server-only';
-import { and, eq, type InferSelectModel } from 'drizzle-orm';
+import { and, eq, sql, type InferSelectModel } from 'drizzle-orm';
 import { db, type DbInstance } from '@/db';
 import { accounts } from '@/db/schema';
 
 type Account = InferSelectModel<typeof accounts>;
 
-async function getUserLinkedProviders(userId: Account['userId']): Promise<Account['provider'][]> {
-  const providers = await db.query.accounts.findMany({
-    where: eq(accounts.userId, userId),
+const preparedGetLinkedProviders = db.query.accounts
+  .findMany({
+    where: eq(accounts.userId, sql.placeholder('userId')),
     columns: { provider: true },
-  });
+  })
+  .prepare('get_linked_providers');
+
+async function getLinkedProviders(userId: Account['userId']): Promise<Account['provider'][]> {
+  const providers = await preparedGetLinkedProviders.execute({ userId });
 
   return providers.map(({ provider }) => provider);
 }
@@ -34,4 +38,4 @@ async function deleteAccount(
     .where(and(eq(accounts.userId, userId), eq(accounts.provider, provider)));
 }
 
-export { type Account, getUserLinkedProviders, createAccount, deleteAccount };
+export { type Account, getLinkedProviders, createAccount, deleteAccount };
