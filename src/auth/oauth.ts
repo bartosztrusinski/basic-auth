@@ -133,8 +133,7 @@ async function fetchOAuthUser(
   tokenType: string,
 ): Promise<OAuthUser> {
   const { userUrl, userSchema, userMapper } = providers[provider];
-  // TODO type this properly
-  // Uses type assertion to get the correct type for userMapper
+  // Uses type assertion to get the correct type
   const typedUserMapper = userMapper as (data: z.infer<typeof userSchema>) => OAuthUser;
 
   const data = await fetcher(userUrl, {

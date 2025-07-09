@@ -1,4 +1,4 @@
-import { getUserLinkedProviders } from '@/data/account';
+import { getLinkedProviders } from '@/data/account';
 import { UserRoles } from '@/data/user';
 import { redirectToLogin, currentUser } from '@/auth/session';
 import { Protect } from '@/auth/components/protect';
@@ -22,7 +22,7 @@ export default async function ProfilePage() {
     redirectToLogin({ returnBackUrl: '/profile' });
   }
 
-  const linkedProviders = await getUserLinkedProviders(user.id);
+  const linkedProviders = await getLinkedProviders(user.id);
   const { email, name, role } = user;
 
   return (
