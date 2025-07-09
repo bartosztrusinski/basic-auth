@@ -13,7 +13,7 @@ export const metadata = {
   },
   applicationName: config.appName,
   description:
-    'Next.js app presenting basic user authentication and authorization, role-based access control, email verification, OAuth provider integration, Two-Factor authentication, user management and more',
+    'Next.js app implementing user authentication and authorization, role-based access control, email verification, OAuth provider integration, Two-Factor authentication, user management and more',
   keywords: [
     'Next.js',
     'React',
