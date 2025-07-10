@@ -1,4 +1,4 @@
-import { type ReactNode } from 'react';
+import { Suspense, type ReactNode } from 'react';
 import { GeistSans } from 'geist/font/sans';
 import '@/globals.css';
 import { AuthProvider } from '@/auth/providers/auth-provider';
@@ -38,7 +38,9 @@ export default async function RootLayout({ children }: Readonly<{ children: Reac
           <Header />
           <main>{children}</main>
         </AuthProvider>
-        <AuthToaster />
+        <Suspense>
+          <AuthToaster />
+        </Suspense>
       </body>
     </html>
   );
