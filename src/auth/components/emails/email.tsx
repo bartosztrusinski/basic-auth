@@ -30,9 +30,7 @@ export function Email({ children, previewText, showLogo = true }: Props) {
         <Body className='bg-neutral-100 p-[8px]'>
           {previewText && <Preview>{previewText}</Preview>}
           <Container className='rounded-[4px] border border-solid border-neutral-300 bg-white p-[20px] pb-[5px] font-sans text-neutral-900 shadow'>
-            {showLogo && (
-              <Img src={`${config.baseUrl}/${config.logoFilename}`} width={48} height={48} />
-            )}
+            {showLogo && <Email.Logo />}
             <Section>{children}</Section>
           </Container>
         </Body>
