@@ -1,8 +1,9 @@
 <p align="center">
-  <img width="128" height="128" alt="logo" src="https://github.com/user-attachments/assets/19a7c4cd-2296-4d04-8f3e-0a20b75da8c4" alt="Basic Auth Logo" />
+  <img width="128" height="128" alt="Basic Auth Logo" src="https://github.com/user-attachments/assets/19a7c4cd-2296-4d04-8f3e-0a20b75da8c4" />
 </p>
 
 # Basic Auth
+
 
 A Next.js application that provides a secure, extensible and ready-to-use auth solution, implemented from scratch. It includes features like role-based access control, two-factor authentication, OAuth integration, and more - with a strong emphasis on security and best practices.
 
