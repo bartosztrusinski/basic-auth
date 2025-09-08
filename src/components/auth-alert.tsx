@@ -1,5 +1,3 @@
-'use client';
-
 import { getAuthMessage, type AuthCode } from '@/auth/message';
 import { Alert } from '@/components/ui/alert';
 
