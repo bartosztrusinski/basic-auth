@@ -1,15 +1,21 @@
 'use client';
 
+import { useActionState } from 'react';
+import { deleteCurrentUser } from '@/actions';
 import { Modal, ModalContent, ModalOpenButton } from '@/components/ui/modal';
 import {
   ModalContainer,
   ModalTitle,
   ModalDescription,
   ModalCloseButton,
+  ModalButtonsContainer,
+  ModalCancelButton,
+  ModalConfirmButton,
 } from '@/components/ui/classy-modal';
-import { DeleteUserForm } from './delete-user-form';
 
 export function DeleteUserModal() {
+  const [, action, isPending] = useActionState(deleteCurrentUser, null);
+
   return (
     <Modal>
       <ModalOpenButton>
@@ -23,7 +29,14 @@ export function DeleteUserModal() {
           <ModalDescription>
             This action is irreversible and will delete all your data.
           </ModalDescription>
-          <DeleteUserForm />
+          <form action={action}>
+            <ModalButtonsContainer>
+              <ModalConfirmButton disabled={isPending} className='btn-danger'>
+                {isPending ? 'Deleting...' : 'Delete'}
+              </ModalConfirmButton>
+              <ModalCancelButton />
+            </ModalButtonsContainer>
+          </form>
           <ModalCloseButton />
         </ModalContainer>
       </ModalContent>

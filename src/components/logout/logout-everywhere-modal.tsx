@@ -1,15 +1,21 @@
 'use client';
 
+import { useActionState } from 'react';
+import { logOutEverywhere } from '@/actions';
 import { Modal, ModalContent, ModalOpenButton } from '@/components/ui/modal';
 import {
   ModalCloseButton,
   ModalContainer,
   ModalDescription,
   ModalTitle,
+  ModalButtonsContainer,
+  ModalConfirmButton,
+  ModalCancelButton,
 } from '@/components/ui/classy-modal';
-import { LogoutEverywhereForm } from './logout-everywhere-form';
 
 export function LogoutEverywhereModal() {
+  const [, action, isPending] = useActionState(logOutEverywhere, null);
+
   return (
     <Modal>
       <ModalOpenButton>
@@ -23,7 +29,14 @@ export function LogoutEverywhereModal() {
           <ModalDescription>
             This action will log you out of all devices and sessions.
           </ModalDescription>
-          <LogoutEverywhereForm />
+          <form action={action}>
+            <ModalButtonsContainer>
+              <ModalConfirmButton disabled={isPending} className='btn-danger'>
+                {isPending ? 'Logging out...' : 'Log Out'}
+              </ModalConfirmButton>
+              <ModalCancelButton />
+            </ModalButtonsContainer>
+          </form>
           <ModalCloseButton />
         </ModalContainer>
       </ModalContent>
