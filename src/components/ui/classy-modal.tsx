@@ -21,21 +21,19 @@ function ModalDescription({ children }: { children: ReactNode }) {
 
 function ModalCloseButton({ children = '⨉', className, ...props }: ComponentProps<'button'>) {
   return (
-    <UnstyledModalCloseButton>
-      <button
-        className={`btn btn-danger absolute right-2 top-2 size-7 bg-opacity-0 p-0 text-danger-500 shadow-none outline-offset-0 transition-colors hover:scale-100 hover:bg-opacity-20 ${className}`}
-        {...props}
-      >
-        <span aria-hidden>{children}</span>
-        <span className='sr-only'>Close</span>
-      </button>
+    <UnstyledModalCloseButton
+      {...props}
+      className={`btn btn-danger absolute right-2 top-2 size-7 bg-opacity-0 p-0 text-danger-500 shadow-none outline-offset-0 transition-colors hover:scale-100 hover:bg-opacity-20 ${className}`}
+    >
+      <span aria-hidden>{children}</span>
+      <span className='sr-only'>Close</span>
     </UnstyledModalCloseButton>
   );
 }
 
 function ModalButtonsContainer({ className, children, ...props }: ComponentProps<'div'>) {
   return (
-    <div className={`flex items-center justify-end gap-2 ${className}`} {...props}>
+    <div {...props} className={`flex items-center justify-end gap-2 ${className}`}>
       {children}
     </div>
   );
@@ -44,34 +42,30 @@ function ModalButtonsContainer({ className, children, ...props }: ComponentProps
 function ModalConfirmButton({
   type = 'submit',
   children = 'Confirm',
+  className,
   ...props
 }: ComponentProps<'button'>) {
   return (
-    <ModalButton type={type} {...props}>
+    <button {...props} type={type} className={`btn w-auto px-4 py-1 text-sm ${className}`}>
       {children}
-    </ModalButton>
+    </button>
   );
 }
 
 function ModalCancelButton({
   type = 'button',
   children = 'Cancel',
+  className,
   ...props
 }: ComponentProps<'button'>) {
   return (
-    <UnstyledModalCloseButton>
-      <ModalButton type={type} {...props}>
-        {children}
-      </ModalButton>
-    </UnstyledModalCloseButton>
-  );
-}
-
-function ModalButton({ children, className, ...props }: ComponentProps<'button'>) {
-  return (
-    <button {...props} className={`btn w-auto px-4 py-1 text-sm ${className}`}>
+    <UnstyledModalCloseButton
+      {...props}
+      type={type}
+      className={`btn w-auto px-4 py-1 text-sm ${className}`}
+    >
       {children}
-    </button>
+    </UnstyledModalCloseButton>
   );
 }
 

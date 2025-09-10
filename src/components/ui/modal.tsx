@@ -4,14 +4,11 @@ import {
   useEffect,
   useRef,
   useState,
-  cloneElement,
-  isValidElement,
   createContext,
   useContext,
   type MouseEvent,
-  type ReactElement,
   type ReactNode,
-  type MouseEventHandler,
+  type ComponentProps,
 } from 'react';
 import { callAll } from '@/util';
 
@@ -25,10 +22,6 @@ type ModalContext = {
 type ModalOptions = {
   onClose?: () => void;
   closeOnBackdropClick?: boolean;
-};
-
-type ModalButtonProps = {
-  children: ReactElement<Record<string, unknown> & { onClick?: MouseEventHandler }>;
 };
 
 const ModalContext = createContext<ModalContext | undefined>(undefined);
@@ -98,26 +91,22 @@ function ModalContent({ children }: { children: ReactNode }) {
   );
 }
 
-function ModalOpenButton({ children }: ModalButtonProps) {
+function ModalOpenButton({ children, onClick, ...props }: ComponentProps<'button'>) {
   const { openModal } = useModal();
-  return <ModalButton onClick={openModal}>{children}</ModalButton>;
+  return (
+    <button {...props} onClick={callAll(onClick, openModal)}>
+      {children}
+    </button>
+  );
 }
 
-function ModalCloseButton({ children }: ModalButtonProps) {
+function ModalCloseButton({ children, onClick, ...props }: ComponentProps<'button'>) {
   const { closeModal } = useModal();
-  return <ModalButton onClick={closeModal}>{children}</ModalButton>;
-}
-
-function ModalButton({ children, onClick }: { onClick: MouseEventHandler } & ModalButtonProps) {
-  if (!isValidElement(children)) {
-    throw new Error(`
-      ${ModalButton.name} expects a single React element as its child.`);
-  }
-
-  return cloneElement(children, {
-    ...children.props,
-    onClick: callAll(children.props.onClick, onClick),
-  });
+  return (
+    <button {...props} onClick={callAll(onClick, closeModal)}>
+      {children}
+    </button>
+  );
 }
 
 export { Modal, ModalContent, ModalOpenButton, ModalCloseButton };
