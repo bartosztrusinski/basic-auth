@@ -39,8 +39,8 @@ export function DisableTwoFactorModal() {
 
   return (
     <Modal>
-      <ModalOpenButton>
-        <button className='btn btn-danger'>Disable Two-Factor Authentication</button>
+      <ModalOpenButton className='btn btn-danger'>
+        Disable Two-Factor Authentication
       </ModalOpenButton>
       <ModalContent>
         <ModalContainer>

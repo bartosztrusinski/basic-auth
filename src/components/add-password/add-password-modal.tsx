@@ -49,9 +49,7 @@ export function AddPasswordModal({ email }: Props) {
 
   return (
     <Modal>
-      <ModalOpenButton>
-        <button className='btn'>Add Password</button>
-      </ModalOpenButton>
+      <ModalOpenButton className='btn'>Add Password</ModalOpenButton>
       <ModalContent>
         <ModalContainer>
           <ModalTitle>

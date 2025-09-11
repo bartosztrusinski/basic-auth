@@ -18,9 +18,7 @@ export function LogoutEverywhereModal() {
 
   return (
     <Modal>
-      <ModalOpenButton>
-        <button className='btn btn-danger'>Log Out Everywhere</button>
-      </ModalOpenButton>
+      <ModalOpenButton className='btn btn-danger'>Log Out Everywhere</ModalOpenButton>
       <ModalContent>
         <ModalContainer>
           <ModalTitle>

@@ -18,9 +18,7 @@ export function DeleteUserModal() {
 
   return (
     <Modal>
-      <ModalOpenButton>
-        <button className='btn btn-danger'>Delete Account</button>
-      </ModalOpenButton>
+      <ModalOpenButton className='btn btn-danger'>Delete Account</ModalOpenButton>
       <ModalContent>
         <ModalContainer>
           <ModalTitle>
