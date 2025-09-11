@@ -1,27 +1,17 @@
 'use client';
 
 import { useEffect, useRef, useState } from 'react';
-import { useRouter } from 'next/navigation';
-import { toast } from 'sonner';
-import { getAuthMessage } from '@/auth/message';
 import { ModalCloseButton } from '@/components/ui/modal';
 import { formatCode } from '@/util';
-import { type TwoFactorData } from './enable-two-factor-form';
+import { type TwoFactorSetupState } from './types';
 
 type Props = {
-  recoveryCodes: TwoFactorData['recoveryCodes'];
+  recoveryCodes: TwoFactorSetupState['recoveryCodes'];
 };
 
 export function TwoFactorRecoveryCodes({ recoveryCodes }: Props) {
   const [isCopied, setIsCopied] = useState(false);
   const timeoutId = useRef<number>();
-  const router = useRouter();
-
-  function handleClose() {
-    const { message } = getAuthMessage('two-factor-enabled');
-    toast.success(message);
-    router.refresh();
-  }
 
   async function copyCodesToClipboard() {
     await navigator.clipboard.writeText(recoveryCodes.join('\n'));
@@ -57,10 +47,8 @@ export function TwoFactorRecoveryCodes({ recoveryCodes }: Props) {
       >
         {isCopied ? 'Copied!' : 'Copy to Clipboard'}
       </button>
-      <ModalCloseButton>
-        <button className='btn text-sm font-bold' onClick={handleClose}>
-          I have saved Recovery Codes
-        </button>
+      <ModalCloseButton className='btn text-sm font-bold'>
+        I have saved Recovery Codes
       </ModalCloseButton>
     </>
   );

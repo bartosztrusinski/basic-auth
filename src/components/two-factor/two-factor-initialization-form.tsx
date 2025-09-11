@@ -3,10 +3,10 @@
 import { useActionState, useEffect } from 'react';
 import { initializeTwoFactorAuth } from '@/actions';
 import { Alert } from '@/components/ui/alert';
-import { type TwoFactorData } from './enable-two-factor-form';
+import { type TwoFactorSetupState } from './types';
 
 type Props = {
-  onSuccess?: (data: Partial<TwoFactorData>) => void;
+  onSuccess?: (data: Partial<TwoFactorSetupState>) => void;
 };
 
 export function TwoFactorInitializationForm({ onSuccess }: Props) {
@@ -16,8 +16,7 @@ export function TwoFactorInitializationForm({ onSuccess }: Props) {
 
   useEffect(() => {
     if (state.isSuccess) {
-      const { qrCode, secret } = state;
-      onSuccess?.({ qrCode, secret });
+      onSuccess?.(state);
     }
   }, [state, onSuccess]);
 

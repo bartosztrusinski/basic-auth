@@ -5,12 +5,12 @@ import Image from 'next/image';
 import { enableTwoFactorAuth } from '@/actions';
 import { Alert } from '@/components/ui/alert';
 import { CodeInput } from '@/components/ui/code-input';
-import { type TwoFactorData } from './enable-two-factor-form';
+import { type TwoFactorSetupState } from './types';
 
 type Props = {
-  secret: TwoFactorData['secret'];
-  qrCode: TwoFactorData['qrCode'];
-  onSuccess?: (data: Partial<TwoFactorData>) => void;
+  secret: TwoFactorSetupState['secret'];
+  qrCode: TwoFactorSetupState['qrCode'];
+  onSuccess?: (data: Partial<TwoFactorSetupState>) => void;
 };
 
 export function TwoFactorConfirmationForm({ secret, qrCode, onSuccess }: Props) {
@@ -22,8 +22,7 @@ export function TwoFactorConfirmationForm({ secret, qrCode, onSuccess }: Props) 
 
   useEffect(() => {
     if (state.isSuccess) {
-      const { recoveryCodes } = state;
-      onSuccess?.({ recoveryCodes });
+      onSuccess?.(state);
     }
   }, [state, onSuccess]);
 
