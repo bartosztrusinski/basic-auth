@@ -34,9 +34,9 @@ export function TwoFactorRecoveryCodes({ recoveryCodes }: Props) {
 
   return (
     <>
-      <div className='flex flex-row flex-wrap items-center justify-center gap-x-4 gap-y-2 py-2 font-mono'>
+      <div className='flex flex-wrap items-center justify-center gap-x-4 gap-y-2 py-2 font-mono'>
         {recoveryCodes.map((code) => (
-          <div className='rounded bg-neutral-800 px-2 py-1' key={code}>
+          <div className='min-w-36 rounded bg-neutral-800 px-2 py-1 text-center' key={code}>
             {formatCode(code)}
           </div>
         ))}

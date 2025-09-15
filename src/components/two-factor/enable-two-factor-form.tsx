@@ -1,68 +1,75 @@
 'use client';
 
-import { useState } from 'react';
-import { ModalTitle, ModalDescription } from '@/components/ui/classy-modal';
+import { useRouter } from 'next/navigation';
+import { useEffect, useState } from 'react';
+import { toast } from 'sonner';
+import { getAuthMessage } from '@/auth/message';
+import { ModalContainer, ModalTitle, ModalDescription } from '@/components/ui/classy-modal';
 import { TwoFactorInitializationForm } from './two-factor-initialization-form';
 import { TwoFactorConfirmationForm } from './two-factor-confirmation-form';
 import { TwoFactorRecoveryCodes } from './two-factor-recovery-codes';
+import { type TwoFactorSetupState } from './types';
 
-export type TwoFactorData = {
-  qrCode: string;
-  secret: string;
-  recoveryCodes: string[];
-};
-
-const formSteps = [
+const twoFactorFormSteps = [
   {
     title: 'Enable Two-Factor Authentication',
     description:
       'To enhance your account security, it is recommended to enable 2FA authentication. This will require a second form of verification in addition to your password. You will need an authenticator app.',
-    Component: TwoFactorInitializationForm,
+    component: TwoFactorInitializationForm,
   },
   {
     title: 'Enable Two-Factor Authentication',
     description:
       'Scan the QR code below with your authenticator app or enter the code manually to set up two-factor authentication.',
-    Component: TwoFactorConfirmationForm,
+    component: TwoFactorConfirmationForm,
   },
   {
     title: 'Two-Factor Authentication Enabled',
     description:
       'Two-Factor Authentication has been enabled! Please save your recovery codes in a safe place. You will need them to access your account if you lose access to your authenticator app.',
-    Component: TwoFactorRecoveryCodes,
+    component: TwoFactorRecoveryCodes,
   },
 ];
 
 export function EnableTwoFactorForm() {
+  const router = useRouter();
   const [currentStep, setCurrentStep] = useState(0);
-  const [data, setData] = useState<TwoFactorData>({
+  const [setupData, setSetupData] = useState<TwoFactorSetupState>({
     qrCode: '',
     secret: '',
     recoveryCodes: [],
   });
-  const formStep = formSteps[currentStep];
+  const stepData = twoFactorFormSteps[currentStep];
+  const isLastStep = currentStep === twoFactorFormSteps.length - 1;
 
-  if (!formStep) {
-    return null;
-  }
-
-  const { title, description, Component } = formStep;
-
-  function goToNextStep(data: Partial<TwoFactorData>) {
-    setData((prevData) => ({
-      ...prevData,
-      ...data,
-    }));
+  function goToNextStep(data: Partial<TwoFactorSetupState>) {
+    setSetupData((prevData) => ({ ...prevData, ...data }));
     setCurrentStep((prevStep) => prevStep + 1);
   }
 
+  useEffect(() => {
+    return () => {
+      if (isLastStep) {
+        const { message } = getAuthMessage('two-factor-enabled');
+        toast.success(message);
+        router.refresh();
+      }
+    };
+  }, [currentStep, isLastStep, router]);
+
+  if (!stepData) {
+    return null;
+  }
+
+  const StepComponent = stepData.component;
+
   return (
-    <>
+    <ModalContainer>
       <ModalTitle>
-        <h2>{title}</h2>
+        <h2>{stepData.title}</h2>
       </ModalTitle>
-      <ModalDescription>{description}</ModalDescription>
-      <Component {...data} onSuccess={goToNextStep} />
-    </>
+      <ModalDescription>{stepData.description}</ModalDescription>
+      <StepComponent {...setupData} onSuccess={goToNextStep} />
+    </ModalContainer>
   );
 }
