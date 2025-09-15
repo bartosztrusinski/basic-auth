@@ -1,9 +1,6 @@
 'use client';
 
-import { useActionState, useTransition, type FormEvent } from 'react';
-import { toast } from 'sonner';
-import { getAuthMessage } from '@/auth/message';
-import { disableTwoFactorAuth } from '@/actions';
+import dynamic from 'next/dynamic';
 import { Modal, ModalContent, ModalOpenButton } from '@/components/ui/modal';
 import {
   ModalCloseButton,
@@ -14,29 +11,21 @@ import {
   ModalConfirmButton,
   ModalCancelButton,
 } from '@/components/ui/classy-modal';
+import { Spinner } from '@/components/ui/spinner';
+
+const DisableTwoFactorForm = dynamic(
+  () => import('./disable-two-factor-form').then((mod) => mod.DisableTwoFactorForm),
+  {
+    ssr: false,
+    loading: () => (
+      <ModalConfirmButton disabled className='btn-danger min-w-20'>
+        <Spinner />
+      </ModalConfirmButton>
+    ),
+  },
+);
 
 export function DisableTwoFactorModal() {
-  const [, action, isActionPending] = useActionState(disableTwoFactorAuth, null);
-  const [isTransitionPending, startTransition] = useTransition();
-  const isPending = isTransitionPending || isActionPending;
-
-  function handleSubmit(event: FormEvent<HTMLFormElement>) {
-    event.preventDefault();
-
-    startTransition(async () => {
-      const { isSuccess, errors } = await disableTwoFactorAuth();
-
-      if (errors && errors.length > 0) {
-        toast.error(errors);
-      }
-
-      if (isSuccess) {
-        const { message } = getAuthMessage('two-factor-disabled');
-        toast.success(message);
-      }
-    });
-  }
-
   return (
     <Modal>
       <ModalOpenButton className='btn btn-danger'>
@@ -50,14 +39,10 @@ export function DisableTwoFactorModal() {
           <ModalDescription>
             This action will disable two-factor authentication for your account.
           </ModalDescription>
-          <form action={action} onSubmit={handleSubmit}>
-            <ModalButtonsContainer>
-              <ModalConfirmButton disabled={isPending} className='btn-danger'>
-                {isPending ? 'Disabling...' : 'Disable'}
-              </ModalConfirmButton>
-              <ModalCancelButton />
-            </ModalButtonsContainer>
-          </form>
+          <ModalButtonsContainer>
+            <DisableTwoFactorForm />
+            <ModalCancelButton />
+          </ModalButtonsContainer>
           <ModalCloseButton />
         </ModalContainer>
       </ModalContent>

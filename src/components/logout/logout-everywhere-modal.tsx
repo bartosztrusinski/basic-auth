@@ -1,7 +1,6 @@
 'use client';
 
-import { useActionState } from 'react';
-import { logOutEverywhere } from '@/actions';
+import dynamic from 'next/dynamic';
 import { Modal, ModalContent, ModalOpenButton } from '@/components/ui/modal';
 import {
   ModalCloseButton,
@@ -12,10 +11,21 @@ import {
   ModalConfirmButton,
   ModalCancelButton,
 } from '@/components/ui/classy-modal';
+import { Spinner } from '@/components/ui/spinner';
+
+const LogoutEverywhereForm = dynamic(
+  () => import('./logout-everywhere-form').then((module) => module.LogoutEverywhereForm),
+  {
+    ssr: false,
+    loading: () => (
+      <ModalConfirmButton disabled className='btn-danger min-w-20'>
+        <Spinner />
+      </ModalConfirmButton>
+    ),
+  },
+);
 
 export function LogoutEverywhereModal() {
-  const [, action, isPending] = useActionState(logOutEverywhere, null);
-
   return (
     <Modal>
       <ModalOpenButton className='btn btn-danger'>Log Out Everywhere</ModalOpenButton>
@@ -27,14 +37,10 @@ export function LogoutEverywhereModal() {
           <ModalDescription>
             This action will log you out of all devices and sessions.
           </ModalDescription>
-          <form action={action}>
-            <ModalButtonsContainer>
-              <ModalConfirmButton disabled={isPending} className='btn-danger'>
-                {isPending ? 'Logging out...' : 'Log Out'}
-              </ModalConfirmButton>
-              <ModalCancelButton />
-            </ModalButtonsContainer>
-          </form>
+          <ModalButtonsContainer>
+            <LogoutEverywhereForm />
+            <ModalCancelButton />
+          </ModalButtonsContainer>
           <ModalCloseButton />
         </ModalContainer>
       </ModalContent>

@@ -5,7 +5,7 @@ type Props = {
 export function Spinner({ className }: Props) {
   return (
     <svg
-      className={`w-5 animate-spin fill-none text-inherit ${className}`}
+      className={`mx-auto w-5 animate-spin fill-none text-inherit ${className}`}
       xmlns='http://www.w3.org/2000/svg'
       viewBox='0 0 24 24'
     >
