@@ -15,6 +15,10 @@
     @apply w-full appearance-none rounded bg-neutral-800 p-2 font-semibold shadow outline-2 outline-offset-4 outline-primary-500 transition-all duration-100 ease-in-out hover:scale-[1.03] focus-visible:outline active:scale-100 disabled:cursor-not-allowed disabled:opacity-60;
   }
 
+  .btn-inline {
+    @apply w-auto px-4 py-1 text-sm;
+  }
+
   .btn-success {
     @apply bg-success-600 outline-success-600;
   }
