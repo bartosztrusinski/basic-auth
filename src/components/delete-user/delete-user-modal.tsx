@@ -2,15 +2,8 @@
 
 import dynamic from 'next/dynamic';
 import { Modal, ModalContent, ModalOpenButton } from '@/components/ui/modal';
-import {
-  ModalContainer,
-  ModalTitle,
-  ModalDescription,
-  ModalCloseButton,
-  ModalButtonsContainer,
-  ModalCancelButton,
-  ModalConfirmButton,
-} from '@/components/ui/classy-modal';
+import { ModalCancelButton, ModalCloseButton } from '@/components/ui/modal-buttons';
+import { Card, CardHeader, CardDescription, CardFooter } from '@/components/ui/card';
 import { Spinner } from '@/components/ui/spinner';
 
 const DeleteUserForm = dynamic(
@@ -18,9 +11,9 @@ const DeleteUserForm = dynamic(
   {
     ssr: false,
     loading: () => (
-      <ModalConfirmButton disabled className='btn-danger min-w-20'>
+      <button disabled className='btn btn-inline btn-danger min-w-20'>
         <Spinner />
-      </ModalConfirmButton>
+      </button>
     ),
   },
 );
@@ -30,19 +23,19 @@ export function DeleteUserModal() {
     <Modal>
       <ModalOpenButton className='btn btn-danger'>Delete Account</ModalOpenButton>
       <ModalContent>
-        <ModalContainer>
-          <ModalTitle>
+        <Card>
+          <CardHeader>
             <h2>Delete Account</h2>
-          </ModalTitle>
-          <ModalDescription>
+          </CardHeader>
+          <CardDescription>
             This action is irreversible and will delete all your data.
-          </ModalDescription>
-          <ModalButtonsContainer>
+          </CardDescription>
+          <CardFooter>
             <DeleteUserForm />
             <ModalCancelButton />
-          </ModalButtonsContainer>
+          </CardFooter>
           <ModalCloseButton />
-        </ModalContainer>
+        </Card>
       </ModalContent>
     </Modal>
   );

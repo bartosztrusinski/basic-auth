@@ -4,7 +4,6 @@ import { useActionState, useTransition, type FormEvent } from 'react';
 import { toast } from 'sonner';
 import { getAuthMessage } from '@/auth/message';
 import { disableTwoFactorAuth } from '@/actions';
-import { ModalConfirmButton } from '@/components/ui/classy-modal';
 
 export function DisableTwoFactorForm() {
   const [, action, isActionPending] = useActionState(disableTwoFactorAuth, null);
@@ -30,9 +29,9 @@ export function DisableTwoFactorForm() {
 
   return (
     <form action={action} onSubmit={handleSubmit}>
-      <ModalConfirmButton disabled={isPending} className='btn-danger'>
+      <button type='submit' disabled={isPending} className='btn btn-inline btn-danger'>
         {isPending ? 'Disabling...' : 'Disable'}
-      </ModalConfirmButton>
+      </button>
     </form>
   );
 }

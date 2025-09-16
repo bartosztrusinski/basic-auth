@@ -2,15 +2,8 @@
 
 import dynamic from 'next/dynamic';
 import { Modal, ModalContent, ModalOpenButton } from '@/components/ui/modal';
-import {
-  ModalCloseButton,
-  ModalContainer,
-  ModalDescription,
-  ModalTitle,
-  ModalButtonsContainer,
-  ModalConfirmButton,
-  ModalCancelButton,
-} from '@/components/ui/classy-modal';
+import { ModalCancelButton, ModalCloseButton } from '@/components/ui/modal-buttons';
+import { Card, CardDescription, CardHeader, CardFooter } from '@/components/ui/card';
 import { Spinner } from '@/components/ui/spinner';
 
 const LogoutEverywhereForm = dynamic(
@@ -18,9 +11,9 @@ const LogoutEverywhereForm = dynamic(
   {
     ssr: false,
     loading: () => (
-      <ModalConfirmButton disabled className='btn-danger min-w-20'>
+      <button disabled className='btn btn-inline btn-danger min-w-20'>
         <Spinner />
-      </ModalConfirmButton>
+      </button>
     ),
   },
 );
@@ -30,19 +23,19 @@ export function LogoutEverywhereModal() {
     <Modal>
       <ModalOpenButton className='btn btn-danger'>Log Out Everywhere</ModalOpenButton>
       <ModalContent>
-        <ModalContainer>
-          <ModalTitle>
+        <Card>
+          <CardHeader>
             <h2>Log Out Everywhere</h2>
-          </ModalTitle>
-          <ModalDescription>
+          </CardHeader>
+          <CardDescription>
             This action will log you out of all devices and sessions.
-          </ModalDescription>
-          <ModalButtonsContainer>
+          </CardDescription>
+          <CardFooter>
             <LogoutEverywhereForm />
             <ModalCancelButton />
-          </ModalButtonsContainer>
+          </CardFooter>
           <ModalCloseButton />
-        </ModalContainer>
+        </Card>
       </ModalContent>
     </Modal>
   );

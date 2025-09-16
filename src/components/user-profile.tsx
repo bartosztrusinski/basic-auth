@@ -7,6 +7,7 @@ import { useCurrentUser } from '@/auth/hooks/use-current-user';
 import { isSameObject } from '@/auth/util';
 import { editProfile } from '@/actions';
 import { Alert } from '@/components/ui/alert';
+import { Card, CardFooter } from '@/components/ui/card';
 
 type Props = {
   user: Pick<User, 'email' | 'name' | 'role'>;
@@ -59,7 +60,7 @@ export function UserProfile({ user, roles }: Props) {
   }
 
   return (
-    <div className='space-y-5 rounded-xl border border-neutral-700 p-4 shadow-lg'>
+    <Card className='gap-5'>
       <div className='flex flex-col break-all'>
         <span className='font-medium text-neutral-400'>Email</span>
         {user.email}
@@ -102,7 +103,7 @@ export function UserProfile({ user, roles }: Props) {
 
           <Alert variant='error' message={errors ?? state.errors ?? []} />
 
-          <div className='flex gap-2'>
+          <CardFooter>
             <button
               type='submit'
               disabled={isPending || isActionPending}
@@ -113,7 +114,7 @@ export function UserProfile({ user, roles }: Props) {
             <button type='button' onClick={closeForm} className='btn size-10'>
               ⨉
             </button>
-          </div>
+          </CardFooter>
         </form>
       ) : (
         <>
@@ -125,11 +126,13 @@ export function UserProfile({ user, roles }: Props) {
             <span className='font-medium text-neutral-400'>Role</span>
             {user.role}
           </div>
-          <button onClick={openForm} className='btn'>
-            Edit Profile
-          </button>
+          <CardFooter>
+            <button onClick={openForm} className='btn'>
+              Edit Profile
+            </button>
+          </CardFooter>
         </>
       )}
-    </div>
+    </Card>
   );
 }

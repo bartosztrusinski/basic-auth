@@ -4,7 +4,7 @@ import { useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
 import { toast } from 'sonner';
 import { getAuthMessage } from '@/auth/message';
-import { ModalContainer, ModalTitle, ModalDescription } from '@/components/ui/classy-modal';
+import { Card, CardHeader, CardDescription } from '@/components/ui/card';
 import { TwoFactorInitializationForm } from './two-factor-initialization-form';
 import { TwoFactorConfirmationForm } from './two-factor-confirmation-form';
 import { TwoFactorRecoveryCodes } from './two-factor-recovery-codes';
@@ -64,12 +64,12 @@ export function EnableTwoFactorForm() {
   const StepComponent = stepData.component;
 
   return (
-    <ModalContainer>
-      <ModalTitle>
+    <Card>
+      <CardHeader>
         <h2>{stepData.title}</h2>
-      </ModalTitle>
-      <ModalDescription>{stepData.description}</ModalDescription>
+      </CardHeader>
+      <CardDescription>{stepData.description}</CardDescription>
       <StepComponent {...setupData} onSuccess={goToNextStep} />
-    </ModalContainer>
+    </Card>
   );
 }
